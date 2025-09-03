@@ -1,32 +1,46 @@
 /* Reset mặc định */
-body {
+html, body {
     margin: 0;
     padding: 0;
-    background: #111; /* nền tối như YouTube */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh; /* chiếm toàn bộ chiều cao màn hình */
+    background: #111;
     font-family: Arial, sans-serif;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    overflow-y: auto; /* Allow vertical scrolling */
 }
 
-/* Bao toàn bộ game + control */
+body {
+    padding-top: 120px; /* Much more space for fixed header */
+}
+
+/* Main container to hold game and description vertically */
+.main-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: calc(100vh - 120px);
+    padding: 60px 20px; /* Much more top padding for breathing room */
+    width: 100%;
+}
+
+/* Game wrapper */
 .game-wrapper {
-    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 50px; /* More space before description */
 }
 
 /* Khung chứa game (giống player YouTube) */
 .webgl-content {
     position: relative;
-    width: 960px;      /* mặc định */
-    height: 600px;     /* mặc định */
+    width: 960px;
+    height: 600px;
     border: 3px solid #333;
     border-radius: 10px;
     overflow: hidden;
     background: black;
     box-shadow: 0 0 15px rgba(0,0,0,0.7);
-    margin: 40px auto 20px auto;
-    text-align: center;
+    margin-bottom: 20px;
 }
 
 /* Canvas game Unity */
@@ -34,6 +48,24 @@ body {
     width: 100%;
     height: 100%;
     margin: auto;
+}
+
+.fullscreen-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 10px;
+    cursor: pointer;
+    font-size: 18px;
+    z-index: 9999;
+}
+
+.fullscreen-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
 }
 
 /* Thanh control dưới game */
@@ -137,20 +169,6 @@ body {
     float: right;
 }
 
-
-/* Container khung game */
-.webgl-content {
-    position: relative;
-    margin: auto;
-    width: 960px;
-    height: 600px;
-    border: 3px solid #333;
-    border-radius: 10px;
-    overflow: hidden;
-    background: black;
-    box-shadow: 0 0 15px rgba(0,0,0,0.7);
-}
-
 /* Overlay controls trong khung game */
 .overlay-controls {
     position: absolute;
@@ -160,34 +178,34 @@ body {
     gap: 8px;
 }
 
-
+/* Header styles */
 header {
-            width: 100%;
-            background: #222;
-            padding: 10px 0;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-            position: fixed;
-            top: 0;
-            left: 0;
-            z-index: 1000;
-        }
+    width: 100%;
+    background: #222;
+    padding: 10px 0;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2500;
+}
 
 .header-container {
-            width: 90%;
-            margin: auto;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+    width: 90%;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
 .logo img {
-            height: 40px;
-        }
+    height: 40px;
+}
 
 nav {
-            display: flex;
-            gap: 20px;
-        }
+    display: flex;
+    gap: 20px;
+}
 
 nav a {
     color: #fff;
@@ -199,11 +217,12 @@ nav a {
 
 nav a:hover {
     color: #ff9800;
-        }
+}
 
+/* Game description styles - positioned below the game */
 .game-description {
     max-width: 960px;
-    margin: 0 auto 40px auto;
+    width: 100%;
     padding: 20px;
     background: #fff;
     border-radius: 10px;
@@ -224,3 +243,37 @@ nav a:hover {
     margin: 10px 0 20px 20px;
 }
 
+/* Responsive design */
+@media (max-width: 1000px) {
+    .webgl-content,
+    .game-description {
+        width: 95%;
+        max-width: none;
+    }
+    
+    .webgl-content {
+        height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .header-container {
+        width: 95%;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    nav {
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    body {
+        padding-top: 140px; /* Even more space on mobile */
+    }
+    
+    .main-container {
+        min-height: calc(100vh - 140px);
+        padding: 30px 10px;
+    }
+}

@@ -21,50 +21,12 @@
                 }
             }
         });
+        
+        // Ensure scrolling is enabled after game loads
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.style.overflow = 'auto';
+        });
     </script>
-    <style>
-        body {
-            margin: 0;
-            background: #111;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .webgl-content {
-            position: relative;
-            width: 960px;
-            height: 600px;
-            background: #000;
-            border-radius: 8px;
-            overflow: hidden;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-        }
-
-        #gameContainer {
-            width: 100%;
-            height: 100%;
-        }
-
-        .fullscreen-btn {
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            border: none;
-            border-radius: 4px;
-            padding: 6px 10px;
-            cursor: pointer;
-            font-size: 18px;
-            z-index: 9999;
-        }
-
-        .fullscreen-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-    </style>
 </head>
 
 <body>
@@ -80,36 +42,42 @@
             <nav>
                 <a href="about.html">About us</a>
                 <a href="contact.html">Contact</a>
-                <a href="privacy.html">Privary Policy</a>
+                <a href="privacy.html">Privacy Policy</a>
                 <a href="terms.html">Terms and Conditions</a>
             </nav>
         </div>
     </header>
-    <div class="webgl-content">
-        <div id="gameContainer"></div>
-        <button class="fullscreen-btn" onclick="setFullscreen()">⛶</button>
-    </div>
-    <div class="game-description">
-        <h2>Snow Rider 3D – Game Description</h2>
-        <p>
-            Ready to conquer the snow? 🎿 Jump on your sled and race down endless icy slopes, 
-            dodging trees, rocks, and crazy obstacles along the way. 
-            Collect gifts to boost your score, pull off daring moves, 
-            and see how far you can ride without crashing. 
-            The deeper you go, the faster it gets—can you handle the ultimate snow challenge? ❄️🔥
-        </p>
 
-        <h3>🎮 Play Tips</h3>
-        <ul>
-            <li>Stay focused — obstacles appear faster the longer you ride.</li>
-            <li>Collect gifts to increase your score and unlock bonuses.</li>
-            <li>Use smooth movements instead of sharp turns to avoid losing control.</li>
-        </ul>
+    <div class="main-container">
+        <div class="game-wrapper">
+            <div class="webgl-content">
+                <div id="gameContainer"></div>
+                <button class="fullscreen-btn" onclick="setFullscreen()">⛶</button>
+            </div>
+        </div>
+        
+        <div class="game-description">
+            <h2>Snow Rider 3D – Game Description</h2>
+            <p>
+                Ready to conquer the snow? 🎿 Jump on your sled and race down endless icy slopes, 
+                dodging trees, rocks, and crazy obstacles along the way. 
+                Collect gifts to boost your score, pull off daring moves, 
+                and see how far you can ride without crashing. 
+                The deeper you go, the faster it gets—can you handle the ultimate snow challenge? ❄️🔥
+            </p>
 
-        <h3>❓ Quick FAQ</h3>
-        <p><strong>Is Snow Rider 3D free to play?</strong><br>Yes, it’s 100% free to play online.</p>
-        <p><strong>Can I play on mobile?</strong><br>Yes, the game works on most modern browsers, including mobile.</p>
-        <p><strong>How do I get a high score?</strong><br>Avoid crashes, collect as many gifts as possible, and survive as long as you can!</p>
+            <h3>🎮 Play Tips</h3>
+            <ul>
+                <li>Stay focused — obstacles appear faster the longer you ride.</li>
+                <li>Collect gifts to increase your score and unlock bonuses.</li>
+                <li>Use smooth movements instead of sharp turns to avoid losing control.</li>
+            </ul>
+
+            <h3>❓ Quick FAQ</h3>
+            <p><strong>Is Snow Rider 3D free to play?</strong><br>Yes, it's 100% free to play online.</p>
+            <p><strong>Can I play on mobile?</strong><br>Yes, the game works on most modern browsers, including mobile.</p>
+            <p><strong>How do I get a high score?</strong><br>Avoid crashes, collect as many gifts as possible, and survive as long as you can!</p>
+        </div>
     </div>
 
     <script>
