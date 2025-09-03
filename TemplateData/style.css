@@ -1,132 +1,226 @@
+/* Reset mặc định */
 body {
-    margin: 0px;
-    padding: 0px;
-    overflow: hidden;
-}
-.webgl-content * {
-    border: 0;
     margin: 0;
     padding: 0;
+    background: #111; /* nền tối như YouTube */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* chiếm toàn bộ chiều cao màn hình */
+    font-family: Arial, sans-serif;
 }
 
-#gameContainer canvas {
-    display: block;
-    background: #222;
-    /*background: url('tunnelRush.jpg') no-repeat center;*/
-    /*background-color: black;*/
+/* Bao toàn bộ game + control */
+.game-wrapper {
+    text-align: center;
 }
 
+/* Khung chứa game (giống player YouTube) */
 .webgl-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    /*disable selection in games which select content when dragging mouse*/
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    position: relative;
+    width: 960px;      /* mặc định */
+    height: 600px;     /* mặc định */
+    border: 3px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+    background: black;
+    box-shadow: 0 0 15px rgba(0,0,0,0.7);
+    margin: 40px auto 20px auto;
+    text-align: center;
 }
 
-    .webgl-content .logo,
-    .progress,
-    .text {
-        position: absolute;
-        left: 50%;
-        top: 40%;
-        -webkit-transform: translate(-50%, -50%);
-        transform: translate(-50%, -50%);
-    }
+/* Canvas game Unity */
+#gameContainer {
+    width: 100%;
+    height: 100%;
+    margin: auto;
+}
 
-    .webgl-content .logo {
-        background: url('logo.png') no-repeat center / contain;
-        width: 500px;
-        height: 155px;
-    }
+/* Thanh control dưới game */
+.controls {
+    margin-top: 10px;
+}
 
-    .webgl-content .progress {
-        height: 26px;
-        width: 211px;
-        margin-top: 120px;
-    }
+.controls button {
+    background: #222;
+    color: white;
+    border: 1px solid #444;
+    border-radius: 5px;
+    padding: 6px 12px;
+    margin: 0 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+}
 
-        .webgl-content .progress .empty {
-            background: url('progressEmpty.Light.png') no-repeat right / cover;
-            float: right;
+.controls button:hover {
+    background: #444;
+}
+
+/* Nếu muốn logo, loading bar, text trong Unity build thì vẫn giữ */
+.webgl-content .logo,
+.webgl-content .progress,
+.webgl-content .text {
+    position: absolute;
+    left: 50%;
+    top: 40%;
+    transform: translate(-50%, -50%);
+}
+
+/* Logo khi loading */
+.webgl-content .logo {
+    background: url('logo.png') no-repeat center / contain;
+    width: 500px;
+    height: 155px;
+}
+
+/* Progress bar */
+.webgl-content .progress {
+    height: 26px;
+    width: 211px;
+    margin-top: 120px;
+}
+
+.webgl-content .progress .empty {
+    background: url('progressEmpty.Light.png') no-repeat right / cover;
+    float: right;
+    width: 100%;
+    height: 100%;
+    display: inline-block;
+}
+
+.webgl-content .progress .full {
+    background: url('progressFull.Light.png') no-repeat left / cover;
+    float: left;
+    width: 0%;
+    height: 100%;
+    display: inline-block;
+}
+
+/* Text khi loading */
+.webgl-content .text {
+    margin-top: 170px;
+    color: white;
+    font-weight: 700;
+    font-size: 25px;
+    width: 500px;
+    text-align: center;
+}
+
+/* Footer (nếu muốn giống template gốc của Unity) */
+.webgl-content .footer {
+    margin-top: 5px;
+    height: 38px;
+    line-height: 38px;
+    font-size: 18px;
+    background: #fff;
+}
+.webgl-content .footer .webgl-logo,
+.webgl-content .footer .title,
+.webgl-content .footer .fullscreen {
+    height: 100%;
+    display: inline-block;
+    background: transparent center no-repeat;
+}
+.webgl-content .footer .webgl-logo {
+    background-image: url('webgl-logo.png');
+    width: 204px;
+    float: left;
+}
+.webgl-content .footer .title {
+    margin-right: 10px;
+    float: right;
+}
+.webgl-content .footer .fullscreen {
+    background-image: url('fullscreen.png');
+    width: 38px;
+    float: right;
+}
+
+
+/* Container khung game */
+.webgl-content {
+    position: relative;
+    margin: auto;
+    width: 960px;
+    height: 600px;
+    border: 3px solid #333;
+    border-radius: 10px;
+    overflow: hidden;
+    background: black;
+    box-shadow: 0 0 15px rgba(0,0,0,0.7);
+}
+
+/* Overlay controls trong khung game */
+.overlay-controls {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    display: flex;
+    gap: 8px;
+}
+
+
+header {
             width: 100%;
-            height: 100%;
-            display: inline-block;
+            background: #222;
+            padding: 10px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
         }
 
-        .webgl-content .progress .full {
-            background: url('progressFull.Light.png') no-repeat left / cover;
-            float: left;
-            width: 0%;
-            height: 100%;
-            display: inline-block;
+.header-container {
+            width: 90%;
+            margin: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
 
-    .webgl-content .text {
-        margin-top: 170px;
-        /*color: blueviolet;*/
-        color: white;
-        font-family: 'Times New Roman', Times, serif, Haettenschweiler, 'Arial Narrow Bold', sans-serif, Helvetica, Verdana, sans-serif;
-        font-weight: 700;
-        font-size: 25px;
-        width: 500px;
-        text-align: center;
-    }
-
-    .webgl-content .spinner {
-        vertical-align: middle;
-        height: 100px;
-    }
-
-    .webgl-content .logo.Dark {
-        //background-image: url('logo.png');
-    }
-
-    .webgl-content .progress.Dark .empty {
-        background: white;
-    }
-
-    .webgl-content .progress.Dark .full {
-        background: royalblue;
-    }
-
-    .webgl-content .footer {
-        margin-top: 5px;
-        height: 38px;
-        line-height: 38px;
-        font-family: Helvetica, Verdana, Arial, sans-serif;
-        font-size: 18px;
-        background: #fff;
-    }
-
-        .webgl-content .footer .webgl-logo,
-        .title,
-        .fullscreen {
-            height: 100%;
-            display: inline-block;
-            background: transparent center no-repeat;
+.logo img {
+            height: 40px;
         }
 
-        .webgl-content .footer .webgl-logo {
-            background-image: url('webgl-logo.png');
-            width: 204px;
-            float: left;
+nav {
+            display: flex;
+            gap: 20px;
         }
 
-        .webgl-content .footer .title {
-            margin-right: 10px;
-            float: right;
+nav a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    transition: color 0.3s;        
+}
+
+nav a:hover {
+    color: #ff9800;
         }
 
-        .webgl-content .footer .fullscreen {
-            background-image: url('fullscreen.png');
-            width: 38px;
-            float: right;
-        }
+.game-description {
+    max-width: 960px;
+    margin: 0 auto 40px auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    font-family: Arial, Helvetica, sans-serif;
+    color: #333;
+    line-height: 1.6;
+    text-align: left;
+}
+
+.game-description h2, 
+.game-description h3 {
+    color: #111;
+    margin-top: 15px;
+}
+
+.game-description ul {
+    margin: 10px 0 20px 20px;
+}
+
