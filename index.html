@@ -277,23 +277,15 @@
     <script>
         // Auto scroll to game area after page loads
         window.addEventListener('load', function() {
-            // Get header height to calculate offset
-            const header = document.querySelector('header');
-            const headerHeight = header ? header.offsetHeight : 0;
-            
-            // Get play button position
-            const playButton = document.querySelector('.play-button');
-            
-            if (playButton) {
-                // Calculate scroll position (play button top - header height - small margin)
-                const scrollPosition = playButton.offsetTop - headerHeight - 20;
-                
-                // Smooth scroll to position
-                window.scrollTo({
-                    top: scrollPosition,
-                    behavior: 'smooth'
-                });
-            }
+            setTimeout(function() {
+                const gameBox = document.querySelector('.play-button');
+                if (gameBox) {
+                    gameBox.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }
+            }, 500); 
         });
 
         // Fullscreen functionality
