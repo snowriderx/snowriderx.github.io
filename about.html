@@ -1,18 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="description" content="Learn more about Snow Rider 3D, our mission, and why players around the world love this exciting snowboarding game.">
-    <meta name="keywords" content="About Snow Rider 3D, Snowboarding Game, Online Game, Free Game, Play Snow Rider">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>About Us - Snow Rider 3D</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>About Us - Slice Master</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 0px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+
+        .navbar-nav .nav-link {
+            color: #666;
+            margin: 0 15px;
+            text-decoration: none;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #333;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 4px 8px;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        /* Content */
+        .page-header {
+            text-align: center;
+            padding: 60px 0 40px 0;
+            background: white;
+            margin-bottom: 40px;
+        }
+
+        .page-header h1 {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .page-header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .content-section {
+            background: white;
+            padding: 40px 0;
+            margin-bottom: 40px;
+        }
+
+        .content-section h2 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .content-section h3 {
+            color: #444;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .content-section p {
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 60px 0;
+            margin-bottom: 40px;
+        }
+
+        .hero-section h2 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .hero-section p {
+            font-size: 1.2em;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .stats-section {
+            background: #f8f9fa;
+            padding: 50px 0;
+            margin-bottom: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #007bff;
+            display: block;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .feature-grid {
+            margin: 50px 0;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 10px;
+            text-align: center;
+            height: 100%;
+            margin-bottom: 30px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+
+        .feature-icon {
+            font-size: 3em;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+
+        .feature-card h4 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .timeline-section {
+            margin: 50px 0;
+        }
+
+        .timeline-item {
+            border-left: 3px solid #007bff;
+            padding-left: 30px;
+            margin-bottom: 40px;
+            position: relative;
+        }
+
+        .timeline-item::before {
+            content: '';
+            width: 12px;
+            height: 12px;
+            background: #007bff;
+            border-radius: 50%;
+            position: absolute;
+            left: -7px;
+            top: 5px;
+        }
+
+        .timeline-date {
+            color: #007bff;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
+        .timeline-title {
+            color: #333;
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .timeline-desc {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .team-section {
+            background: #f8f9fa;
+            padding: 50px 0;
+            margin-bottom: 40px;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #FF6B35, #F7941D);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .cta-section h2 {
+            font-size: 2.2em;
+            margin-bottom: 20px;
+        }
+
+        .cta-section p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .play-btn {
+            background: white;
+            color: #FF6B35;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        .play-btn:hover {
+            transform: translateY(-2px);
+            color: #FF6B35;
+            text-decoration: none;
+        }
+
+        /* Fixed Bottom Button */
+        .fixed-bottom-btn {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            z-index: 1000;
+            font-weight: bold;
+        }
+
+        .fixed-bottom-btn button {
+            background: white;
+            color: #4CAF50;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-left: 12px;
+            cursor: pointer;
+        }
+
+        @media(max-width: 991px) {
+            .navbar-nav {
+                background: white;
+                margin-top: 10px;
+                padding: 10px 0;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+            .navbar-nav .nav-link {
+                margin: 5px 15px;
+                padding: 8px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .navbar-nav .nav-link:last-child {
+                border-bottom: none;
+            }
+        }
+
+        @media(max-width: 767px) {
+            .page-header h1 {
+                font-size: 2em;
+            }
+            
+            .page-header {
+                padding: 40px 0 30px 0;
+            }
+
+            .hero-section h2 {
+                font-size: 2em;
+            }
+
+            .stat-number {
+                font-size: 2.5em;
+            }
+
+            .timeline-item {
+                padding-left: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <!-- Header -->
     <header>
         <nav class="navbar navbar-expand-lg">
             <div class="container">
-                <a class="navbar-brand" href="/">SNOWRIDERX</a>
+                <a class="navbar-brand" href="/">SLICEMASTER.NET</a>
                 <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span>☰</span>
                 </button>
@@ -29,22 +344,145 @@
         </nav>
     </header>
 
-    <div class="container">
-        <h1>About Us</h1>
-        <p>Welcome to <strong>Snow Rider 3D</strong> – the ultimate snowboarding adventure that lets you experience the thrill of racing down snowy mountains right from your browser.</p>
-        
-        <h2>Our Mission</h2>
-        <p>We aim to provide free, fun, and accessible games to players all over the world. Snow Rider 3D is designed to challenge your reflexes while giving you a realistic winter sports experience.</p>
-        
-        <h2>Why Choose Snow Rider 3D?</h2>
-        <ul>
-            <li>Completely free to play online.</li>
-            <li>Fast, responsive, and optimized for desktop and mobile browsers.</li>
-            <li>Simple controls yet highly addictive gameplay.</li>
-        </ul>
-
-        <p>We believe in building a global gaming community where anyone can enjoy and share the excitement of Snow Rider 3D.</p>
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1>About SliceMaster.net</h1>
+            <p>Discover the story behind the web's premier slicing game</p>
+        </div>
     </div>
+
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="container">
+            <h2>Redefining Browser Gaming</h2>
+            <p>SliceMaster.net represents a new era of browser-based arcade gaming. We've transformed the simple concept of slicing into a skill-based, reflex-driven experience that challenges players worldwide to master precision, timing, and strategy.</p>
+        </div>
+    </div>
+
+    <!-- Our Story -->
+    <div class="content-section">
+        <div class="container">
+            <h2>Our Story</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <p>SliceMaster.net was born from a simple observation: mobile slicing games had become passive experiences that required little skill or engagement. We saw an opportunity to bring back the excitement and challenge that made arcade games legendary.</p>
+                    
+                    <p>In 2025, our team set out to create a browser-based slicing game that would prioritize skill over mindless tapping. We wanted to build something that would reward precision, timing, and strategic thinking while maintaining the accessibility that makes browser games so appealing.</p>
+                    
+                    <p>The result is Slice Master - a game that combines the satisfying mechanics of slicing with genuine skill requirements, creating an experience that's easy to learn but challenging to master.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="stats-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-item">
+                        <span class="stat-number">50K+</span>
+                        <div class="stat-label">Monthly Players</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-item">
+                        <span class="stat-number">10</span>
+                        <div class="stat-label">Legendary Knives</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-item">
+                        <span class="stat-number">100%</span>
+                        <div class="stat-label">Browser-Based</div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="stat-item">
+                        <span class="stat-number">0</span>
+                        <div class="stat-label">Downloads Required</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features -->
+    <div class="content-section">
+        <div class="container">
+            <h2>What Makes Us Different</h2>
+            <div class="row feature-grid">
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">🎯</div>
+                        <h4>Skill-Based Gameplay</h4>
+                        <p>Unlike idle tappers, Slice Master rewards precision, timing, and strategic thinking. Every slice matters.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h4>Instant Access</h4>
+                        <p>Play immediately in any modern browser. No downloads, no installations, no waiting.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">📱</div>
+                        <h4>Cross-Platform</h4>
+                        <p>Seamless experience across desktop, tablet, and mobile devices with responsive design.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">🏆</div>
+                        <h4>Competitive Edge</h4>
+                        <p>Global leaderboards and achievement systems that reward mastery and consistent improvement.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">🗡️</div>
+                        <h4>Legendary Knives</h4>
+                        <p>Unlock unique knives with special effects and abilities as you progress through the game.</p>
+                    </div>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <div class="feature-card">
+                        <div class="feature-icon">🔄</div>
+                        <h4>Regular Updates</h4>
+                        <p>Continuous improvements, new features, and fresh content to keep the experience engaging.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Team Section -->
+    <div class="team-section">
+        <div class="container">
+            <h2>Our Mission</h2>
+            <div class="row">
+                <div class="col-lg-8 mx-auto text-center">
+                    <p>Our mission is to prove that browser games can deliver the same level of engagement and skill requirement as traditional arcade games. We believe that accessibility shouldn't come at the cost of depth, and that the best games are those that grow with the player.</p>
+                    
+                    <p>We're committed to maintaining SliceMaster.net as a free, accessible platform that prioritizes player experience over monetization, skill over chance, and community over competition.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="cta-section">
+        <div class="container">
+            <h2>Ready to Test Your Skills?</h2>
+            <p>Join thousands of players who have discovered the thrill of precision slicing</p>
+            <a href="/index.html" class="play-btn">Play Slice Master Now</a>
+        </div>
+    </div>
+
     <!-- Fixed Bottom Button -->
     <div class="fixed-bottom-btn">
         📲 Add slicemaster.net to your home screen for faster access!
