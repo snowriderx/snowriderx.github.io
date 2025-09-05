@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>Slice Master Blog – Unlock Every Slice of the Game</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        /* Header */
+        header {
+            background: white;
+            padding: 0px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+
+        .navbar-nav .nav-link {
+            color: #666;
+            margin: 0 15px;
+            text-decoration: none;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #333;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 4px 8px;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        /* Blog Header */
+        .blog-header {
+            text-align: center;
+            padding: 30px 0;
+            background: white;
+            margin-bottom: 30px;
+        }
+
+        .blog-header h1 {
+            font-size: 1.8em;
+            font-weight: normal;
+            color: #666;
+            margin: 0;
+        }
+
+        /* Blog Grid */
+        .blog-grid {
+            margin-bottom: 80px;
+        }
+
+        .blog-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 30px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
+
+        .blog-card-image {
+            width: 100%;
+            height: 160px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .blog-card-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-card h3 {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 12px;
+            line-height: 1.3;
+            flex-grow: 0;
+        }
+
+        .blog-card p {
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 0;
+            flex-grow: 1;
+            font-size: 0.9em;
+        }
+
+        .blog-card a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Blog Image Styles */
+        .blog-1 {
+            background: linear-gradient(135deg, #FF6B35, #F7941D);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blog-2 {
+            background: linear-gradient(135deg, #4ECDC4, #44A08D);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blog-3 {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blog-4 {
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blog-5 {
+            background: linear-gradient(135deg, #9C27B0, #673AB7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blog-6 {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blog-7 {
+            background: linear-gradient(135deg, #3F51B5, #303F9F);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blog-8 {
+            background: linear-gradient(135deg, #00BCD4, #0097A7);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blog-9 {
+            background: linear-gradient(135deg, #4CAF50, #388E3C);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blog-10 {
+            background: linear-gradient(135deg, #FF5722, #D84315);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blog-11 {
+            background: linear-gradient(135deg, #FFC107, #FF8F00);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .blog-12 {
+            background: linear-gradient(135deg, #E91E63, #C2185B);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+            text-align: center;
+            padding: 20px;
+        }
+
+        /* Blog Description */
+        .blog-description {
+            background: white;
+            padding: 30px 0;
+            margin-top: 40px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .blog-description p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        /* Fixed Bottom Button */
+        .fixed-bottom-btn {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            z-index: 1000;
+            font-weight: bold;
+        }
+
+        .fixed-bottom-btn button {
+            background: white;
+            color: #4CAF50;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-left: 12px;
+            cursor: pointer;
+        }
+
+        @media(max-width: 991px) {
+            .navbar-nav {
+                background: white;
+                margin-top: 10px;
+                padding: 10px 0;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+            .navbar-nav .nav-link {
+                margin: 5px 15px;
+                padding: 8px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .navbar-nav .nav-link:last-child {
+                border-bottom: none;
+            }
+        }
+
+        @media(max-width: 767px) {
+            .blog-header h1 {
+                font-size: 1.5em;
+            }
+            
+            .blog-header {
+                padding: 20px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="/">SLICEMASTER.NET</a>
+                <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span>☰</span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link" href="/blog.html">Blog</a>
+                        <a class="nav-link" href="/about.html">About us</a>
+                        <a class="nav-link" href="/contact.html">Contact</a>
+                        <a class="nav-link" href="/privacy.html">Privacy Policy</a>
+                        <a class="nav-link" href="/terms.html">Terms and Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Blog Header -->
+    <div class="blog-header">
+        <div class="container">
+            <h1>Slice Master Blog – Unlock Every Slice of the Game</h1>
+        </div>
+    </div>
+
+    <!-- Blog Grid -->
+    <div class="container blog-grid">
+        <div class="row g-4">
+            <!-- Blog Post 1 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/how-slice-master-became-browser-game" class="blog-card">
+                    <div class="blog-card-image blog-1">
+                        <!-- <img src="blog-1.jpg" alt="How Slice Master Became a Browser-Based Video Game Brand in 2025"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>How Slice Master Became a Browser-Based Video Game Brand in 2025</h3>
+                        <p>Discover how Slice Master evolved from a mobile tapper to a fully-fledged browser video game brand in 2025, powered by...</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Blog Post 2 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/slice-master-scoring-system" class="blog-card">
+                    <div class="blog-card-image blog-2">
+                        <!-- <img src="blog-2.jpg" alt="Slice Master Scoring System"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>Slice Master Scoring System – How Combos and Slices Boost Your Rank</h3>
+                        <p>Discover how Slice Master's scoring mechanics work. Learn how to maximize your combos, slices, and precision to climb...</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Blog Post 3 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/mastering-slice-master-combos" class="blog-card">
+                    <div class="blog-card-image blog-3">
+                        <!-- <img src="blog-3.jpg" alt="Mastering Slice Master Advanced Combos"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>Mastering Slice Master: Advanced Combos and Score-Chaining Secrets</h3>
+                        <p>Discover how to dominate the leaderboard in Slice Master with advanced combo strategies and precision-based score...</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Blog Post 4 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/mastering-combos-timing" class="blog-card">
+                    <div class="blog-card-image blog-4">
+                        <!-- <img src="blog-4.jpg" alt="Mastering Combos Timing and Strategy"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>Mastering Combos in Slice Master: Timing, Momentum, and Strategy</h3>
+                        <p>Discover how to master combos in Slice Master's browser edition. Learn the mechanics behind chaining slices, building...</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Blog Post 5 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/slice-master-web-vs-mobile" class="blog-card">
+                    <div class="blog-card-image blog-5">
+                        <!-- <img src="blog-5.jpg" alt="Slice Master Web vs Mobile Comparison"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>Slice Master Web vs Mobile Clones: What Makes the Official Version Stand Out</h3>
+                        <p>The official web edition of Slice Master on SliceMaster.net is more than a tap-to-win clone. Discover how it breaks free from...</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Blog Post 6 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/slice-master-browser-reflex-game" class="blog-card">
+                    <div class="blog-card-image blog-6">
+                        <!-- <img src="blog-6.jpg" alt="Slice Master Browser Reflex Game"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>Why Slice Master's Browser Edition is a True Reflex Game, Not Just a Tapper</h3>
+                        <p>Slice Master Web Edition challenges your timing and reflexes – a major leap from passive tapper games. Discover...</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Blog Post 7 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/evolution-slice-master" class="blog-card">
+                    <div class="blog-card-image blog-7">
+                        <!-- <img src="blog-7.jpg" alt="Evolution of Slice Master Game"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>The Evolution of Slice Master: From Mobile Tapper to Browser Reflex Game</h3>
+                        <p>Discover how Slice Master evolved from a casual mobile tapper into a fully interactive, reflex-based browser game rebuilt by...</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Blog Post 8 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/slice-master-gaining-momentum" class="blog-card">
+                    <div class="blog-card-image blog-8">
+                        <!-- <img src="blog-8.jpg" alt="Slice Master Gaining Momentum Online"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>Why Slice Master Official Is Gaining Momentum Online</h3>
+                        <p>Discover how Slice Master Official is rising in popularity as the go-to arcade game. Explore what makes it the authentic...</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Blog Post 9 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/slice-master-reflex-strategy" class="blog-card">
+                    <div class="blog-card-image blog-9">
+                        <!-- <img src="blog-9.jpg" alt="Slice Master Reflex and Strategy Gameplay"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>How Slice Master Combines Reflex and Strategy in One-Button Gameplay</h3>
+                        <p>Slice Master is more than fast reflexes. Discover how timing, combo planning, and knife upgrades turn this one-button game...</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Blog Post 10 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/rise-of-slice-master-arcade" class="blog-card">
+                    <div class="blog-card-image blog-10">
+                        <!-- <img src="blog-10.jpg" alt="Rise of Slice Master Arcade Game"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>The Rise of Slice Master: Web-Based Arcade Game Taking Over 2025</h3>
+                        <p>Discover how Slice Master is redefining online button gaming in 2025. Explore its legendary knives, level systems, and why it's...</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Blog Post 11 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/top-5-games-like-slice-master" class="blog-card">
+                    <div class="blog-card-image blog-11">
+                        <!-- <img src="blog-11.jpg" alt="Top 5 Games Like Slice Master"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>Top 5 Games Like Slice Master with Weapon Upgrades</h3>
+                        <p>Explore five exciting arcade games like Slice Master that feature slicing action and weapon upgrades systems. Discover what...</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Blog Post 12 -->
+            <div class="col-lg-4 col-md-6 col-12">
+                <a href="/blog/slice-master-gameplay-mechanics" class="blog-card">
+                    <div class="blog-card-image blog-12">
+                        <!-- <img src="blog-12.jpg" alt="Slice Master Gameplay Mechanics"> -->
+                    </div>
+                    <div class="blog-card-content">
+                        <h3>Slice Master Gameplay Mechanics – How It Works Behind the Slice Combo Calculations</h3>
+                        <p>Learn how Slice Master gameplay works. Discover slicing physics, jump timing, combo calculations, and what makes this...</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Blog Description -->
+    <div class="blog-description">
+        <div class="container">
+            <p>Welcome to the <strong>official Slice Master blog</strong>, powered by SliceMaster.net. This is your trusted source for in-depth gameplay strategies, expert slicing techniques, legendary knife guides, level breakdowns, and updates straight from the development team. Whether you're new or a seasoned slicer, this blog helps you master every angle of the official web-based Slice Master game.</p>
+            <p>10 Thang cuoi</p>
+        </div>
+    </div>
+
+    <!-- Fixed Bottom Button -->
+    <div class="fixed-bottom-btn">
+        📲 Add slicemaster.net to your home screen for faster access!
+        <button onclick="alert('App installation feature')">Add Now</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
