@@ -205,7 +205,7 @@
     <div class="game-box">
         <div class="game-container" id="gameContainer">
             <button class="fullscreen-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
-            <iframe id="gameIframe" allowtransparency="yes" allow="autoplay" frameborder="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;" marginheight="0" marginwidth="0" scrolling="no" src="/snowrider3d/index.html"></iframe>
+            <iframe id="gameIframe" allowtransparency="yes" allow="autoplay" frameborder="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;" marginheight="0" marginwidth="0" scrolling="no" src="/snowriderx.github.io/snowrider3d/index.html"></iframe>
         </div>
     </div>
 
@@ -277,15 +277,23 @@
     <script>
         // Auto scroll to game area after page loads
         window.addEventListener('load', function() {
-            setTimeout(function() {
-                const gameBox = document.querySelector('.game-box');
-                if (gameBox) {
-                    gameBox.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
-                    });
-                }
-            }, 500); 
+            // Get header height to calculate offset
+            const header = document.querySelector('header');
+            const headerHeight = header ? header.offsetHeight : 0;
+            
+            // Get play button position
+            const playButton = document.querySelector('.play-button');
+            
+            if (playButton) {
+                // Calculate scroll position (play button top - header height - small margin)
+                const scrollPosition = playButton.offsetTop - headerHeight - 20;
+                
+                // Smooth scroll to position
+                window.scrollTo({
+                    top: scrollPosition,
+                    behavior: 'smooth'
+                });
+            }
         });
 
         // Fullscreen functionality

@@ -1,80 +1,120 @@
+/* Unified Header CSS for all pages */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Header Styles */
 header {
-    width: 100%;
-    background: #222;
-    padding: 10px 0;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
+    background: white;
+    padding: 8px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .header-container {
-    width: 90%;
-    margin: auto;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
     display: flex;
-    align-items: center;
     justify-content: space-between;
+    align-items: center;
 }
 
 .logo img {
     height: 40px;
+    width: auto;
 }
 
+.logo a {
+    text-decoration: none;
+    font-weight: bold;
+    color: #333;
+    font-size: 1.2em;
+}
+
+/* Navigation */
 nav {
     display: flex;
-    gap: 20px;
+    gap: 30px;
+    align-items: center;
 }
 
 nav a {
-    color: #fff;
+    color: #666;
     text-decoration: none;
-    font-size: 16px;
-    font-weight: bold;
-    transition: color 0.3s;        
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
 }
 
 nav a:hover {
-    color: #ff9800;
+    color: #333;
+    background-color: #f8f9fa;
 }
 
-body {
-    background: #fff;
-    color: #333;
-    font-family: Arial, Helvetica, sans-serif;
-    margin: 0;
-    padding: 80px 20px 20px 20px; /* Added top padding to account for fixed header */
+/* Container for content */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 15px;
     line-height: 1.6;
 }
 
-.container {
-    max-width: 900px;
-    margin: 0 auto;
+.container h1 {
+    color: #333;
+    margin-bottom: 20px;
 }
 
-h1, h2, h3 {
-    color: #111;
-    margin-top: 20px;
+.container h2 {
+    color: #555;
+    margin-top: 30px;
+    margin-bottom: 15px;
 }
 
-p {
-    margin: 10px 0;
+.container p {
+    color: #666;
+    margin-bottom: 15px;
 }
 
-/* Responsive design for mobile */
-@media (max-width: 768px) {
+.container ul {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.container a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.container a:hover {
+    text-decoration: underline;
+}
+
+/* Mobile Responsive */
+@media(max-width: 768px) {
     .header-container {
-        width: 95%;
         flex-direction: column;
-        gap: 10px;
+        gap: 15px;
     }
     
     nav {
-        flex-wrap: wrap;
+        flex-direction: column;
         gap: 10px;
+        width: 100%;
     }
     
-    body {
-        padding-top: 120px; /* More space on mobile due to stacked header */
+    nav a {
+        text-align: center;
+        padding: 12px;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    nav a:last-child {
+        border-bottom: none;
+    }
+    
+    .container {
+        padding: 20px 15px;
     }
 }
