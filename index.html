@@ -1,99 +1,322 @@
 <!DOCTYPE html>
-<html lang="en-us">
-
+<html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Snow Rider 3D</title>
-    <link rel="shortcut icon" href="TemplateData/favicon.ico">
-    <link rel="stylesheet" href="TemplateData/style.css">
-    <meta name="description" content="Snow Rider 3D, Snow Rider 3D Mathnook, Snow Rider 3D Unblocked">
-    <meta property="og:image" content="snow-rider-3d.png" />
-    <script src="TemplateData/UnityProgress.js"></script>
-    <script src="Build/UnityLoader.js"></script>
-    <link rel="stylesheet" href="header.css">
-    <script>
-        var gameInstance = UnityLoader.instantiate("gameContainer", "Build/SnowRider3D-gd-1.json", {
-            onProgress: UnityProgress,
-            Module: {
-                onRuntimeInitialized: function () {
-                    UnityProgress(gameInstance, "complete")
-                }
-            }
-        });
-        
-        // Ensure scrolling is enabled after game loads
-        document.addEventListener('DOMContentLoaded', function() {
-            document.body.style.overflow = 'auto';
-        });
-    </script>
-</head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <title>Slice Master – Unlock 10 Legendary Knives Online</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
 
+        /* Header */
+        header {
+            background: white;
+            padding: 0px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            color: #333;
+            text-decoration: none;
+            font-size: 1.2em;
+        }
+
+        .navbar-nav .nav-link {
+            color: #666;
+            margin: 0 15px;
+            text-decoration: none;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: #333;
+        }
+
+        .navbar-toggler {
+            border: none;
+            padding: 4px 8px;
+        }
+
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+
+        /* Play Button */
+        .play-button {
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        .play-button:hover {
+            background: #0056b3;
+            color: white;
+            text-decoration: none;
+        }
+
+        /* Game Container */
+        .game-box {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .game-container {
+            position: relative;
+            height: 0;
+            width: 100%;
+            padding-bottom: 50%;
+            background: linear-gradient(135deg, #ff9a56, #ffad84, #87ceeb);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .game-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Fullscreen Button */
+        .fullscreen-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 2000; /* nằm trên iframe */
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 18px;
+            transition: background 0.3s;
+        }
+
+        .fullscreen-btn:hover {
+            background: rgba(0,0,0,0.8);
+        }
+
+        /* Fixed Bottom Button */
+        .fixed-bottom-btn {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 12px;
+            z-index: 1000;
+            font-weight: bold;
+        }
+
+        .fixed-bottom-btn button {
+            background: white;
+            color: #4CAF50;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            margin-left: 12px;
+            cursor: pointer;
+        }
+
+        @media(max-width: 991px) {
+            .navbar-nav {
+                background: white;
+                margin-top: 10px;
+                padding: 10px 0;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+
+            .navbar-nav .nav-link {
+                margin: 5px 15px;
+                padding: 8px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }
+
+            .navbar-nav .nav-link:last-child {
+                border-bottom: none;
+            }
+        }
+
+        @media(max-width: 767px) {
+            .game-container {
+                padding-bottom: 100%;
+            }
+            
+            .game-title {
+                font-size: 2.5em;
+            }
+            
+            .level-display {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
 <body>
+    <!-- Header -->
     <header>
-        <div class="header-container">
-            <!-- Logo -->
-            <div class="logo">
-                <a href="#">
-                    <img src="TemplateData/logo.png" alt="Logo">
-                </a>
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="/">SNOWRIDERX</a>
+                <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span>☰</span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="navbar-nav ms-auto">
+                        <a class="nav-link" href="/about.html">About us</a>
+                        <a class="nav-link" href="/contact.html">Contact</a>
+                        <a class="nav-link" href="/privacy.html">Privacy Policy</a>
+                        <a class="nav-link" href="/terms.html">Terms and Conditions</a>
+                    </div>
+                </div>
             </div>
-            <!-- Navigation -->
-            <nav>
-                <a href="about.html">About us</a>
-                <a href="contact.html">Contact</a>
-                <a href="privacy.html">Privacy Policy</a>
-                <a href="terms.html">Terms and Conditions</a>
-            </nav>
-        </div>
+        </nav>
     </header>
 
-    <div class="main-container">
-        <div class="game-wrapper">
-            <div class="webgl-content">
-                <div id="gameContainer"></div>
-                <button class="fullscreen-btn" onclick="setFullscreen()">⛶</button>
-            </div>
-        </div>
-        
-        <div class="game-description">
-            <h2>Snow Rider 3D – Game Description</h2>
-            <p>
-                Ready to conquer the snow? 🎿 Jump on your sled and race down endless icy slopes, 
-                dodging trees, rocks, and crazy obstacles along the way. 
-                Collect gifts to boost your score, pull off daring moves, 
-                and see how far you can ride without crashing. 
-                The deeper you go, the faster it gets—can you handle the ultimate snow challenge? ❄️🔥
-            </p>
+    <!-- Play Button -->
+    <div class="container text-center">
+        <a href="#" class="play-button">▶ Play Snow rider – No Ads, Unblocked! Start Catching Now</a>
+    </div>
 
-            <h3>🎮 Play Tips</h3>
-            <ul>
-                <li>Stay focused — obstacles appear faster the longer you ride.</li>
-                <li>Collect gifts to increase your score and unlock bonuses.</li>
-                <li>Use smooth movements instead of sharp turns to avoid losing control.</li>
-            </ul>
-
-            <h3>❓ Quick FAQ</h3>
-            <p><strong>Is Snow Rider 3D free to play?</strong><br>Yes, it's 100% free to play online.</p>
-            <p><strong>Can I play on mobile?</strong><br>Yes, the game works on most modern browsers, including mobile.</p>
-            <p><strong>How do I get a high score?</strong><br>Avoid crashes, collect as many gifts as possible, and survive as long as you can!</p>
+    <!-- Game Area -->
+    <div class="game-box">
+        <div class="game-container" id="gameContainer">
+            <button class="fullscreen-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
+            <iframe id="gameIframe" allowtransparency="yes" allow="autoplay" frameborder="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;" marginheight="0" marginwidth="0" scrolling="no" src="/snowriderx.github.io/snowrider3d/index.html"></iframe>
         </div>
     </div>
 
+    <!-- Fixed Bottom Button -->
+    <div class="fixed-bottom-btn">
+        📲 Add snowriderx to your home screen for faster access!
+        <button onclick="alert('App installation feature')">Add Now</button>
+    </div>
+
+    <!-- Game Description -->
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-12">
+                <h1 style="text-align:center; margin-bottom: 30px;">Slice Master Official – The Web-Based Slicing Game</h1>
+                
+                <p><strong>Slice Master</strong> is a reflex-based slicing game originally known for its mobile version by <strong>Playcalm</strong>. In 2025, <strong>SliceMaster.net</strong> independently rebuilt the game as a browser-based arcade experience. This official web edition is faster, skill-based, and playable instantly – no download, no installs.</p>
+
+                <h2>🎮 What Is Slice Master (Web Edition)?</h2>
+                <p>This is not just a casual tapper. The <strong>official Slice Master browser version</strong> was redesigned for real-time control and reflex action. You jump, flip, and slice through levels – with precision timing being the key to winning combos and high scores.</p>
+
+                <div style="text-align: center; margin: 30px 0;">
+                    <img src="/Uploads/images/Logo/SliceMasterOfficial.jpg" alt="Slice Master official logo" style="max-width:100%; height: auto; border-radius: 10px;">
+                </div>
+
+                <h2>🗓️ Game Information</h2>
+                <ul>
+                    <li><strong>Title:</strong> Slice Master (Web)</li>
+                    <li><strong>Platform:</strong> Browser only (no mobile install)</li>
+                    <li><strong>Release:</strong> 2025</li>
+                    <li><strong>Official Site:</strong> <a href="https://slicemaster.net">https://slicemaster.net</a></li>
+                    <li><strong>Developer:</strong> SliceMaster.net Team</li>
+                    <li><strong>Inspired by:</strong> Original mobile concept by Playcalm</li>
+                    <li><strong>Category:</strong> Reflex, Arcade, Skill-based</li>
+                </ul>
+
+                <h2>🗡️ Unlockable Legendary Knives</h2>
+                <p>Unlock and master over <strong>10 legendary knives</strong> – each with its own slicing effects. Collect the Golden Edge, wield the Cyber Dagger, and discover your slicing identity.</p>
+
+                <h2>⚙️ Game Features</h2>
+                <ul>
+                    <li>Tap to jump, double-tap to flip mid-air</li>
+                    <li>Real-time slicing with physics and timing</li>
+                    <li>Combo system for score boosts</li>
+                    <li>Obstacles, breakables, and leaderboard rankings</li>
+                </ul>
+
+                <h2>❓ Frequently Asked Questions</h2>
+                
+                <p><strong>Is this the same as the mobile Slice Master?</strong><br>
+                No. This version is a browser-based arcade rebuild developed in 2025 by SliceMaster.net, focusing on reflexes instead of idle tapping.</p>
+
+                <p><strong>Is Slice Master (Web) free?</strong><br>
+                Yes. It's 100% free to play online with no login or installation required.</p>
+
+                <p><strong>Who made this version?</strong><br>
+                The web edition was developed independently by the SliceMaster.net Team to offer a real-time slicing challenge for browsers.</p>
+
+                <p><strong>Can I unlock new knives?</strong><br>
+                Yes! Slicing through levels earns you points to unlock knives, each with unique visuals and slicing effects.</p>
+
+                <p><strong>How do I compete?</strong><br>
+                Earn combos and aim for the top of the global leaderboard. New events are added regularly.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    
     <script>
-        function setFullscreen() {
-            var gameContainer = document.getElementById("gameContainer");
-            if (gameContainer.requestFullscreen) {
-                gameContainer.requestFullscreen();
-            } else if (gameContainer.mozRequestFullScreen) { // Firefox
-                gameContainer.mozRequestFullScreen();
-            } else if (gameContainer.webkitRequestFullscreen) { // Chrome, Safari
-                gameContainer.webkitRequestFullscreen();
-            } else if (gameContainer.msRequestFullscreen) { // IE/Edge
-                gameContainer.msRequestFullscreen();
+        // Auto scroll to game area after page loads
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                const gameBox = document.querySelector('.game-box');
+                if (gameBox) {
+                    gameBox.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                    });
+                }
+            }, 500); 
+        });
+
+        // Fullscreen functionality
+        const fullscreenBtn = document.getElementById('fullscreenBtn');
+        const gameContainer = document.getElementById('gameContainer');
+
+        fullscreenBtn.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                gameContainer.requestFullscreen().then(() => {
+                    fullscreenBtn.innerHTML = '✖';
+                    fullscreenBtn.title = 'Exit Fullscreen';
+                }).catch(err => {
+                    console.log('Error entering fullscreen:', err);
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    fullscreenBtn.innerHTML = '⛶';
+                    fullscreenBtn.title = 'Fullscreen';
+                }).catch(err => {
+                    console.log('Error exiting fullscreen:', err);
+                });
             }
-        }
+        });
+
+        // Handle ESC or system exit fullscreen
+        document.addEventListener('fullscreenchange', function() {
+            if (!document.fullscreenElement) {
+                fullscreenBtn.innerHTML = '⛶';
+                fullscreenBtn.title = 'Fullscreen';
+            }
+        });
     </script>
 </body>
-
 </html>
