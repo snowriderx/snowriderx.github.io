@@ -1,350 +1,227 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta property="og:description" content=" Play Snow Rider 3D online for free in your browser. Race down snowy slopes, dodge obstacles, collect gifts, and unlock new sleds in this endless runner by GemGamer Studio." />
-    <title>Snow Rider 3D – The Ultimate Browser Sledding Adventure Online</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
-    <script type="application/ld+json">
-        {
-        "@context": "https://schema.org",
-        "@type": "VideoGame",
-        "name": "Snow Rider 3D",
-        "alternateName": ["Snow Rider", "Snowrider", "Snow Rider X"],
-        "genre": "Endless Runner",
-        "gamePlatform": "Web browser",
-        "playMode": "SinglePlayer",
-        "url": "https://snowriderx.github.io/",
-        "image": "https://snowriderx.github.io/Uploads/images/Banner/snow-rider-3d-browser-game-banner.png",
-        "description": "Snow Rider 3D is a browser sledding game by GemGamer Studio. Ride your sled down snowy slopes, dodge obstacles, and collect gifts in this endless winter adventure.",
-        "author": {
-            "@type": "Organization",
-            "name": "GemGamer Studio"
-        },
-        "publisher": {
-            "@type": "Organization",
-            "name": "GemGamer Studio"
-        },
-        "sameAs": [
-            "https://en.wikipedia.org/wiki/Browser_game",
-            "https://snowriderx.github.io/about",
-            "https://snowriderx.github.io/how-to-play",
-            "https://snowriderx.github.io/faq",
-            "https://snowriderx.github.io/contact"
-        ]
-        }
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta property="og:description" content="Play Snow Rider 3D online for free in your browser. Race down snowy slopes, dodge obstacles, collect gifts, and unlock new sleds in this endless runner by GemGamer Studio." />
+  <title>Snow Rider 3D – The Ultimate Browser Sledding Adventure Online</title>
 
-    </script>
+  <!-- Bootstrap -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
 
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-        }
+  <!-- Manifest + Theme -->
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#007bff" />
 
-        /* Header */
-        header {
-            background: white;
-            padding: 0px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+  <!-- Schema JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Snow Rider 3D",
+    "alternateName": ["Snow Rider", "Snowrider", "Snow Rider X"],
+    "genre": "Endless Runner",
+    "gamePlatform": "Web browser",
+    "playMode": "SinglePlayer",
+    "url": "https://snowriderx.github.io/",
+    "image": "https://snowriderx.github.io/Uploads/images/Banner/snow-rider-3d-browser-game-banner.png",
+    "description": "Snow Rider 3D is a browser sledding game by GemGamer Studio. Ride your sled down snowy slopes, dodge obstacles, and collect gifts in this endless winter adventure.",
+    "author": { "@type": "Organization", "name": "GemGamer Studio" },
+    "publisher": { "@type": "Organization", "name": "GemGamer Studio" },
+    "sameAs": [
+      "https://en.wikipedia.org/wiki/Browser_game",
+      "https://snowriderx.github.io/about",
+      "https://snowriderx.github.io/how-to-play",
+      "https://snowriderx.github.io/faq",
+      "https://snowriderx.github.io/contact"
+    ]
+  }
+  </script>
 
-        .navbar-brand {
-            font-weight: bold;
-            color: #333;
-            text-decoration: none;
-            font-size: 1.2em;
-        }
+  <style>
+    body { margin:0; padding:0; font-family: Arial, sans-serif; }
+    header { background:white; padding:0; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+    .navbar-brand { font-weight:bold; color:#333; text-decoration:none; font-size:1.2em; }
+    .navbar-nav .nav-link { color:#666; margin:0 15px; text-decoration:none; }
+    .navbar-nav .nav-link:hover { color:#333; }
 
-        .navbar-nav .nav-link {
-            color: #666;
-            margin: 0 15px;
-            text-decoration: none;
-        }
+    .play-button {
+      background:#007bff; color:white; padding:12px 24px;
+      border:none; border-radius:6px; font-weight:bold;
+      text-decoration:none; display:inline-block; margin:20px auto;
+    }
+    .play-button:hover { background:#0056b3; color:white; }
 
-        .navbar-nav .nav-link:hover {
-            color: #333;
-        }
+    .game-box { width:100%; max-width:1200px; margin:0 auto; padding:0 15px; }
+    .game-container {
+      position:relative; height:0; width:100%; padding-bottom:50%;
+      background:linear-gradient(135deg, #ff9a56, #ffad84, #87ceeb);
+      border-radius:10px; overflow:hidden;
+    }
+    .fullscreen-btn {
+      position:absolute; top:10px; right:10px; z-index:2000;
+      background:rgba(0,0,0,0.6); color:white; border:none;
+      padding:8px 12px; border-radius:6px; cursor:pointer; font-size:18px;
+    }
+    .fullscreen-btn:hover { background:rgba(0,0,0,0.8); }
 
-        .navbar-toggler {
-            border: none;
-            padding: 4px 8px;
-        }
-
-        .navbar-toggler:focus {
-            box-shadow: none;
-        }
-
-        /* Play Button */
-        .play-button {
-            background: #007bff;
-            color: white;
-            padding: 12px 24px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-            margin: 20px auto;
-            text-align: center;
-        }
-
-        .play-button:hover {
-            background: #0056b3;
-            color: white;
-            text-decoration: none;
-        }
-
-        /* Game Container */
-        .game-box {
-            width: 100%;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 15px;
-        }
-
-        .game-container {
-            position: relative;
-            height: 0;
-            width: 100%;
-            padding-bottom: 50%;
-            background: linear-gradient(135deg, #ff9a56, #ffad84, #87ceeb);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-
-        .game-content {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        /* Fullscreen Button */
-        .fullscreen-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            z-index: 2000; /* nằm trên iframe */
-            background: rgba(0,0,0,0.6);
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 18px;
-            transition: background 0.3s;
-        }
-
-        .fullscreen-btn:hover {
-            background: rgba(0,0,0,0.8);
-        }
-
-        /* Fixed Bottom Button */
-        .fixed-bottom-btn {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: #4CAF50;
-            color: white;
-            text-align: center;
-            padding: 12px;
-            z-index: 1000;
-            font-weight: bold;
-        }
-
-        .fixed-bottom-btn button {
-            background: white;
-            color: #4CAF50;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-weight: bold;
-            margin-left: 12px;
-            cursor: pointer;
-        }
-
-        @media(max-width: 991px) {
-            .navbar-nav {
-                background: white;
-                margin-top: 10px;
-                padding: 10px 0;
-                border-radius: 8px;
-                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            }
-
-            .navbar-nav .nav-link {
-                margin: 5px 15px;
-                padding: 8px 0;
-                border-bottom: 1px solid #f0f0f0;
-            }
-
-            .navbar-nav .nav-link:last-child {
-                border-bottom: none;
-            }
-        }
-
-        @media(max-width: 767px) {
-            .game-container {
-                padding-bottom: 100%;
-            }
-            
-            .game-title {
-                font-size: 2.5em;
-            }
-            
-            .level-display {
-                font-size: 2em;
-            }
-        }
-    </style>
+    .fixed-bottom-btn {
+      position:fixed; bottom:0; left:0; right:0;
+      background:#4CAF50; color:white; text-align:center;
+      padding:12px; z-index:1000; font-weight:bold;
+      /* display:none;  */
+    }
+    .fixed-bottom-btn button {
+      background:white; color:#4CAF50; border:none;
+      padding:6px 12px; border-radius:6px; font-weight:bold;
+      margin-left:12px; cursor:pointer;
+    }
+  </style>
 </head>
 <body>
-    <!-- Header -->
-    <header>
-        <nav class="navbar navbar-expand-lg">
-            <div class="container">
-                <a class="navbar-brand" href="/">SNOWRIDERX</a>
-                <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span>☰</span>
-                </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <div class="navbar-nav ms-auto">
-                        <a class="nav-link" href="/blog.html">Blog</a>
-                        <a class="nav-link" href="/about.html">About us</a>
-                        <a class="nav-link" href="/contact.html">Contact</a>
-                        <a class="nav-link" href="/privacy.html">Privacy Policy</a>
-                        <a class="nav-link" href="/terms.html">Terms and Conditions</a>
-                    </div>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <!-- Play Button -->
-    <div class="container text-center">
-        <a href="#" class="play-button">▶ Play Snow rider – No Ads, Unblocked! Start Catching Now</a>
-    </div>
-
-    <!-- Game Area -->
-    <div class="game-box">
-        <div class="game-container" id="gameContainer">
-            <button class="fullscreen-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
-            <iframe id="gameIframe" allowtransparency="yes" allow="autoplay" frameborder="0" width="100%" height="100%" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;" marginheight="0" marginwidth="0" scrolling="no" src="/snowrider3d/index.html"></iframe>
+  <!-- Header -->
+  <header>
+    <nav class="navbar navbar-expand-lg">
+      <div class="container">
+        <a class="navbar-brand" href="/">SNOWRIDERX</a>
+        <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span>☰</span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/blog.html">Blog</a>
+            <a class="nav-link" href="/about.html">About us</a>
+            <a class="nav-link" href="/contact.html">Contact</a>
+            <a class="nav-link" href="/privacy.html">Privacy Policy</a>
+            <a class="nav-link" href="/terms.html">Terms and Conditions</a>
+          </div>
         </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Play Button -->
+  <div class="container text-center">
+    <a href="#" class="play-button">▶ Play Snow Rider – No Ads, Unblocked! Start Playing Now</a>
+  </div>
+
+  <!-- Game Area -->
+  <div class="game-box">
+    <div class="game-container" id="gameContainer">
+      <button class="fullscreen-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
+      <iframe id="gameIframe" allowtransparency="yes" allow="autoplay" frameborder="0"
+        width="100%" height="100%"
+        style="position:absolute; top:0; left:0; right:0; bottom:0;"
+        marginheight="0" marginwidth="0" scrolling="no"
+        src="/snowrider3d/index.html"></iframe>
     </div>
+  </div>
 
-    <!-- Fixed Bottom Button -->
-    <div class="fixed-bottom-btn">
-        📲 Add snowriderx to your home screen for faster access!
-        <button onclick="alert('App installation feature')">Add Now</button>
-    </div>
+  <!-- Fixed Bottom Button (Add Now) -->
+  <div class="fixed-bottom-btn">
+    📲 Add Snow Rider 3D to your home screen for faster access!
+    <button onclick="installApp()">Add Now</button>
+  </div>
 
-    <!-- Game Description -->
-    <div class="container mt-5">
-        <div class="row">
-            <div class="col-12">
-                <h1 style="text-align:center; margin-bottom: 30px;">Welcome to <strong>Snow Rider 3D</strong> – Browser Sledding Game by <strong>GemGamer Studio</strong></h1>
-                
-                <p> <a href="https://snowriderx.github.io/"><strong>Snow Rider 3D</strong></a> is more than just a casual sledding game – it’s one of the most addictive endless runner experiences ever created for the web. Developed by <strong>GemGamer Studio</strong>, this browser-based version allows players to dive straight into the snowy action without downloads or installations.</p>
-                <p>From the very first ride, you’ll feel the thrill of guiding your sled down steep mountains, avoiding frozen obstacles, and collecting colorful gifts scattered along the track. Each gift brings you closer to unlocking new sled designs, making every run both exciting and rewarding.</p>
-                <div style="text-align: center; margin: 30px 0;">
-                    <img src="logo.jpg" alt="Snow Rider 3D official logo" style="max-width:100%; height: auto; border-radius: 10px;">
-                </div>
-               
-
-                <h2>Why <strong>Snow Rider 3D</strong> Stands Out?</h2>
-                <ul>
-                    <li><strong>Endless Winter Adventure:</strong> The slopes never end, and the challenge grows sharper the further you ride.</li>
-                    <li><strong>Simple but Addictive Controls:</strong>  Just use the arrow keys or A/D to steer – easy to learn, tough to master.</li>
-                    <li><strong>Unlockable Sleds:</strong> Collect gifts and exchange them for stylish new sleds, each with its own unique look.</li>
-                    <li><strong>Play Anywhere:</strong> As a browser game, Snow Rider 3D runs smoothly on both desktop and mobile devices.</li>
-                    <li><strong>Trusted Developer:</strong>  Created by GemGamer Studio, known for fun and engaging web games loved worldwide.</li>
-                </ul>
-
-                <h2>🎮 Play <strong>Snow Rider 3D</strong> Online – No Downloads Needed</h2>
-                <p>One of the best things about Snow Rider 3D is its accessibility. You don’t need to install apps or worry about storage space – simply open your browser, hit play, and you’re ready to race. The game is lightweight, optimized for instant loading, and free to play.</p>
-                <p>Many students and office workers even enjoy Snow Rider 3D during short breaks, with the unblocked version making it possible to play anytime, anywhere. Whether you want a quick 5-minute ride or a marathon session chasing the world record,<strong> Snow Rider 3D</strong> has you covered.</p>
-                
-                <h2>⚙️ Tips for Scoring High in <strong>Snow Rider 3D</strong></h2>
-                <ul>
-                    <li>Stay focused on the slope ahead – the speed increases as you progress</li>
-                    <li>Collect as many gifts as possible to maximize your sled collection.</li>
-                    <li>Anticipate obstacles early instead of making last-second moves.</li>
-                    <li>Practice daily – your reaction time improves the more you play.</li>
-                </ul>
-
-                <h2>❓ Frequently Asked Questions</h2>
-                
-                <p><strong>Is Snow Rider 3D free to play?</strong><br>
-                Yes, it’s 100% free to play directly in your browser.</p>
-
-                <p><strong>Can I play Snow Rider 3D unblocked at school or work?</strong><br>
-                Yes, the unblocked version is available, making it possible to play from anywhere.</p>
-
-                <p><strong>Who created Snow Rider 3D?</strong><br>
-                The game was developed by <strong>GemGamer Studio</strong>, known for bringing fun, addictive browser games to players worldwide.</p>
-
-                <p><strong>What makes Snow Rider 3D different from other endless runners?</strong><br>
-                The unique sledding theme, unlockable sleds, and snowy mountain atmosphere make it stand out from classic runner games.</p>
-
-            </div>
+  <!-- Game Description -->
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-12">
+        <h1 style="text-align:center; margin-bottom: 30px;">Welcome to <strong>Snow Rider 3D</strong> – Browser Sledding Game by <strong>GemGamer Studio</strong></h1>
+        
+        <p><a href="https://snowriderx.github.io/"><strong>Snow Rider 3D</strong></a> is more than just a casual sledding game – it’s one of the most addictive endless runner experiences ever created for the web. Developed by <strong>GemGamer Studio</strong>, this browser-based version allows players to dive straight into the snowy action without downloads or installations.</p>
+        
+        <p>From the very first ride, you’ll feel the thrill of guiding your sled down steep mountains, avoiding frozen obstacles, and collecting colorful gifts scattered along the track. Each gift brings you closer to unlocking new sled designs, making every run both exciting and rewarding.</p>
+        
+        <div style="text-align: center; margin: 30px 0;">
+          <img src="logo.jpg" alt="Snow Rider 3D official logo" style="max-width:100%; height: auto; border-radius: 10px;">
         </div>
+       
+        <h2>Why <strong>Snow Rider 3D</strong> Stands Out?</h2>
+        <ul>
+          <li><strong>Endless Winter Adventure:</strong> The slopes never end, and the challenge grows sharper the further you ride.</li>
+          <li><strong>Simple but Addictive Controls:</strong> Just use the arrow keys or A/D to steer – easy to learn, tough to master.</li>
+          <li><strong>Unlockable Sleds:</strong> Collect gifts and exchange them for stylish new sleds, each with its own unique look.</li>
+          <li><strong>Play Anywhere:</strong> Snow Rider 3D runs smoothly on both desktop and mobile browsers.</li>
+          <li><strong>Trusted Developer:</strong> Created by GemGamer Studio, known for fun and engaging web games loved worldwide.</li>
+        </ul>
+
+        <h2>🎮 Play <strong>Snow Rider 3D</strong> Online – No Downloads Needed</h2>
+        <p>Snow Rider 3D is all about accessibility. No installs, no extra storage needed – just open your browser, hit play, and start racing down snowy slopes instantly. Optimized for quick loading, lightweight, and free-to-play.</p>
+
+        <h2>⚙️ Tips for Scoring High in <strong>Snow Rider 3D</strong></h2>
+        <ul>
+          <li>Stay focused on the slope ahead – the speed increases as you progress.</li>
+          <li>Collect as many gifts as possible to maximize your sled collection.</li>
+          <li>Anticipate obstacles early instead of making last-second moves.</li>
+          <li>Practice daily – your reaction time improves the more you play.</li>
+        </ul>
+
+        <h2>❓ Frequently Asked Questions</h2>
+        <p><strong>Is Snow Rider 3D free to play?</strong><br>Yes, it’s 100% free to play directly in your browser.</p>
+        <p><strong>Can I play Snow Rider 3D unblocked at school or work?</strong><br>Yes, the unblocked version makes it possible to play from anywhere.</p>
+        <p><strong>Who created Snow Rider 3D?</strong><br>Snow Rider 3D was developed by <strong>GemGamer Studio</strong>, known for bringing fun, addictive browser games to players worldwide.</p>
+        <p><strong>What makes Snow Rider 3D different from other endless runners?</strong><br>The unique sledding theme, unlockable sleds, and snowy mountain atmosphere make it stand out from classic runner games.</p>
+      </div>
     </div>
+  </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Auto scroll to game area after page loads
-        window.addEventListener('load', function() {
-            setTimeout(function() {
-                const gameBox = document.querySelector('.play-button');
-                if (gameBox) {
-                    gameBox.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
-                    });
-                }
-            }, 500); 
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Auto scroll
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const gameBox = document.querySelector('.play-button');
+        if (gameBox) gameBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 500);
+    });
+
+    // Fullscreen
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
+    const gameContainer = document.getElementById('gameContainer');
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        gameContainer.requestFullscreen().then(() => {
+          fullscreenBtn.innerHTML = '✖'; fullscreenBtn.title = 'Exit Fullscreen';
         });
-
-        // Fullscreen functionality
-        const fullscreenBtn = document.getElementById('fullscreenBtn');
-        const gameContainer = document.getElementById('gameContainer');
-
-        fullscreenBtn.addEventListener('click', function() {
-            if (!document.fullscreenElement) {
-                gameContainer.requestFullscreen().then(() => {
-                    fullscreenBtn.innerHTML = '✖';
-                    fullscreenBtn.title = 'Exit Fullscreen';
-                }).catch(err => {
-                    console.log('Error entering fullscreen:', err);
-                });
-            } else {
-                document.exitFullscreen().then(() => {
-                    fullscreenBtn.innerHTML = '⛶';
-                    fullscreenBtn.title = 'Fullscreen';
-                }).catch(err => {
-                    console.log('Error exiting fullscreen:', err);
-                });
-            }
+      } else {
+        document.exitFullscreen().then(() => {
+          fullscreenBtn.innerHTML = '⛶'; fullscreenBtn.title = 'Fullscreen';
         });
+      }
+    });
+    document.addEventListener('fullscreenchange', () => {
+      if (!document.fullscreenElement) {
+        fullscreenBtn.innerHTML = '⛶'; fullscreenBtn.title = 'Fullscreen';
+      }
+    });
 
-        // Handle ESC or system exit fullscreen
-        document.addEventListener('fullscreenchange', function() {
-            if (!document.fullscreenElement) {
-                fullscreenBtn.innerHTML = '⛶';
-                fullscreenBtn.title = 'Fullscreen';
-            }
+    // --- PWA setup ---
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js?v=20250906')
+        .then(() => console.log('✅ Service Worker registered'));
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.querySelector('.fixed-bottom-btn').style.display = 'block';
+    });
+
+    function installApp() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(choice => {
+          if (choice.outcome === 'accepted') {
+            console.log('🎉 App added to home screen');
+          }
+          deferredPrompt = null;
+          document.querySelector('.fixed-bottom-btn').style.display = 'none';
         });
-    </script>
+      }
+    }
+  </script>
 </body>
 </html>
