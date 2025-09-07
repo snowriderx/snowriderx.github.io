@@ -69,7 +69,7 @@
       position:fixed; bottom:0; left:0; right:0;
       background:#4CAF50; color:white; text-align:center;
       padding:12px; z-index:1000; font-weight:bold;
-      display:none; 
+      /* display:none;  */
     }
     .fixed-bottom-btn button {
       background:white; color:#4CAF50; border:none;
@@ -118,7 +118,7 @@
   </div>
 
   <!-- Fixed Bottom Button (Add Now) -->
-  <div class="fixed-bottom-btn">
+  <div class="fixed-bottom-btn" id ='addnowBtn' style="display: none;">
     
     📲 Add Snow Rider 3D to your home screen for faster access!
     <button onclick="installApp()">Add Now</button>
@@ -198,6 +198,7 @@
       }
     });
 
+
     // --- PWA setup ---
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('/sw.js?v=20250906')
@@ -208,19 +209,25 @@
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredPrompt = e;
-      document.querySelector('.fixed-bottom-btn').style.display = 'block';
+      document.getElementById('addnowBtn').style.display = 'block';
+      console.log('📲 beforeinstallprompt event fired, show Add Now button');
     });
 
     function installApp() {
       if (deferredPrompt) {
         deferredPrompt.prompt();
         deferredPrompt.userChoice.then(choice => {
+          console.log('📊 User choice result:', choice);
           if (choice.outcome === 'accepted') {
-            console.log('🎉 App added to home screen');
+            console.log('🎉 User accepted: App added to home screen');
+          } else {
+            console.log('❌ User dismissed the install prompt');
           }
           deferredPrompt = null;
-          document.querySelector('.fixed-bottom-btn').style.display = 'none';
+          document.getElementById('addnowBtn').style.display = 'none';
         });
+      } else {
+        console.warn('⚠️ deferredPrompt is null, không thể cài đặt.');
       }
     }
   </script>
