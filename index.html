@@ -10,7 +10,7 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
 
   <!-- Manifest + Theme -->
-  <link rel="manifest" href="/manifest.json" />
+  <link rel="manifest" href="manifest.json" />
   <meta name="theme-color" content="#007bff" />
 
   <!-- Schema JSON-LD -->
@@ -69,7 +69,7 @@
       position:fixed; bottom:0; left:0; right:0;
       background:#4CAF50; color:white; text-align:center;
       padding:12px; z-index:1000; font-weight:bold;
-      /* display:none;  */
+      display:none; 
     }
     .fixed-bottom-btn button {
       background:white; color:#4CAF50; border:none;
@@ -113,12 +113,13 @@
         width="100%" height="100%"
         style="position:absolute; top:0; left:0; right:0; bottom:0;"
         marginheight="0" marginwidth="0" scrolling="no"
-        src="/snowrider3d/index.html"></iframe>
+        src="snowrider3d/index.html"></iframe>
     </div>
   </div>
 
   <!-- Fixed Bottom Button (Add Now) -->
   <div class="fixed-bottom-btn">
+    
     📲 Add Snow Rider 3D to your home screen for faster access!
     <button onclick="installApp()">Add Now</button>
   </div>
@@ -223,5 +224,7 @@
       }
     }
   </script>
+  
+
 </body>
 </html>
