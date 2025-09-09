@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <title>Contact Snow Rider 3D – Get in Touch with GemGamer Studio</title>
-    <meta property="og:description" content=" Contact Snow Rider 3D team for support, feedback, or collaboration. Reach out directly to GemGamer Studio, the official developer of the popular browser sledding game." />
+    <title>How to Play Snow Rider 3D – Master the Browser Sledding Adventure</title>
+    <meta property="og:description" content=" Learn how to play Snow Rider 3D in your browser. See the controls, gameplay loop, and pro tips to score high in the sledding game by GemGamer Studio." />
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet" />
     <style>
@@ -48,150 +48,127 @@
             box-shadow: none;
         }
 
-        /* Content */
-        .page-header {
-            text-align: center;
-            padding: 60px 0 40px 0;
-            background: white;
-            margin-bottom: 40px;
-        }
-
-        .page-header h1 {
-            font-size: 2.5em;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .page-header p {
-            color: #666;
-            font-size: 1.1em;
-        }
-
         .content-section {
             background: white;
             padding: 40px 0;
-            margin-bottom: 80px;
+            margin-bottom: 40px;
         }
 
-        .contact-grid {
-            margin-bottom: 50px;
+        .content-section h2 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 25px;
+            text-align: left;
         }
 
-        .contact-card {
+        .content-section h3 {
+            color: #444;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .content-section p {
+            color: #666;
+            line-height: 1.7;
+            margin-bottom: 20px;
+        }
+
+        .stats-section {
+            background: #f8f9fa;
+            padding: 50px 0;
+            margin-bottom: 40px;
+        }
+
+        .stat-item {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #007bff;
+            display: block;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1.1em;
+            margin-top: 10px;
+        }
+
+        .feature-grid {
+            margin: 50px 0;
+        }
+
+        .feature-card {
             background: #f8f9fa;
             padding: 30px;
             border-radius: 10px;
             text-align: center;
             height: 100%;
+            margin-bottom: 30px;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
 
-        .contact-card:hover {
+        .feature-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
 
-        .contact-card-icon {
+        .feature-icon {
             font-size: 3em;
             margin-bottom: 20px;
             color: #007bff;
         }
 
-        .contact-card h3 {
+        .feature-card h4 {
             color: #333;
-            font-size: 1.5em;
             margin-bottom: 15px;
         }
 
-        .contact-card p {
+        .feature-card p {
             color: #666;
             line-height: 1.6;
+        }
+
+
+
+        .cta-section {
+            background: linear-gradient(135deg, #FF6B35, #F7941D);
+            color: white;
+            padding: 60px 0;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .cta-section h2 {
+            font-size: 2.2em;
             margin-bottom: 20px;
         }
 
-        .contact-card a {
-            color: #007bff;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .contact-card a:hover {
-            text-decoration: underline;
-        }
-
-        .contact-form {
-            background: #f8f9fa;
-            padding: 40px;
-            border-radius: 10px;
-            margin-top: 40px;
-        }
-
-        .contact-form h2 {
-            color: #333;
+        .cta-section p {
+            font-size: 1.2em;
             margin-bottom: 30px;
-            text-align: center;
         }
 
-        .form-group {
-            margin-bottom: 25px;
-        }
-
-        .form-group label {
-            color: #333;
-            font-weight: 500;
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .form-control {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 12px 15px;
-            font-size: 1em;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
-        }
-
-        .form-control textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .submit-btn {
-            background: #007bff;
-            color: white;
-            padding: 12px 30px;
+        .play-btn {
+            background: white;
+            color: #FF6B35;
+            padding: 15px 40px;
             border: none;
             border-radius: 8px;
-            font-size: 1.1em;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            width: 100%;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-decoration: none;
+            display: inline-block;
+            transition: transform 0.3s ease;
         }
 
-        .submit-btn:hover {
-            background: #0056b3;
-        }
-
-        .info-section {
-            margin-top: 50px;
-        }
-
-        .info-section h2 {
-            color: #333;
-            margin-bottom: 25px;
-        }
-
-        .info-section p {
-            color: #666;
-            line-height: 1.7;
-            margin-bottom: 20px;
+        .play-btn:hover {
+            transform: translateY(-2px);
+            color: #FF6B35;
+            text-decoration: none;
         }
 
         /* Fixed Bottom Button */
@@ -248,8 +225,16 @@
                 padding: 40px 0 30px 0;
             }
 
-            .contact-form {
-                padding: 30px 20px;
+            .hero-section h2 {
+                font-size: 2em;
+            }
+
+            .stat-number {
+                font-size: 2.5em;
+            }
+
+            .timeline-item {
+                padding-left: 20px;
             }
         }
     </style>
@@ -278,32 +263,53 @@
         </nav>
     </header>
 
-    <!-- Content -->
+    <!-- Our Story -->
     <div class="content-section">
         <div class="container">
-            <h1>Contact Snow Rider 3D – Get in Touch</h1>
+            <h1>How to Play Snow Rider 3D – Master the Browser Sledding Adventure</h1>
 
-            <p>If you have questions, feedback, or collaboration requests about <a href="https://snowriderx.github.io/">Snow Rider 3D</a>, this page will help you reach the right place. The game is developed and published by <strong>GemGamer Studio</strong>, and we are always open to hearing from our players.</p>
+            <p><strong>Snow Rider 3D</strong> is one of the most popular browser sledding games, developed by <strong>GemGamer Studio</strong>. The game is simple to play but challenging to master, offering endless fun for all players. Below is your complete guide.</p>
 
-            <h2>Contact Information</h2>
+            <h2>Controls</h2>
             <ul>
-            <li><strong>Email:</strong> support@snowriderx.github.io</li>
-            <li><strong>Developer:</strong> GemGamer Studio</li>
+            <li><strong>← Arrow / A:</strong> Move sled left</li>
+            <li><strong>→ Arrow / D:</strong> Move sled right</li>
+            <li><strong>Spacebar (optional):</strong> Jump over small obstacles</li>
             </ul>
 
-            <h2>When to Contact Us</h2>
-            <p>You can reach out for the following reasons:</p>
+            <h2>Gameplay Basics</h2>
+            <ol>
+            <li>Your sled starts sliding downhill automatically.</li>
+            <li>Avoid trees, rocks, cabins, and snow piles.</li>
+            <li>Collect gifts to increase your score.</li>
+            <li>Use gifts to unlock new sleds with unique designs.</li>
+            <li>Survive as long as possible—the further you go, the faster it gets.</li>
+            </ol>
+
+            <h2>Beginner Tips</h2>
             <ul>
-            <li>Questions about gameplay or controls</li>
-            <li>Reporting bugs or technical issues</li>
-            <li>Feedback and suggestions for improvements</li>
-            <li>Collaboration or media inquiries</li>
+            <li>Stay in the center lane for more reaction time.</li>
+            <li>Anticipate obstacles early instead of last-second moves.</li>
+            <li>Collect easy gifts before the slope speeds up.</li>
+            <li>Practice daily to sharpen reflexes.</li>
             </ul>
 
-            <h2>Community and Support</h2>
-            <p>Snow Rider 3D has grown into one of the most popular browser sledding games worldwide. Your feedback helps us improve the experience and ensure the game continues to deliver fun for everyone. Don’t hesitate to share your high scores, challenges, or suggestions with us.</p>
+            <h2>Advanced Tips for High Scores</h2>
+            <ul>
+            <li>Use smooth movements instead of sharp zigzags.</li>
+            <li>Recognize obstacle patterns—they often repeat.</li>
+            <li>Prioritize survival over risky gifts.</li>
+            <li>Challenge friends for higher scores to improve consistency.</li>
+            </ul>
 
-            <p><em>Snow Rider 3D is developed by GemGamer Studio – official browser version.</em></p>
+            <h2>Play Snow Rider 3D Unblocked</h2>
+            <p>If you want to play at school or work, the <strong>unblocked version</strong> of Snow Rider 3D allows you to enjoy the game anywhere with a browser.</p>
+            <p>
+            <a href="/">Play Now</a> 
+            </p>
+
+            <p><em>Developed by GemGamer Studio — Snow Rider 3D Browser Version</em></p>
+
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
