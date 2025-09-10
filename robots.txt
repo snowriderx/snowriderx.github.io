@@ -8,4 +8,4 @@ Disallow: /Build/
 Disallow: /TemplateData/
 
 # Sitemap location
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://snowriderx.github.io/sitemap.xml

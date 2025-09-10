@@ -9,6 +9,30 @@
     <priority>1.0</priority>
   </url>
 
+  <!-- How to play -->
+  <url>
+    <loc>https://snowriderx.github.io/How-to-play.html</loc>
+    <lastmod>2025-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- FAQ -->
+  <url>
+    <loc>https://snowriderx.github.io/faq.html</loc>
+    <lastmod>2025-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Blog-->
+  <url>
+    <loc>https://snowriderx.github.io/blog.html</loc>
+    <lastmod>2025-09-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- About Us -->
   <url>
     <loc>https://snowriderx.github.io/about.html</loc>
