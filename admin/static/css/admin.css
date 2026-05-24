@@ -1,0 +1,1215 @@
+/* ================================================================
+   Admin Panel — Design System
+   ================================================================ */
+
+:root {
+  /* ── Layout ──────────────────────────────────────────────────── */
+  --sidebar-width: 240px;
+  --topbar-height: 56px;
+
+  /* ── Sidebar (kept for legacy refs) ─────────────────────────── */
+  --sidebar-bg: #1e293b;
+  --sidebar-text: #94a3b8;
+  --sidebar-hover: #334155;
+  --sidebar-active-bg: #2563eb;
+  --sidebar-active-text: #fff;
+
+  /* ── Brand / Accent ──────────────────────────────────────────── */
+  --c-primary:        #2563eb;
+  --c-primary-hover:  #1d4ed8;
+  --c-primary-bg:     #dbeafe;
+  --c-primary-text:   #1d4ed8;
+
+  --c-success:        #16a34a;
+  --c-success-bg:     #dcfce7;
+  --c-success-text:   #15803d;
+
+  --c-danger:         #dc2626;
+  --c-danger-bg:      #fee2e2;
+  --c-danger-text:    #b91c1c;
+
+  --c-warning:        #d97706;
+  --c-warning-bg:     #fef3c7;
+  --c-warning-text:   #92400e;
+
+  --c-info:           #0891b2;
+  --c-info-bg:        #e0f2fe;
+  --c-info-text:      #0e7490;
+
+  --c-muted:          #64748b;
+
+  /* ── Surface / Background ────────────────────────────────────── */
+  --surface-page:   #f1f5f9;
+  --surface-card:   #ffffff;
+  --surface-subtle: #f8fafc;
+  --surface-input:  #ffffff;
+
+  /* ── Text ────────────────────────────────────────────────────── */
+  --text-primary:   #0f172a;
+  --text-secondary: #475569;
+  --text-muted:     #94a3b8;
+  --text-inverse:   #f1f5f9;
+
+  /* ── Border ──────────────────────────────────────────────────── */
+  --border:         #e2e8f0;
+  --border-strong:  #c8d3e0;
+  --border-dark:    #1e293b;
+
+  /* ── Radius ──────────────────────────────────────────────────── */
+  --radius-sm:  0.25rem;
+  --radius:     0.5rem;
+  --radius-lg:  0.75rem;
+  --radius-xl:  1rem;
+  --radius-pill: 999px;
+
+  /* ── Shadow ──────────────────────────────────────────────────── */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.10);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.12);
+
+  /* ── Typography ──────────────────────────────────────────────── */
+  --font-size-xs:   0.7rem;
+  --font-size-sm:   0.8rem;
+  --font-size-base: 0.875rem;
+  --font-size-md:   0.925rem;
+}
+
+/* ----------------------------------------------------------------
+   Layout
+   ---------------------------------------------------------------- */
+body.admin-body {
+  display: flex;
+  min-height: 100vh;
+  background: #f1f5f9;
+  font-size: 0.875rem;
+  color: #1e293b;
+}
+
+/* ----------------------------------------------------------------
+   Sidebar
+   ---------------------------------------------------------------- */
+.admin-sidebar {
+  width: var(--sidebar-width);
+  min-height: 100vh;
+  background: #111827;
+  color: var(--sidebar-text);
+  flex-shrink: 0;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  overflow-y: auto;
+  z-index: 100;
+  transition: transform 0.25s ease;
+  scrollbar-width: thin;
+  scrollbar-color: #1f2937 transparent;
+  display: flex;
+  flex-direction: column;
+}
+.admin-sidebar.collapsed { transform: translateX(-100%); }
+
+/* Brand */
+.sidebar-brand {
+  padding: 1rem 1rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.sidebar-brand-icon {
+  width: 34px;
+  height: 34px;
+  background: #2563eb;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  color: #fff;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.45);
+}
+
+.sidebar-brand-name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: #f1f5f9;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+/* Nav links — pill style */
+.admin-sidebar .nav-link {
+  color: #94a3b8;
+  margin: 1px 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.45rem;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  transition: background 0.15s, color 0.15s;
+  font-size: 0.835rem;
+  position: relative;
+}
+
+.admin-sidebar .nav-link i {
+  font-size: 1rem;
+  flex-shrink: 0;
+  opacity: 0.75;
+  transition: opacity 0.15s;
+}
+
+.admin-sidebar .nav-link:hover {
+  background: rgba(255,255,255,0.07);
+  color: #e2e8f0;
+}
+.admin-sidebar .nav-link:hover i { opacity: 1; }
+
+.admin-sidebar .nav-link.active {
+  background: #2563eb;
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.4);
+}
+.admin-sidebar .nav-link.active i { opacity: 1; }
+.admin-sidebar .nav-link.active::before { display: none; }
+
+/* Section labels */
+.nav-section-label {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #374151;
+  padding: 1.1rem 1.25rem 0.3rem;
+  display: block;
+  font-weight: 700;
+}
+
+/* Footer: user info + logout */
+.sidebar-footer {
+  border-top: 1px solid rgba(255,255,255,0.06);
+  background: rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.sidebar-avatar {
+  width: 30px;
+  height: 30px;
+  background: #1f2937;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 0.9rem;
+  flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.sidebar-username {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #cbd5e1;
+}
+
+.sidebar-logout-btn {
+  color: #4b5563;
+  padding: 0.35rem;
+  border-radius: 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+  flex-shrink: 0;
+  text-decoration: none;
+  font-size: 1rem;
+}
+.sidebar-logout-btn:hover {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.1);
+}
+
+/* ----------------------------------------------------------------
+   Main content
+   ---------------------------------------------------------------- */
+.admin-main {
+  margin-left: var(--sidebar-width);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: margin-left 0.25s ease;
+}
+.admin-main.expanded { margin-left: 0; }
+
+/* ----------------------------------------------------------------
+   Topbar
+   ---------------------------------------------------------------- */
+.admin-topbar {
+  height: var(--topbar-height);
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ----------------------------------------------------------------
+   Page content
+   ---------------------------------------------------------------- */
+.admin-content { flex: 1; }
+
+/* ----------------------------------------------------------------
+   Stat cards (dashboard)
+   ---------------------------------------------------------------- */
+.stat-card {
+  border-radius: var(--radius) !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  cursor: pointer;
+}
+.stat-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md) !important;
+}
+
+.stat-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: var(--radius);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* ----------------------------------------------------------------
+   Cards
+   ---------------------------------------------------------------- */
+.card {
+  border-radius: var(--radius) !important;
+}
+.card-header {
+  font-size: 0.875rem;
+  padding: 0.65rem 1rem;
+}
+
+/* ----------------------------------------------------------------
+   Tables
+   ---------------------------------------------------------------- */
+.table-responsive {
+  border-radius: var(--radius);
+  border: 1px solid #e2e8f0;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.table {
+  margin-bottom: 0;
+}
+
+.table th {
+  font-weight: 600;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #f1f5f9;
+  background: #334155;
+  border-bottom: 2px solid #1e293b !important;
+  white-space: nowrap;
+}
+
+.table-hover tbody tr {
+  transition: background-color 0.1s ease;
+}
+
+.table-hover tbody tr:hover > * {
+  background-color: #eff6ff !important;
+  color: #1e293b;
+}
+
+.table td, .table th {
+  vertical-align: middle;
+  padding: 0.5rem 0.75rem;
+}
+
+/* First column (checkbox) — center-align header AND cells */
+.table thead th:first-child,
+.table tbody td:first-child {
+  text-align: center;
+}
+
+/* Sticky header */
+.table-responsive thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+/* Striped — softer */
+.table-striped > tbody > tr:nth-of-type(odd) > * {
+  --bs-table-accent-bg: rgba(241, 245, 249, 0.55);
+}
+
+/* Status rows always override stripe */
+.table-striped > tbody > tr.table-warning > *,
+.table-striped > tbody > tr.table-danger > *,
+.table-striped > tbody > tr.table-success > * {
+  --bs-table-accent-bg: inherit;
+}
+
+/* Row highlight when checkbox checked */
+.table tbody tr:has(input[type="checkbox"]:checked) > * {
+  background-color: #dbeafe !important;
+}
+
+/* Cell borders */
+.table-bordered > :not(caption) > * > * {
+  border-color: #c8d3e0;
+}
+
+/* Remove border on last row */
+.table tbody tr:last-child > td {
+  border-bottom: 0;
+}
+
+/* Action buttons in tables */
+.btn-xs {
+  padding: 0.15rem 0.4rem;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  border-radius: 0.3rem;
+}
+.btn-xs i { pointer-events: none; }
+
+/* ================================================================
+   Forms — complete design system
+   All form styles are scoped to .card-form to avoid side-effects
+   on list-page filter bars and inline batch forms.
+   ================================================================ */
+
+/* ── Card wrapper ─────────────────────────────────────────────── */
+.card-form .card-header {
+  background: #334155;
+  color: #f1f5f9;
+  border-bottom: 1px solid #1e293b;
+  font-weight: 600;
+}
+.card-form .card-body {
+  background: #e8eef7;
+  padding: 1.5rem;
+}
+
+/* ── Field spacing ────────────────────────────────────────────── */
+.card-form .mb-3 {
+  margin-bottom: 1.25rem !important;
+}
+
+/* ── Labels ───────────────────────────────────────────────────── */
+.card-form .form-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: #374151;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+}
+.card-form .form-label .text-danger {
+  font-size: 0.8em;
+  vertical-align: top;
+  margin-left: 0.1rem;
+  line-height: 1.8;
+}
+.card-form .form-label .text-muted {
+  font-weight: 400;
+  font-size: 0.9em;
+}
+
+/* ── Base inputs & selects ────────────────────────────────────── */
+.card-form .form-control,
+.card-form .form-select {
+  background: #ffffff;
+  border: 1px solid #dde3ec;
+  border-radius: 0.4rem;
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  min-height: 40px;
+  color: #1e293b;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease,
+              background-color 0.15s ease;
+}
+
+.card-form .form-control::placeholder {
+  color: #b5bfcc;
+  font-weight: 400;
+}
+
+.card-form .form-control:hover:not(:focus):not(:disabled):not([readonly]):not(.is-invalid),
+.card-form .form-select:hover:not(:focus):not(:disabled):not(.is-invalid) {
+  border-color: #adb8cb;
+}
+
+.card-form .form-control:focus,
+.card-form .form-select:focus {
+  background: #fff;
+  border-color: var(--c-primary);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.1);
+  outline: none;
+}
+
+.card-form .form-control:disabled,
+.card-form .form-control[readonly] {
+  background: #f1f5f9;
+  color: #64748b;
+  border-color: #e2e8f0;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ── Select custom arrow ──────────────────────────────────────── */
+.card-form .form-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath fill='%2364748b' d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  background-size: 12px;
+  padding-right: 2.25rem;
+}
+
+/* ── Textarea ─────────────────────────────────────────────────── */
+.card-form textarea.form-control {
+  min-height: 90px;
+  resize: vertical;
+  line-height: 1.65;
+  padding-top: 0.55rem;
+}
+
+/* ── Small variants ───────────────────────────────────────────── */
+.card-form .form-control-sm,
+.card-form .form-select-sm {
+  min-height: 33px;
+  padding: 0.28rem 0.6rem;
+  font-size: 0.8rem;
+  border-radius: 0.3rem;
+}
+
+/* ── File input ───────────────────────────────────────────────── */
+.card-form input[type="file"].form-control {
+  padding: 0.4rem 0.6rem;
+  cursor: pointer;
+  line-height: 1.6;
+}
+.card-form input[type="file"].form-control::file-selector-button {
+  background: #f1f5f9;
+  border: 1px solid #dde3ec;
+  border-radius: 0.3rem;
+  padding: 0.2rem 0.7rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  margin-right: 0.75rem;
+  transition: background 0.15s;
+}
+.card-form input[type="file"].form-control::file-selector-button:hover {
+  background: #e2e8f0;
+}
+
+/* ── Input groups ─────────────────────────────────────────────── */
+.card-form .input-group .form-control,
+.card-form .input-group .form-select {
+  box-shadow: none;
+}
+.card-form .input-group-text {
+  background: #f1f5f9;
+  border-color: #dde3ec;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+.card-form .input-group .form-control:focus { z-index: 3; }
+
+/* ── Checkboxes & radios ──────────────────────────────────────── */
+.card-form .form-check {
+  padding-left: 1.65em;
+}
+.card-form .form-check-input {
+  width: 1.05em;
+  height: 1.05em;
+  margin-top: 0.2em;
+  margin-left: -1.65em;
+  border-color: #c5cfe0;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s;
+}
+.card-form .form-check-input:checked {
+  background-color: var(--c-primary);
+  border-color: var(--c-primary);
+}
+.card-form .form-check-input:focus {
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+  border-color: var(--c-primary);
+}
+.card-form .form-check-label {
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #374151;
+  padding-left: 0.2rem;
+}
+
+/* ── Validation — invalid ─────────────────────────────────────── */
+.card-form .form-control.is-invalid,
+.card-form .form-select.is-invalid {
+  border-color: var(--c-danger);
+  background-color: #fff8f8;
+  box-shadow: none;
+}
+.card-form .form-control.is-invalid:focus,
+.card-form .form-select.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgba(220,38,38,0.1);
+}
+
+/* ── Validation — valid ───────────────────────────────────────── */
+.card-form .form-control.is-valid,
+.card-form .form-select.is-valid {
+  border-color: var(--c-success);
+  box-shadow: none;
+}
+.card-form .form-control.is-valid:focus,
+.card-form .form-select.is-valid:focus {
+  box-shadow: 0 0 0 3px rgba(22,163,74,0.1);
+}
+
+/* ── Validation messages ──────────────────────────────────────── */
+.invalid-feedback {
+  font-size: 0.775rem;
+  color: var(--c-danger-text, #b91c1c);
+  margin-top: 0.3rem;
+  font-weight: 500;
+  padding-left: 0.1rem;
+}
+
+/* ── Help text ────────────────────────────────────────────────── */
+.card-form .form-text {
+  font-size: 0.775rem;
+  color: #6b7280;
+  margin-top: 0.3rem;
+  line-height: 1.5;
+}
+.card-form .form-text code {
+  font-size: 0.85em;
+  background: #e8edf4;
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+  color: #475569;
+}
+
+/* ── Action buttons ───────────────────────────────────────────── */
+.card-form .btn-primary {
+  min-height: 38px;
+  padding-left: 1.2rem;
+  padding-right: 1.2rem;
+  font-weight: 600;
+  background: var(--c-primary);
+  border-color: var(--c-primary);
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+}
+.card-form .btn-primary:hover {
+  background: var(--c-primary-hover);
+  border-color: var(--c-primary-hover);
+  box-shadow: 0 4px 12px rgba(37,99,235,0.28);
+}
+.card-form .btn-primary:active { transform: translateY(1px); box-shadow: none; }
+
+.card-form .btn-outline-secondary {
+  min-height: 38px;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  color: #64748b;
+  border-color: #dde3ec;
+  background: #fff;
+  font-weight: 500;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.card-form .btn-outline-secondary:hover {
+  background: #f1f5f9;
+  border-color: #c5cfe0;
+  color: #374151;
+}
+
+/* ── Form code blocks (font-monospace fields) ─────────────────── */
+.card-form .form-control.font-monospace {
+  font-size: 0.825rem;
+  letter-spacing: 0;
+  background: #f8fafc;
+  line-height: 1.6;
+}
+
+/* ================================================================
+   Buttons — global consistent sizing
+   ================================================================ */
+.btn {
+  border-radius: 0.375rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+.btn-sm {
+  padding: 0.3rem 0.7rem;
+  font-size: 0.8rem;
+}
+
+/* ----------------------------------------------------------------
+   Badge tweaks
+   ---------------------------------------------------------------- */
+.badge { font-weight: 500; letter-spacing: 0.02em; }
+
+/* ----------------------------------------------------------------
+   Alert tweaks
+   ---------------------------------------------------------------- */
+.alert { border-radius: var(--radius); border: none; }
+.alert i { vertical-align: -0.1em; }
+
+/* ----------------------------------------------------------------
+   Status badges  (.badge-status-*)
+   Usage: <span class="badge-status badge-status-active">Hiển thị</span>
+   ---------------------------------------------------------------- */
+.badge-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.18rem 0.55rem;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  line-height: 1.6;
+}
+.badge-status::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.badge-status-active   { background: var(--c-success-bg);  color: var(--c-success-text); }
+.badge-status-active::before   { background: var(--c-success); }
+
+.badge-status-inactive { background: #f1f5f9; color: var(--c-muted); }
+.badge-status-inactive::before { background: var(--text-muted); }
+
+.badge-status-pending  { background: var(--c-warning-bg); color: var(--c-warning-text); }
+.badge-status-pending::before  { background: var(--c-warning); }
+
+.badge-status-new      { background: var(--c-primary-bg); color: var(--c-primary-text); }
+.badge-status-new::before      { background: var(--c-primary); }
+
+.badge-status-danger   { background: var(--c-danger-bg);  color: var(--c-danger-text); }
+.badge-status-danger::before   { background: var(--c-danger); }
+
+/* ----------------------------------------------------------------
+   Page header  (.page-header)
+   Usage:
+     <div class="page-header">
+       <div class="page-header-left">
+         <i class="bi bi-newspaper page-header-icon"></i>
+         <div>
+           <h1 class="page-title">Tin tức</h1>
+           <p class="page-subtitle">42 bài viết</p>
+         </div>
+       </div>
+       <a href="..." class="btn btn-primary btn-sm">...</a>
+     </div>
+   ---------------------------------------------------------------- */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+  flex-wrap: wrap;
+}
+.page-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+.page-header-icon {
+  font-size: 1.35rem;
+  color: var(--c-primary);
+  flex-shrink: 0;
+}
+.page-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+.page-subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin: 0.1rem 0 0;
+}
+
+/* ----------------------------------------------------------------
+   Filter bar  (.filter-bar)
+   Usage: <div class="filter-bar">...</div>
+   ---------------------------------------------------------------- */
+.filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.6rem 0.75rem;
+  background: var(--surface-subtle);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* ----------------------------------------------------------------
+   Action bar  (.action-bar)
+   The toolbar row above / below batch list tables.
+   Usage:
+     <div class="action-bar">
+       <button class="btn btn-sm btn-success">...</button>
+       <button class="btn btn-sm btn-danger">...</button>
+       <span class="action-bar-spacer"></span>
+       <span class="action-bar-count">42 bản ghi</span>
+       <a class="btn btn-sm btn-primary">...</a>
+     </div>
+   ---------------------------------------------------------------- */
+.action-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.6rem;
+}
+.action-bar-spacer { flex: 1; }
+.action-bar-count {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* ----------------------------------------------------------------
+   Empty state  (.empty-state)
+   Usage: inside a <td colspan="N"> or standalone
+   ---------------------------------------------------------------- */
+.empty-state {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+.empty-state-icon {
+  font-size: 2.25rem;
+  color: var(--text-muted);
+  opacity: 0.4;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+.empty-state-title {
+  font-size: var(--font-size-md);
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.25rem;
+}
+.empty-state-text {
+  font-size: var(--font-size-sm);
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ----------------------------------------------------------------
+   Content card  (.card-content)
+   Lighter variant for info/list cards (not forms).
+   Usage: <div class="card card-content shadow-sm">
+   ---------------------------------------------------------------- */
+.card-content .card-header {
+  background: var(--surface-subtle);
+  border-bottom: 1px solid var(--border);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  padding: 0.65rem 1rem;
+}
+.card-content .card-header i {
+  color: var(--c-primary);
+}
+.card-content .card-body {
+  background: var(--surface-card);
+}
+
+/* ----------------------------------------------------------------
+   Stat card accent  (.stat-card-accent)
+   Color accent on top border, driven by Bootstrap color helpers.
+   Usage: <div class="card stat-card stat-card-accent accent-primary">
+   ---------------------------------------------------------------- */
+.stat-card-accent { border-top: 3px solid transparent; }
+.stat-card-accent.accent-primary { border-top-color: var(--c-primary); }
+.stat-card-accent.accent-success { border-top-color: var(--c-success); }
+.stat-card-accent.accent-danger  { border-top-color: var(--c-danger);  }
+.stat-card-accent.accent-warning { border-top-color: var(--c-warning); }
+.stat-card-accent.accent-info    { border-top-color: var(--c-info);    }
+.stat-card-accent.accent-purple  { border-top-color: #7c3aed; }
+
+/* ----------------------------------------------------------------
+   Status dot  (.status-dot)
+   Inline colored dot for activity lists.
+   Usage: <span class="status-dot dot-success"></span>
+   ---------------------------------------------------------------- */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.dot-success { background: var(--c-success); }
+.dot-danger  { background: var(--c-danger); }
+.dot-warning { background: var(--c-warning); }
+.dot-muted   { background: var(--text-muted); }
+.dot-primary { background: var(--c-primary); }
+
+/* ----------------------------------------------------------------
+   Divider with label  (.divider-label)
+   Usage: <div class="divider-label">Thông tin khác</div>
+   ---------------------------------------------------------------- */
+.divider-label {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0 1rem;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+.divider-label::before,
+.divider-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* ----------------------------------------------------------------
+   Typography utilities
+   ---------------------------------------------------------------- */
+.text-xs   { font-size: var(--font-size-xs)   !important; }
+.text-sm   { font-size: var(--font-size-sm)   !important; }
+.text-base { font-size: var(--font-size-base) !important; }
+.fw-medium { font-weight: 500 !important; }
+.fw-semibold { font-weight: 600 !important; }
+
+/* ----------------------------------------------------------------
+   Soft button variants  (.btn-soft-*)
+   Filled with color's light bg, colored text — no hard outline.
+   Usage: <a class="btn btn-soft-primary btn-sm">...</a>
+   ---------------------------------------------------------------- */
+.btn-soft-primary {
+  background: var(--c-primary-bg);
+  color: var(--c-primary-text);
+  border-color: transparent;
+}
+.btn-soft-primary:hover {
+  background: #bfdbfe;
+  color: var(--c-primary-hover);
+  border-color: transparent;
+}
+.btn-soft-success {
+  background: var(--c-success-bg);
+  color: var(--c-success-text);
+  border-color: transparent;
+}
+.btn-soft-success:hover { background: #bbf7d0; color: var(--c-success); border-color: transparent; }
+
+.btn-soft-danger {
+  background: var(--c-danger-bg);
+  color: var(--c-danger-text);
+  border-color: transparent;
+}
+.btn-soft-danger:hover { background: #fecaca; color: var(--c-danger); border-color: transparent; }
+
+.btn-soft-warning {
+  background: var(--c-warning-bg);
+  color: var(--c-warning-text);
+  border-color: transparent;
+}
+.btn-soft-warning:hover { background: #fde68a; color: var(--c-warning); border-color: transparent; }
+
+/* ----------------------------------------------------------------
+   Login page
+   ---------------------------------------------------------------- */
+body.login-body {
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+
+.login-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* Left panel */
+.login-left {
+  flex: 1;
+  background: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  /* dot grid */
+  background-image:
+    radial-gradient(circle at 70% 20%, rgba(37,99,235,0.25) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(37,99,235,0.15) 0%, transparent 45%),
+    radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px);
+  background-size: auto, auto, 28px 28px;
+}
+
+.login-left-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 3rem 2rem;
+  max-width: 360px;
+}
+
+.login-brand-icon {
+  width: 72px;
+  height: 72px;
+  background: #2563eb;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #fff;
+  margin: 0 auto 1.75rem;
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.5);
+}
+
+.login-brand-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.03em;
+}
+
+.login-brand-sub {
+  color: #4b5563;
+  font-size: 0.9rem;
+  margin-bottom: 2.5rem;
+}
+
+.login-brand-badges {
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.login-brand-badges span {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #64748b;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 999px;
+  padding: 0.3rem 0.75rem;
+  white-space: nowrap;
+}
+
+/* Right panel */
+.login-right {
+  width: 460px;
+  min-width: 460px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: -8px 0 32px rgba(0,0,0,0.07);
+}
+
+.login-form-wrapper {
+  width: 100%;
+  padding: 2.5rem 3rem;
+}
+
+.login-form-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.login-form-header h2 {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 0.35rem;
+  letter-spacing: -0.02em;
+}
+
+.login-form-header p {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.login-form-wrapper .form-label {
+  font-size: 0.825rem;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.4rem;
+}
+
+.login-form-wrapper .input-group-text {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  font-size: 1rem;
+}
+
+.login-form-wrapper .form-control {
+  border-color: #e5e7eb;
+  font-size: 0.9rem;
+  padding: 0.6rem 0.8rem;
+  color: #111827;
+}
+
+.login-form-wrapper .form-control:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  z-index: 3;
+}
+
+.login-form-wrapper .form-control::placeholder {
+  color: #d1d5db;
+}
+
+.login-pw-toggle {
+  border: 1px solid #e5e7eb;
+  border-left: 0;
+  background: #f9fafb;
+  color: #9ca3af;
+  padding: 0 0.75rem;
+  font-size: 1rem;
+  border-radius: 0 0.375rem 0.375rem 0;
+  transition: color 0.15s;
+}
+
+.login-pw-toggle:hover { color: #374151; }
+
+.btn-login {
+  height: 46px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border-radius: 0.5rem;
+  background: #2563eb;
+  border-color: #2563eb;
+  letter-spacing: 0.01em;
+  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+  margin-top: 0.25rem;
+}
+
+.btn-login:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-login:active { transform: translateY(0); }
+
+.login-footer-note {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-top: 1.75rem;
+  margin-bottom: 0;
+}
+
+.login-mobile-brand {
+  display: none;
+  justify-content: center;
+  margin-bottom: 2rem;
+}
+
+.login-mobile-brand span {
+  display: none;
+}
+
+/* Mobile */
+@media (max-width: 992px) {
+  body.login-body {
+    background:
+      radial-gradient(ellipse at 20% 10%, rgba(37,99,235,0.35) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 90%, rgba(17,24,39,0.8) 0%, transparent 60%),
+      linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  }
+
+  .login-wrapper {
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1.25rem;
+  }
+
+  .login-left { display: none; }
+
+  .login-right {
+    width: 100%;
+    min-width: 0;
+    max-width: 440px;
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow:
+      0 24px 64px rgba(0,0,0,0.35),
+      0 0 0 1px rgba(255,255,255,0.06);
+  }
+
+  .login-form-wrapper {
+    padding: 2.25rem 2rem;
+  }
+
+  .login-mobile-brand {
+    display: flex;
+  }
+}
+
+/* ----------------------------------------------------------------
+   Breadcrumb
+   ---------------------------------------------------------------- */
+.breadcrumb { font-size: 0.8rem; }
+.breadcrumb-item.active { color: #64748b; }
+
+/* ----------------------------------------------------------------
+   Scrollbar (webkit)
+   ---------------------------------------------------------------- */
+.admin-sidebar::-webkit-scrollbar { width: 4px; }
+.admin-sidebar::-webkit-scrollbar-track { background: transparent; }
+.admin-sidebar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+/* ----------------------------------------------------------------
+   Responsive
+   ---------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    transform: translateX(-100%);
+  }
+  .admin-sidebar.open {
+    transform: translateX(0);
+  }
+  .admin-main { margin-left: 0; }
+}

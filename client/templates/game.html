@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+{% from "macros/ads.html" import ad_slot %}
+
+{% block extra_head %}
+{% if product_schema | default('') %}{{ product_schema | safe }}{% endif %}
+{% endblock %}
+
+{% block content %}
+
+{{ ad_slot(1, is_googlebot=is_googlebot) }}
+
+<h1 class="game-title visually-hidden">{{ page_title }}</h1>
+
+<div class="container">
+  <div class="unblocked-box ads-hidden">
+    {{ ad_slot(6, is_googlebot=is_googlebot) }}
+    <div class="unblocked-banner">
+      <a href="/unblocked">▶ Play {{ GAME_NAME }} – No Ads, Unblocked! Start Catching Now</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  $(function () {
+    var h = $('header').outerHeight() + 30;
+    $(window).on('load', function () { $('html,body').animate({ scrollTop: h }, 300); });
+  });
+</script>
+
+<div class="game-box">
+  <div class="game-container container">
+    <iframe id="gameIframe" allowtransparency="yes" allow="autoplay" frameborder="0"
+      width="100%" height="100%"
+      style="position:absolute;top:0;left:0;right:0;bottom:0;"
+      marginheight="0" marginwidth="0" scrolling="no"
+      {% if iframe_referrerpolicy | default('') %}referrerpolicy="{{ iframe_referrerpolicy }}"{% endif %}></iframe>
+  </div>
+</div>
+
+{% if game_thumbnails | default([]) %}
+<h3 class="text-center mt-4">You May Also Like</h3>
+<div class="game-list">
+  <ul>
+    {% for thumb in game_thumbnails %}
+    <li><a href="{{ thumb.url }}"><img src="{{ thumb.img }}" {% if thumb.alt %}alt="{{ thumb.alt }}"{% endif %} /></a></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<style>
+  .main-container {
+    padding: 0;
+    min-height: 75vh;
+  }
+  .game-container {
+    position: relative;
+    height: 0;
+    width: 100%;
+    padding-bottom: 42%;
+  }
+  .game-container.full {
+    position: fixed;
+    height: 75vh;
+    width: 100%;
+    padding-bottom: 0;
+    left: 0;
+    top: 0;
+  }
+  @media (max-width: 767px) {
+    .game-container { padding-bottom: 200%; }
+  }
+</style>
+
+<script>
+  var urlGameIframe = '{{ game_src }}';
+  window.onload = function () {
+    $('#gameIframe').on('load', function () {
+      var c = document.querySelector('.game-container');
+      if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    $('#gameIframe').attr('src', urlGameIframe);
+  };
+  function setGameIframe(game) { $('#gameIframe').attr('src', '/static/game/' + game + '/index.html?v=1.2.1'); }
+</script>
+
+{{ ad_slot(2, is_googlebot=is_googlebot) }}
+
+{% if product.desc %}
+<div class="container">
+  <div class="article highlight mb-5 mt-5">
+    {{ product.desc | safe }}
+  </div>
+</div>
+{% endif %}
+
+{{ ad_slot(7, is_googlebot=is_googlebot) }}
+
+{% endblock %}

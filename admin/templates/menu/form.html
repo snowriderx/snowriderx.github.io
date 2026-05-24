@@ -1,0 +1,594 @@
+{% extends "base.html" %}
+
+{% set page_title = "Sửa danh mục" if is_edit else "Thêm danh mục mới" %}
+
+{% block title %}{{ page_title }} — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('menu.index') }}">Quản lý Menu</a>
+</li>
+<li class="breadcrumb-item active">{{ page_title }}</li>
+{% endblock %}
+
+{% block head %}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" id="menuForm" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="row g-3">
+
+    {# ════════════════════════════════════════════════════════════════ #}
+    {# LEFT COLUMN — main content                                       #}
+    {# ════════════════════════════════════════════════════════════════ #}
+    <div class="col-lg-8">
+
+      {# ── Thông tin cơ bản ─────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-list-nested"></i>
+          <span>{{ page_title }}</span>
+          {% if is_edit %}
+            <span class="badge bg-secondary ms-auto font-monospace">{{ menu.IDM }}</span>
+          {% endif %}
+        </div>
+        <div class="card-body">
+
+          {# Action buttons — top #}
+          <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('menu.index') }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+          {# Position — parent selector (create) or read-only (edit) #}
+          {% if not is_edit %}
+          <div class="mb-3">
+            <label for="parent_idm" class="form-label">Danh mục cha</label>
+            <select class="form-select{% if form_errors.get('parent_idm') %} is-invalid{% endif %}"
+                    id="parent_idm" name="parent_idm"
+                    onchange="updateLevelPreview()">
+              <option value="">— Không có (tạo danh mục cấp 1) —</option>
+              {% for p in parents %}
+                <option value="{{ p.IDM }}"
+                  {% if p.IDM == selected_parent_idm %}selected{% endif %}>
+                  {{ p.display_name }} ({{ p.level_label }}, mã {{ p.IDM }})
+                </option>
+              {% endfor %}
+            </select>
+            {% if form_errors.get('parent_idm') %}
+              <div class="invalid-feedback">{{ form_errors['parent_idm'] }}</div>
+            {% endif %}
+            <div class="form-text">
+              Để trống → tạo danh mục cấp 1.
+              <span id="levelPreview" class="ms-2 fw-semibold text-primary"></span>
+            </div>
+          </div>
+          {% else %}
+          <div class="mb-3">
+            <label class="form-label">Vị trí trong cây</label>
+            <div class="d-flex gap-2 flex-wrap align-items-center">
+              <span class="badge bg-primary">{{ menu.level_label }}</span>
+              {% if menu.parent_idm %}
+                <span class="text-muted small">Cha: <code>{{ menu.parent_idm }}</code></span>
+              {% else %}
+                <span class="text-muted small">Danh mục gốc (không có cha)</span>
+              {% endif %}
+              <span class="text-muted small fst-italic">— không thể thay đổi sau khi tạo</span>
+            </div>
+          </div>
+          {% endif %}
+
+          {# Tên danh mục #}
+          <div class="mb-3">
+            <label for="name" class="form-label">
+              Tên danh mục <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('name') %} is-invalid{% endif %}"
+                   id="name" name="name"
+                   value="{{ menu.name or '' }}" maxlength="200"
+                   required autofocus>
+            {% if form_errors.get('name') %}
+              <div class="invalid-feedback">{{ form_errors['name'] }}</div>
+            {% else %}
+              <div class="invalid-feedback">Tên danh mục là trường bắt buộc.</div>
+            {% endif %}
+          </div>
+
+          {# Tên heading (NameMH) #}
+          <div class="mb-3">
+            <label for="name_mh" class="form-label">Tên heading (NameMH)</label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('name_mh') %} is-invalid{% endif %}"
+                   id="name_mh" name="name_mh"
+                   value="{{ menu.name_mh or '' }}" maxlength="200">
+            {% if form_errors.get('name_mh') %}
+              <div class="invalid-feedback">{{ form_errors['name_mh'] }}</div>
+            {% endif %}
+            <div class="form-text">Tiêu đề thay thế, dùng làm RowName trong tblLink.</div>
+          </div>
+
+          {# Slug (Name1M) #}
+          <div class="mb-3">
+            <label for="slug" class="form-label">
+              URL slug (Name1M)
+              <button type="button"
+                      class="btn btn-link btn-sm p-0 ms-1 align-baseline"
+                      onclick="regenSlug()" style="font-size:.8em;">
+                <i class="bi bi-arrow-clockwise"></i> Tạo lại
+              </button>
+            </label>
+            <input type="text"
+                   class="form-control font-monospace{% if form_errors.get('slug') %} is-invalid{% endif %}"
+                   id="slug" name="slug"
+                   value="{{ menu.slug or '' }}" maxlength="100"
+                   placeholder="Để trống → tự động tạo từ tên">
+            {% if form_errors.get('slug') %}
+              <div class="invalid-feedback">{{ form_errors['slug'] }}</div>
+            {% else %}
+              <div class="invalid-feedback">Slug không được vượt quá 100 ký tự.</div>
+            {% endif %}
+          </div>
+
+          {# URL ngoài #}
+          <div class="mb-0">
+            <label for="url" class="form-label">URL ngoài</label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('url') %} is-invalid{% endif %}"
+                   id="url" name="url"
+                   value="{{ menu.url or '' }}" maxlength="100"
+                   placeholder="VD: sub.example.vn">
+            {% if form_errors.get('url') %}
+              <div class="invalid-feedback">{{ form_errors['url'] }}</div>
+            {% endif %}
+            <div class="form-text">Điền nếu danh mục trỏ đến URL bên ngoài (VB: txtUrl1).</div>
+          </div>
+
+        </div>
+      </div>{# card #}
+
+      {# ── Nội dung mô tả (DescM) ───────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-body-text me-1"></i>Nội dung mô tả
+        </div>
+        <div class="card-body">
+          <textarea class="form-control" id="desc_m" name="desc_m"
+                    rows="6">{{ menu.desc_m or '' }}</textarea>
+          <div class="form-text">DescM — nội dung body của trang danh mục.</div>
+        </div>
+      </div>
+
+      {# ── SEO ─────────────────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-search me-1"></i>SEO
+        </div>
+        <div class="card-body">
+
+          <div class="mb-3">
+            <label for="seo_title" class="form-label">Tiêu đề trang (title)</label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('seo_title') %} is-invalid{% endif %}"
+                   id="seo_title" name="seo_title"
+                   value="{{ menu.seo_title or '' }}" maxlength="200">
+            {% if form_errors.get('seo_title') %}
+              <div class="invalid-feedback">{{ form_errors['seo_title'] }}</div>
+            {% endif %}
+            <div class="form-text">Để trống → dùng tên danh mục.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="keywords" class="form-label">Keywords</label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('keywords') %} is-invalid{% endif %}"
+                   id="keywords" name="keywords"
+                   value="{{ menu.keywords or '' }}" maxlength="100">
+            {% if form_errors.get('keywords') %}
+              <div class="invalid-feedback">{{ form_errors['keywords'] }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-0">
+            <label for="description" class="form-label">Meta description</label>
+            <textarea class="form-control{% if form_errors.get('description') %} is-invalid{% endif %}"
+                      id="description" name="description"
+                      rows="3" maxlength="300">{{ menu.description or '' }}</textarea>
+            {% if form_errors.get('description') %}
+              <div class="invalid-feedback">{{ form_errors['description'] }}</div>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>{# card #}
+
+      {# ── Nâng cao ─────────────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-gear me-1"></i>Nâng cao
+        </div>
+        <div class="card-body">
+
+          <div class="mb-3">
+            <label for="rel" class="form-label">Rel</label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('rel') %} is-invalid{% endif %}"
+                   id="rel" name="rel"
+                   value="{{ menu.rel or '' }}" maxlength="100"
+                   placeholder="rel='nofollow' target='_blank'">
+            {% if form_errors.get('rel') %}
+              <div class="invalid-feedback">{{ form_errors['rel'] }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-0">
+            <label for="ischema" class="form-label">Schema JSON-LD (ischema)</label>
+            <textarea class="form-control font-monospace" id="ischema" name="ischema"
+                      rows="5">{{ menu.ischema or '' }}</textarea>
+            <div class="form-text">Markup schema.org dạng JSON-LD cho trang này.</div>
+          </div>
+
+        </div>
+      </div>{# card #}
+
+    </div>{# col-lg-8 #}
+
+    {# ════════════════════════════════════════════════════════════════ #}
+    {# RIGHT COLUMN — settings, images                                  #}
+    {# ════════════════════════════════════════════════════════════════ #}
+    <div class="col-lg-4">
+
+      {# ── Cài đặt hiển thị ─────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-sliders me-1"></i>Cài đặt
+        </div>
+        <div class="card-body">
+
+          <div class="mb-3">
+            <label for="type_m" class="form-label">Loại menu (TypeM)</label>
+            <select class="form-select" id="type_m" name="type_m">
+              {% for val, label in menu_types.items() %}
+                <option value="{{ val }}"
+                  {% if (menu.type_m if menu.type_m is not none else 1) == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="sort_order" class="form-label">Thứ tự sắp xếp (SortM)</label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('sort_order') %} is-invalid{% endif %}"
+                   id="sort_order" name="sort_order"
+                   value="{{ menu.sort_order or '00' }}" maxlength="10">
+            {% if form_errors.get('sort_order') %}
+              <div class="invalid-feedback">{{ form_errors['sort_order'] }}</div>
+            {% endif %}
+            <div class="form-text">VD: 01, 02 … Nhỏ hơn lên trước.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="is_active" class="form-label">Trạng thái</label>
+            <select class="form-select{% if form_errors.get('is_active') %} is-invalid{% endif %}"
+                    id="is_active" name="is_active">
+              {% for val, label in menu_ac.items() %}
+                <option value="{{ val }}"
+                  {% if (menu.is_active if menu.is_active is not none else 1) == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+            {% if form_errors.get('is_active') %}
+              <div class="invalid-feedback">{{ form_errors['is_active'] }}</div>
+            {% endif %}
+          </div>
+
+          <div class="mb-3">
+            <label for="lang" class="form-label">Ngôn ngữ</label>
+            <select class="form-select" id="lang" name="lang">
+              {% for val, label in menu_langs.items() %}
+                <option value="{{ val }}"
+                  {% if (menu.lang or 1) == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          {# lang_id: content language filter tag #}
+          {% if langs %}
+          <div class="mb-3">
+            <label for="lang_id" class="form-label">Ngôn ngữ nội dung</label>
+            <select class="form-select" id="lang_id" name="lang_id" style="max-width:220px;">
+              <option value="">— Mặc định —</option>
+              {% for lang in langs %}
+              <option value="{{ lang.ID }}" {% if menu.lang_id == lang.ID %}selected{% endif %}>{{ lang.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+
+          {% if tab_items %}
+          <div class="mb-3">
+            <label class="form-label">Vị trí</label>
+            <div>
+              {% for tab in tab_items %}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox"
+                       id="tab_m_{{ tab.id }}" name="tab_m" value="{{ tab.id }}"
+                       {% if tab.id in menu.tab_selected_ids %}checked{% endif %}>
+                <label class="form-check-label" for="tab_m_{{ tab.id }}">
+                  {{ tab.name }}
+                </label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="home_m" name="home_m"
+                   value="1" {% if menu.home_m == 1 %}checked{% endif %}>
+            <label class="form-check-label" for="home_m">
+              Hiển thị trên trang chủ (HomeM)
+            </label>
+          </div>
+
+        </div>
+      </div>{# card #}
+
+      {# ── Ảnh Icon (ImgM) ──────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-image me-1"></i>Icon (ImgM)
+        </div>
+        <div class="card-body">
+
+          <input type="hidden" name="delete_img" id="deleteImgFlag" value="0">
+
+          {% if is_edit and menu.has_icon %}
+            <div id="iconPreview" class="mb-2">
+              <img id="iconCurrent"
+                   src="{{ img_url('menu', menu.img_m) }}"
+                   alt="icon"
+                   style="max-height:80px; max-width:100%; object-fit:contain;
+                          border:1px solid #dee2e6; border-radius:4px; padding:2px;">
+              <div class="form-text text-muted mt-1">
+                <i class="bi bi-file-image me-1"></i>{{ menu.img_m }}
+              </div>
+              <div class="mt-1">
+                <button type="button" class="btn btn-sm btn-outline-danger"
+                        onclick="markDelete('icon')">
+                  <i class="bi bi-x-circle me-1"></i>Xóa ảnh
+                </button>
+              </div>
+            </div>
+            <div id="iconDeletedNotice" class="mb-2 d-none">
+              <span class="text-danger small">
+                <i class="bi bi-exclamation-circle me-1"></i>
+                Icon sẽ bị xóa khi nhấn <strong>Ghi nhận</strong>.
+              </span>
+              <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                      onclick="undoDelete('icon')">Hoàn tác</button>
+            </div>
+          {% endif %}
+
+          <div id="iconNewPreview" class="mb-2 d-none">
+            <img id="iconNewImg" src="" alt="preview"
+                 style="max-height:80px; max-width:100%; object-fit:contain;
+                        border:1px solid #0d6efd; border-radius:4px; padding:2px;">
+            <div class="small text-primary mt-1">
+              <i class="bi bi-arrow-repeat me-1"></i>
+              Sẽ được <strong>{{ 'thay thế' if (is_edit and menu.has_icon) else 'tải lên' }}</strong> khi nhấn Ghi nhận.
+            </div>
+          </div>
+
+          <input type="file"
+                 class="form-control{% if form_errors.get('img_file') %} is-invalid{% endif %}"
+                 id="img_file" name="img_file"
+                 accept=".jpg,.jpeg,.gif,.png,.webp"
+                 onchange="previewFile(this, 'iconNewImg', 'iconNewPreview')">
+          {% if form_errors.get('img_file') %}
+            <div class="invalid-feedback">{{ form_errors['img_file'] }}</div>
+          {% endif %}
+          <div class="form-text mt-1">Tối đa 200px rộng. Hỗ trợ: jpg, gif, png, webp.</div>
+
+        </div>
+      </div>{# card #}
+
+      {# ── Ảnh Banner (ImgM1) ───────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-card-image me-1"></i>Banner (ImgM1)
+        </div>
+        <div class="card-body">
+
+          <input type="hidden" name="delete_img1" id="deleteImg1Flag" value="0">
+
+          {% if is_edit and menu.has_banner %}
+            <div id="bannerPreview" class="mb-2">
+              <img id="bannerCurrent"
+                   src="{{ img_url('menu', menu.img_m1) }}"
+                   alt="banner"
+                   style="max-height:80px; max-width:100%; object-fit:contain;
+                          border:1px solid #dee2e6; border-radius:4px; padding:2px;">
+              <div class="form-text text-muted mt-1">
+                <i class="bi bi-file-image me-1"></i>{{ menu.img_m1 }}
+              </div>
+              <div class="mt-1">
+                <button type="button" class="btn btn-sm btn-outline-danger"
+                        onclick="markDelete('banner')">
+                  <i class="bi bi-x-circle me-1"></i>Xóa ảnh
+                </button>
+              </div>
+            </div>
+            <div id="bannerDeletedNotice" class="mb-2 d-none">
+              <span class="text-danger small">
+                <i class="bi bi-exclamation-circle me-1"></i>
+                Banner sẽ bị xóa khi nhấn <strong>Ghi nhận</strong>.
+              </span>
+              <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                      onclick="undoDelete('banner')">Hoàn tác</button>
+            </div>
+          {% endif %}
+
+          <div id="bannerNewPreview" class="mb-2 d-none">
+            <img id="bannerNewImg" src="" alt="preview"
+                 style="max-height:80px; max-width:100%; object-fit:contain;
+                        border:1px solid #0d6efd; border-radius:4px; padding:2px;">
+            <div class="small text-primary mt-1">
+              <i class="bi bi-arrow-repeat me-1"></i>
+              Sẽ được <strong>{{ 'thay thế' if (is_edit and menu.has_banner) else 'tải lên' }}</strong> khi nhấn Ghi nhận.
+            </div>
+          </div>
+
+          <input type="file"
+                 class="form-control{% if form_errors.get('img1_file') %} is-invalid{% endif %}"
+                 id="img1_file" name="img1_file"
+                 accept=".jpg,.jpeg,.gif,.png,.webp"
+                 onchange="previewFile(this, 'bannerNewImg', 'bannerNewPreview')">
+          {% if form_errors.get('img1_file') %}
+            <div class="invalid-feedback">{{ form_errors['img1_file'] }}</div>
+          {% endif %}
+          <div class="form-text mt-1">Tối đa 500px rộng. Hỗ trợ: jpg, gif, png, webp.</div>
+
+        </div>
+      </div>{# card #}
+
+      {# ── Actions — bottom ────────────────────────────────────────── #}
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg me-1"></i>Ghi nhận
+        </button>
+        <a href="{{ url_for('menu.index') }}"
+           class="btn btn-outline-secondary">Hủy</a>
+      </div>
+
+    </div>{# col-lg-4 #}
+  </div>{# row #}
+
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  /* ── Vietnamese slug (mirrors slugify_vi) ──────────────────────── */
+  var VI_MAP = { 'đ': 'd', 'Đ': 'D' };
+  function slugifyVi(text) {
+    if (!text) return '';
+    text = text.replace(/[đĐ]/g, function(c) { return VI_MAP[c] || c; });
+    text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    text = text.toLowerCase().replace(/[^a-z0-9\s-]/g, '');
+    return text.trim().replace(/[\s\-]+/g, '-').replace(/^-+|-+$/g, '');
+  }
+
+  var slugAutoMode = !document.getElementById('slug').value;
+  var nameInput    = document.getElementById('name');
+  var slugInput    = document.getElementById('slug');
+
+  if (nameInput && slugInput) {
+    nameInput.addEventListener('input', function() {
+      if (slugAutoMode) slugInput.value = slugifyVi(nameInput.value);
+    });
+    slugInput.addEventListener('input', function() {
+      slugAutoMode = (slugInput.value === '');
+    });
+  }
+  function regenSlug() {
+    if (nameInput && slugInput) {
+      slugInput.value = slugifyVi(nameInput.value);
+      slugAutoMode = false;
+    }
+  }
+
+  /* ── Level preview (create form only) ──────────────────────────── */
+  function updateLevelPreview() {
+    var sel     = document.getElementById('parent_idm');
+    var preview = document.getElementById('levelPreview');
+    if (!sel || !preview) return;
+    if (!sel.value) { preview.textContent = '→ sẽ tạo danh mục Cấp 1'; return; }
+    var match = sel.options[sel.selectedIndex].text.match(/Cấp (\d)/);
+    preview.textContent = match ? '→ sẽ tạo danh mục Cấp ' + (parseInt(match[1]) + 1) : '';
+  }
+  updateLevelPreview();
+
+  /* ── Client-side validation ─────────────────────────────────────── */
+  document.getElementById('menuForm').addEventListener('submit', function(e) {
+    var ok = true;
+    function setErr(id, msg) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('is-invalid');
+      var fb = el.parentElement.querySelector('.invalid-feedback');
+      if (fb && msg) fb.textContent = msg;
+      ok = false;
+    }
+    function clrErr(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.remove('is-invalid');
+    }
+    clrErr('name'); clrErr('img_file'); clrErr('img1_file');
+
+    var n = document.getElementById('name');
+    if (n && !n.value.trim()) setErr('name', 'Tên danh mục là trường bắt buộc.');
+
+    var MAX = 5 * 1024 * 1024;
+    ['img_file', 'img1_file'].forEach(function(id) {
+      var inp = document.getElementById(id);
+      if (inp && inp.files[0] && inp.files[0].size > MAX)
+        setErr(id, 'Kích thước file không được vượt quá 5 MB.');
+    });
+
+    if (!ok) e.preventDefault();
+  });
+
+  /* ── Image delete / undo / preview ─────────────────────────────── */
+  var IMG_CFG = {
+    icon:   { flag: 'deleteImgFlag',  preview: 'iconPreview',   notice: 'iconDeletedNotice'   },
+    banner: { flag: 'deleteImg1Flag', preview: 'bannerPreview', notice: 'bannerDeletedNotice' },
+  };
+
+  function markDelete(slot) {
+    var c = IMG_CFG[slot]; if (!c) return;
+    document.getElementById(c.flag).value = '1';
+    var prev = document.getElementById(c.preview); if (prev) prev.classList.add('d-none');
+    var note = document.getElementById(c.notice);  if (note) note.classList.remove('d-none');
+  }
+  function undoDelete(slot) {
+    var c = IMG_CFG[slot]; if (!c) return;
+    document.getElementById(c.flag).value = '0';
+    var prev = document.getElementById(c.preview); if (prev) prev.classList.remove('d-none');
+    var note = document.getElementById(c.notice);  if (note) note.classList.add('d-none');
+  }
+  function previewFile(input, imgId, containerId) {
+    var container = document.getElementById(containerId);
+    var imgEl     = document.getElementById(imgId);
+    if (!container || !imgEl) return;
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) { imgEl.src = e.target.result; container.classList.remove('d-none'); };
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      container.classList.add('d-none'); imgEl.src = '';
+    }
+  }
+
+  /* ── CKEditor 5 on DescM textarea ───────────────────────────────── */
+  initCKEditors(['desc_m'], 'menuForm', {
+    imageBaseUrl:    '{{ config.IMAGE_BASE_URL }}',
+    uploadUrl:       '{{ config.UPLOAD_API_URL }}',
+    uploadApiKey:    '{{ config.UPLOAD_API_KEY }}',
+    uploadSubfolder: 'menu',
+    deleteUrl:       '/api/ck-delete',
+  });
+</script>
+{% endblock %}

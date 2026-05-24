@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý liên hệ — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Liên hệ</li>
+{% endblock %}
+
+{% block content %}
+
+{# ── Status tabs — mirrors VB drlAc1: 0=Chưa xử lý, 1=Đang xử lý, 2=Hủy bỏ, 3=Hoàn thành #}
+<div class="mb-3">
+  <div class="btn-group btn-group-sm" role="group">
+    <a href="{{ url_for('contact.index', id='0') }}"
+       class="btn {% if ac_filter == '0' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-envelope me-1"></i>Chưa xử lý
+      {% if counts[0] %}<span class="badge bg-danger ms-1">{{ counts[0] }}</span>{% endif %}
+    </a>
+    <a href="{{ url_for('contact.index', id='1') }}"
+       class="btn {% if ac_filter == '1' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-envelope-open me-1"></i>Đang xử lý
+      {% if counts[1] %}<span class="badge bg-primary ms-1">{{ counts[1] }}</span>{% endif %}
+    </a>
+    <a href="{{ url_for('contact.index', id='2') }}"
+       class="btn {% if ac_filter == '2' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-x-circle me-1"></i>Hủy bỏ
+      {% if counts[2] %}<span class="badge bg-secondary ms-1">{{ counts[2] }}</span>{% endif %}
+    </a>
+    <a href="{{ url_for('contact.index', id='3') }}"
+       class="btn {% if ac_filter == '3' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-check-circle me-1"></i>Hoàn thành
+      {% if counts[3] %}<span class="badge bg-success ms-1">{{ counts[3] }}</span>{% endif %}
+    </a>
+  </div>
+</div>
+
+{# ── Batch form ──────────────────────────────────────────────────── #}
+<form method="post" id="batchForm"
+      action="{{ url_for('contact.index', id=ac_filter) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+
+  <div class="action-bar">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    <span class="action-bar-spacer"></span><span class="action-bar-count">{{ total }} liên hệ</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;">
+            <input type="checkbox" id="selectAll" title="Chọn tất cả">
+          </th>
+          <th style="width:50px;">#</th>
+          <th>Họ tên</th>
+          <th>Email</th>
+          <th style="width:120px;">Điện thoại</th>
+          <th style="width:120px;">Di động</th>
+          <th style="width:130px;">Thành viên</th>
+          <th style="width:150px;">Thời gian</th>
+          <th style="width:150px;">Trạng thái</th>
+          <th style="width:80px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rec in records %}
+        <tr {% if rec.is_read == 0 %}class="table-warning"{% endif %}>
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ rec.ID }}">
+            <input type="hidden" name="row_id" value="{{ rec.ID }}">
+          </td>
+          <td class="text-muted small">{{ rec.ID }}</td>
+          <td>
+            <a href="{{ url_for('contact.view', contact_id=rec.ID) }}"
+               class="text-decoration-none fw-medium">
+              {{ rec.name or '—' }}
+            </a>
+          </td>
+          <td class="small">{{ rec.email or '—' }}</td>
+          <td class="small">{{ rec.tel or '—' }}</td>
+          <td class="small">{{ rec.mobile or '—' }}</td>
+          <td class="small text-muted">{{ user_map.get(rec.user_id, '—') }}</td>
+          <td class="small text-muted">
+            {{ rec.created_at.strftime('%d/%m/%Y %H:%M') if rec.created_at else '—' }}
+          </td>
+          <td>
+            <select name="ac_{{ rec.ID }}" class="form-select form-select-sm">
+              <option value="0" {% if rec.is_read == 0 %}selected{% endif %}>Chưa xử lý</option>
+              <option value="1" {% if rec.is_read == 1 %}selected{% endif %}>Đang xử lý</option>
+              <option value="2" {% if rec.is_read == 2 %}selected{% endif %}>Hủy bỏ</option>
+              <option value="3" {% if rec.is_read == 3 %}selected{% endif %}>Hoàn thành</option>
+            </select>
+          </td>
+          <td class="text-center text-nowrap">
+            <a href="{{ url_for('contact.view', contact_id=rec.ID) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1" title="Xem">
+              <i class="bi bi-eye"></i>
+            </a>
+            <a href="{{ url_for('contact.edit', contact_id=rec.ID, ac_filter=ac_filter) }}"
+               class="btn btn-xs btn-outline-secondary py-0 px-1" title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne({{ rec.ID }}, '{{ rec.name|e }}', '{{ url_for('contact.delete', contact_id=rec.ID) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="10" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">Không có liên hệ nào.</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if records %}
+  <div class="action-bar mt-1">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+  </div>
+  {% endif %}
+
+</form>
+
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="ac_filter" value="{{ ac_filter }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initBatchList('liên hệ');
+</script>
+{% endblock %}

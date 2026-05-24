@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% from "macros/ads.html" import ad_slot %}
+
+{% block content %}
+<div class="container" style="padding-top:1.5rem;padding-bottom:1.5rem;">
+
+  {{ ad_slot(1, is_googlebot=is_googlebot) }}
+
+  <div class="highlight article mb-5">
+    <h1 class="h2 text-center mt-4 mb-4">{{ page_title }}</h1>
+    {{ menu.desc_m | safe }}
+  </div>
+
+  {{ ad_slot(7, is_googlebot=is_googlebot) }}
+
+  {% if ischema %}{{ ischema | safe }}{% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Banner — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Quản lý Banner</li>
+{% endblock %}
+
+{% block content %}
+
+{# ── Language filter ──────────────────────────────────────────────── #}
+{% if langs %}
+<div class="mb-2">
+  <div class="btn-group btn-group-sm">
+    <a href="{{ url_for('banner.index', type=current_zone, langid=current_langid) }}"
+       class="btn {% if lang_filter == '' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-globe me-1"></i>Tất cả
+    </a>
+    {% for lang in langs %}
+    <a href="{{ url_for('banner.index', type=current_zone, langid=current_langid, lang=lang.ID) }}"
+       class="btn {% if lang_filter == lang.ID|string %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      {{ lang.name }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{# ── Filters ─────────────────────────────────────────────────────── #}
+{# VB: drlSubID (tblPro dropdown) + drlType1 RadioButtonList (96/95) #}
+<form method="get" class="row g-2 mb-3 align-items-end">
+
+  <div class="col-auto">
+    <label class="form-label mb-1 small">Sản phẩm</label>
+    <select name="langid" class="form-select form-select-sm" onchange="this.form.submit()">
+      {% for val, label in product_options %}
+        <option value="{{ val }}" {% if val == current_langid|string %}selected{% endif %}>
+          {{ label }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="col-auto align-self-end pb-1">
+    {# VB: RadioButtonList RepeatDirection=Horizontal #}
+    {% for val, label in filter_zone_types.items() %}
+      <div class="form-check form-check-inline">
+        <input class="form-check-input" type="radio" name="type"
+               id="zone_{{ val }}" value="{{ val }}"
+               {% if val == current_zone %}checked{% endif %}
+               onchange="this.form.submit()">
+        <label class="form-check-label" for="zone_{{ val }}">{{ label }}</label>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="col-auto">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">Lọc</button>
+  </div>
+</form>
+
+{# ── List + batch-update form ─────────────────────────────────────── #}
+<form method="post" id="batchForm"
+      action="{{ url_for('banner.index', type=current_zone, langid=current_langid) }}">
+
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+
+  <div class="action-bar">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    <span class="action-bar-spacer"></span><span class="action-bar-count">{{ adverts|length }} mục</span>
+    <a href="{{ url_for('banner.create', type=current_zone, langid=current_langid) }}"
+       class="btn btn-sm btn-primary">
+      <i class="bi bi-plus-lg me-1"></i>Thêm mới
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;">
+            <input type="checkbox" id="selectAll" title="Chọn tất cả">
+          </th>
+          {# VB grid columns: Banner image, Content (Title+Html), Sort, Ac, Sửa, Xóa #}
+          <th style="width:120px;">Banner</th>
+          <th>Nội dung</th>
+          <th style="width:90px;">Sắp xếp</th>
+          <th style="width:110px;">Trạng thái</th>
+          <th style="width:80px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for advert in adverts %}
+        <tr>
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ advert.ID }}">
+            <input type="hidden" name="row_id" value="{{ advert.ID }}">
+          </td>
+
+          {# VB: <img src="/images/media/<Img>" style="max-width:300px;" /> #}
+          <td>
+            {% if advert.has_image %}
+              <img src="{{ img_url('media', advert.img) }}"
+                   alt="" style="max-width:110px; max-height:70px; object-fit:cover;">
+            {% else %}
+              <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+
+          {# VB: <h3 class="heading<isHeading>"><Title></h3> + <div><Html></div> #}
+          <td>
+            <div class="{% if advert.is_heading %}fw-bold fs-6{% else %}fw-semibold{% endif %}">
+              {{ advert.title or '—' }}
+            </div>
+            {% if advert.html %}
+              <div class="text-muted small mt-1">
+                {{ advert.html | striptags | truncate(100) }}
+              </div>
+            {% endif %}
+          </td>
+
+          {# Sort — editable inline (VB: btnUpdate1_Click saves Sort) #}
+          <td>
+            <input type="text" name="sort_{{ advert.ID }}"
+                   value="{{ advert.sort or '' }}"
+                   class="form-control form-control-sm" style="width:70px;">
+          </td>
+
+          {# Ac dropdown — editable inline (VB: btnUpdate1_Click saves Ac) #}
+          <td>
+            <select name="ac_{{ advert.ID }}" class="form-select form-select-sm">
+              <option value="1" {% if advert.is_active == 1 %}selected{% endif %}>Hiển thị</option>
+              <option value="0" {% if advert.is_active == 0 %}selected{% endif %}>Ẩn</option>
+            </select>
+          </td>
+
+          <td class="text-center">
+            <a href="{{ url_for('banner.edit', advert_id=advert.ID, type=current_zone, langid=current_langid) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1" title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne({{ advert.ID }}, '{{ advert.title|e }}', '{{ url_for('banner.delete', advert_id=advert.ID) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">Chưa có nội dung nào trong vùng này.</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if adverts %}
+  <div class="action-bar mt-1">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+  </div>
+  {% endif %}
+
+</form>
+
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>initBatchList('banner');</script>
+{% endblock %}

@@ -1,0 +1,429 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Fonts ─────────────────────────────────────────────────────────────────── */
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 300;
+  src: url('/static/fonts/Montserrat-Light.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 400;
+  src: url('/static/fonts/Montserrat-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 500;
+  src: url('/static/fonts/Montserrat-Medium.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 600;
+  src: url('/static/fonts/Montserrat-SemiBold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Montserrat';
+  font-style: normal;
+  font-display: optional;
+  font-weight: 700;
+  src: url('/static/fonts/Montserrat-Bold.ttf') format('truetype');
+}
+
+/* ── Base ───────────────────────────────────────────────────────────────────── */
+@layer base {
+  * { overflow-anchor: none; }
+
+  body {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.8;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    @apply bg-white text-gray-900;
+  }
+
+  a { color: #1e1e1e; }
+  a:hover { color: #007bff; text-decoration: none; }
+
+  code { color: #1e1e1e; }
+
+  h1, h2, h3, h4, h5 { font-weight: 500; }
+  h1, .h1 { font-size: 24px; }
+  h2, .h2 { font-size: 22px; }
+  h3, .h3 { font-size: 18px; }
+  h4, .h4 { font-size: 16px; }
+  h5, .h5 { font-size: 16px; }
+
+  p {
+    margin-bottom: 0.5rem;
+    font-weight: normal;
+    line-height: 24px;
+  }
+
+  @media (max-width: 767px) {
+    h1, .h1 { font-size: 28px; }
+    h2, .h2 { font-size: 24px; }
+    h3, .h3 { font-size: 20px; }
+    h4, .h4 { font-size: 18px; }
+    h5, .h5 { font-size: 16px; }
+  }
+}
+
+/* ── Components ─────────────────────────────────────────────────────────────── */
+@layer components {
+
+  /* Navbar */
+  .site-navbar {
+    width: 100%;
+    background: #f8f8f8;
+    display: flex;
+    align-items: center;
+  }
+  .site-navbar .nav-inner {
+    max-width: 1140px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 15px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .navbar-brand {
+    font-size: 1.5rem;
+    padding: 0;
+    font-weight: 300;
+    vertical-align: middle;
+    line-height: 35px;
+    text-decoration: none;
+    color: inherit;
+  }
+  .navbar-brand:hover { color: inherit; }
+  .navbar-brand img { max-width: 80px; display: block; }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 0;
+    flex-wrap: wrap;
+  }
+  .nav-links li { position: relative; }
+  .nav-links .nav-link {
+    display: block;
+    padding: 8px 14px;
+    color: #1e1e1e;
+    font-size: 1rem;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-links .nav-link:hover { color: #007bff; }
+
+  /* Hamburger */
+  .nav-toggle {
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+  }
+  .nav-toggle svg { width: 30px; height: 24px; fill: #1e1e1e; }
+
+  @media (max-width: 991px) {
+    .nav-toggle { display: block; }
+    .nav-links {
+      display: none;
+      flex-direction: column;
+      width: 100%;
+      border-top: 1px solid #fff;
+      margin-top: 8px;
+      padding-top: 5px;
+      padding-bottom: 50px;
+    }
+    .nav-links.open { display: flex; }
+    .nav-links li { display: block; width: 100%; margin: 3px 0; }
+    .nav-links .nav-link { display: block; }
+  }
+
+  /* Dropdown */
+  .nav-dropdown { position: relative; }
+  .nav-dropdown-toggle { cursor: pointer; user-select: none; }
+  .nav-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    min-width: 15rem;
+    max-width: 90%;
+    background: #fff;
+    border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    z-index: 1000;
+    padding: 4px 0;
+  }
+  .nav-dropdown-menu a {
+    display: block;
+    padding: 5px 16px;
+    color: #1e1e1e;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .nav-dropdown-menu a:hover { background: #f8f8f8; }
+  @media (max-width: 420px) {
+    .nav-dropdown-menu { min-width: 290px !important; }
+  }
+
+  /* Footer */
+  footer {
+    padding: 15px;
+    margin-top: 40px;
+  }
+  .nav-footer {
+    text-align: center;
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+    list-style: none;
+    padding: 0;
+    margin: 0 0 12px;
+  }
+  .nav-footer li { display: inline-block; }
+  .nav-footer li a {
+    display: block;
+    padding: 12px 20px;
+    color: rgba(0,0,0,0.9);
+    font-size: 14px;
+    text-decoration: none;
+  }
+  @media (max-width: 768px) {
+    .nav-footer { white-space: nowrap; overflow-x: scroll; }
+  }
+
+  /* Main container */
+  .main-container {
+    min-height: 75vh;
+    padding: 0 15px;
+  }
+
+  /* Container (like Bootstrap .container) */
+  .container {
+    max-width: 1140px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 15px;
+  }
+
+  /* Grid row/col (used by blog grid) */
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -15px;
+  }
+  [class*="col-"] {
+    padding: 0 15px;
+    box-sizing: border-box;
+  }
+  .col-lg-4 { width: 33.3333%; }
+  @media (max-width: 991px) {
+    .col-lg-4 { width: 100%; }
+    .col-md-12 { width: 100%; }
+  }
+
+  /* Game box */
+  .game-box {}
+  .game-container {
+    position: relative;
+    height: 0;
+    width: 100%;
+    padding-bottom: 42%;
+  }
+  .game-container.full {
+    position: fixed;
+    height: 75vh;
+    width: 100%;
+    padding-bottom: 0;
+    left: 0;
+    top: 0;
+  }
+  @media (max-width: 767px) {
+    .game-container { padding-bottom: 200%; }
+  }
+
+  /* Game list thumbnails */
+  .game-list { margin: 20px 0 10px 0; }
+  .game-list ul {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    list-style: none;
+    flex-wrap: wrap;
+    padding: 0;
+    margin: 0;
+  }
+  .game-list img {
+    width: 110px;
+    border-radius: 8px;
+    box-shadow: rgba(0,0,0,0.2) 0px 2px 6px;
+  }
+
+  /* Unblocked banner */
+  .unblocked-box {
+    width: 100%;
+    max-width: 728px;
+    height: 90px;
+    margin: 1rem auto;
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+  }
+  .unblocked-banner {
+    background: linear-gradient(90deg, #007BFF, #0056b3);
+    color: #fff;
+    text-align: center;
+    padding: 0.75em 1em;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    position: relative;
+    z-index: 999;
+    width: 100%;
+    max-width: 728px;
+  }
+  .unblocked-banner a { color: #fff; text-decoration: none; }
+  .ads-hidden { position: relative; cursor: pointer; }
+  .ads-hidden .box-media {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 9999999;
+    visibility: hidden;
+    opacity: 0;
+  }
+
+  /* Article content */
+  /* Tailwind preflight sets img/iframe to display:block which breaks
+     text-align:center on parent <p>. Restore inline-block inside article. */
+  /* Images inside article: inline-block so text-align:center on parent <p> works */
+  .article img,
+  .highlight img {
+    display: inline-block;
+    max-width: 100% !important;
+    height: auto;
+    vertical-align: middle;
+  }
+  /* Iframes (YouTube etc): inline-block for centering, but keep height from HTML attribute */
+  .article iframe,
+  .highlight iframe {
+    display: inline-block;
+    max-width: 100% !important;
+    vertical-align: middle;
+    /* Do NOT set height: auto — let the height="" attribute on the iframe control height */
+  }
+  .highlight ul, .article ul { list-style: disc; padding-left: 1.5rem; }
+  .highlight ol, .article ol { list-style: decimal; padding-left: 1.5rem; }
+  .highlight li, .article li { margin-bottom: 0.25rem; }
+
+  .highlight { margin-bottom: 1rem; border-radius: 2px; }
+  .highlight p { margin-bottom: 1.2rem; line-height: 1.8rem; }
+  .highlight p:last-child { margin-bottom: 0; }
+  .highlight h1, .highlight h1 * { font-size: 1.8rem; font-weight: 500; margin-bottom: 2rem; }
+  .highlight h2, .highlight h2 * { font-size: 1.5rem; font-weight: 500; }
+  .highlight h3, .highlight h3 * { font-size: 1.2rem; font-weight: 500; }
+  @media (max-width: 767px) {
+    .highlight h1, .highlight h1 * { font-size: 1.5rem; margin-bottom: 1rem; }
+    .highlight h2, .highlight h2 * { font-size: 1.3rem; }
+    .highlight h3, .highlight h3 * { font-size: 1.1rem; }
+    .article img { max-width: 100% !important; height: auto !important; }
+  }
+
+  /* Blog / single post card */
+  .single-post {
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 3px 4px 25px #0000001a;
+    border-radius: 4px;
+    transition: .3s;
+    min-height: 445px;
+    margin-bottom: 1.5rem;
+  }
+  .single-post:hover { box-shadow: 0px 10px 80px 0px rgba(193,193,193,0.41); }
+  .blog-thumb { height: 0; padding-bottom: 57%; position: relative; }
+  .blog-thumb img {
+    position: absolute;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    top: 0; left: 0; right: 0; bottom: 0;
+  }
+  .blog-content { background: #fff; padding: 25px 20px; position: relative; z-index: 1; }
+  .blog-content h3 { font-size: 18px; margin-bottom: 20px; line-height: 1.4; }
+  .blog-content p { font-size: 14px; font-weight: normal; line-height: 24px; color: #666; }
+  @media (max-width: 767px) { .blog-content { padding: 30px 20px; } }
+
+  /* Breadcrumb */
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 1rem;
+    justify-content: center;
+    background: none;
+  }
+  .breadcrumb li { margin: 0 5px; }
+
+  /* Pagination */
+  .page { margin: 20px 0; text-align: center; }
+  .page a {
+    display: inline-block;
+    padding: 8px 15px;
+    color: #1e1e1e;
+    text-decoration: none;
+  }
+  .page a.active, .page a:hover { color: red; }
+
+  /* Text line-clamp */
+  .line { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; text-overflow: ellipsis; }
+  .line-2 { -webkit-line-clamp: 2; }
+  .line-3 { -webkit-line-clamp: 3; }
+
+  /* Box media ads */
+  .box-media center { background: #f8f8f8; }
+
+  /* Visually hidden — visible to screen readers and crawlers, invisible to users */
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  /* dOverlay */
+  #dOverlay {
+    transition: top 0.5s ease 0s;
+    position: fixed;
+    top: 0; width: 100%; height: 100%;
+    background: black;
+    z-index: 8888;
+    opacity: 0.6;
+    display: none;
+  }
+}

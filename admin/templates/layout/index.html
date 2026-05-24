@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Layout — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Quản lý Layout</li>
+{% endblock %}
+
+{% block content %}
+
+{% if not chk_ready %}
+<div class="alert alert-warning">
+  <i class="bi bi-exclamation-triangle me-2"></i>
+  Cột <code>ChkM</code> chưa tồn tại trong database. Vui lòng chạy migration trước khi sử dụng module này.
+</div>
+{% endif %}
+
+<form method="post" id="batchForm" action="{{ url_for('layout.index') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+
+  <div class="action-bar">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger"
+            onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    <span class="action-bar-spacer"></span><span class="action-bar-count">{{ pages|length }} trang</span>
+    <a href="{{ url_for('layout.create') }}" class="btn btn-sm btn-primary">
+      <i class="bi bi-plus-lg me-1"></i>Thêm mới
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;">
+            <input type="checkbox" id="selectAll" title="Chọn tất cả">
+          </th>
+          <th style="width:70px;">ID</th>
+          <th>Tiêu đề</th>
+          <th style="width:160px;">URL / Slug</th>
+          <th style="width:80px;">Sắp xếp</th>
+          <th style="width:130px;">Trạng thái</th>
+          <th style="width:80px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pages %}
+        <tr>
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ p.IDM }}">
+            <input type="hidden" name="row_id" value="{{ p.IDM }}">
+          </td>
+          <td class="text-muted small text-center">{{ p.IDM }}</td>
+
+          {# Name — link to edit #}
+          <td>
+            <a href="{{ url_for('layout.edit', page_idm=p.IDM) }}"
+               class="text-decoration-none">{{ p.name or '—' }}</a>
+          </td>
+
+          {# URL / slug #}
+          <td class="text-muted small">
+            {% if p.url %}
+              <span title="URL override">{{ p.url }}</span>
+            {% elif p.slug %}
+              <span title="slug">/{{ p.slug }}</span>
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+
+          {# Sort — inline editable #}
+          <td>
+            <input type="text" name="sort_{{ p.IDM }}" value="{{ p.sort_order or '10' }}"
+                   class="form-control form-control-sm" maxlength="10">
+          </td>
+
+          {# Ac — active flag #}
+          <td>
+            <select name="ac_{{ p.IDM }}" class="form-select form-select-sm">
+              <option value="1" {% if p.is_active == 1 %}selected{% endif %}>Hiển thị</option>
+              <option value="2" {% if p.is_active == 2 %}selected{% endif %}>Ẩn trên menu</option>
+              <option value="0" {% if p.is_active == 0 %}selected{% endif %}>Ẩn</option>
+            </select>
+          </td>
+
+          {# Actions #}
+          <td class="text-center">
+            <a href="{{ url_for('layout.edit', page_idm=p.IDM) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1" title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne('{{ p.IDM }}', '{{ p.name|e }}', '{{ url_for('layout.delete', page_idm=p.IDM) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">Chưa có trang layout nào.</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if pages %}
+  <div class="action-bar mt-1">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger"
+            onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+  </div>
+  {% endif %}
+
+</form>
+
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>initBatchList('trang layout');</script>
+{% endblock %}

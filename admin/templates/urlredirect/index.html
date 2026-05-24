@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Redirect 301 — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Redirect 301</li>
+{% endblock %}
+
+{% block content %}
+
+<div class="card shadow-sm mb-3">
+  <div class="card-body py-2">
+    <form method="get" action="{{ url_for('urlredirect.index') }}"
+          class="d-flex align-items-center gap-2 flex-wrap">
+      <label class="form-label mb-0 small fw-medium text-nowrap">Lọc theo loại:</label>
+      <select name="url_type" class="form-select form-select-sm" style="max-width:200px;"
+              onchange="this.form.submit()">
+        <option value="">— Tất cả link —</option>
+        <option value="3" {% if type_filter == '3' %}selected{% endif %}>Link tin tức</option>
+        <option value="1" {% if type_filter == '1' %}selected{% endif %}>Link chuyên mục</option>
+      </select>
+      {% if type_filter %}
+      <a href="{{ url_for('urlredirect.index') }}" class="btn btn-sm btn-outline-secondary">Xóa lọc</a>
+      {% endif %}
+    </form>
+  </div>
+</div>
+
+<form method="post" id="batchForm"
+      action="{{ url_for('urlredirect.index') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+
+  <div class="action-bar">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    <span class="action-bar-spacer"></span><span class="action-bar-count">{{ total }} redirect</span>
+    <a href="{{ url_for('urlredirect.create') }}" class="btn btn-sm btn-primary">
+      <i class="bi bi-plus-lg me-1"></i>Thêm mới
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;">
+            <input type="checkbox" id="selectAll" title="Chọn tất cả">
+          </th>
+          <th>URL cũ</th>
+          <th>URL mới</th>
+          <th style="width:130px;">Loại link</th>
+          <th style="width:130px;">Trạng thái</th>
+          <th style="width:80px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rec in records %}
+        <tr>
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ rec.ID }}">
+            <input type="hidden" name="row_id" value="{{ rec.ID }}">
+          </td>
+          <td>
+            <input type="text" name="old_{{ rec.ID }}"
+                   value="{{ rec.old_url or '' }}"
+                   class="form-control form-control-sm"
+                   maxlength="255">
+          </td>
+          <td>
+            <input type="text" name="new_{{ rec.ID }}"
+                   value="{{ rec.new_url or '' }}"
+                   class="form-control form-control-sm"
+                   maxlength="255">
+          </td>
+          <td>
+            <span class="small">{{ {3:'Tin tức',1:'Chuyên mục'}.get(rec.url_type, '—') }}</span>
+          </td>
+          <td>
+            <select name="ac_{{ rec.ID }}" class="form-select form-select-sm">
+              <option value="1" {% if rec.is_active == 1 %}selected{% endif %}>Hoạt động</option>
+              <option value="0" {% if rec.is_active == 0 %}selected{% endif %}>Tắt</option>
+            </select>
+          </td>
+          <td class="text-center text-nowrap">
+            <a href="{{ url_for('urlredirect.edit', record_id=rec.ID) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1" title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne({{ rec.ID }}, '{{ rec.old_url|e }}', '{{ url_for('urlredirect.delete', record_id=rec.ID) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">Chưa có redirect nào. <a href="{{ url_for('urlredirect.create') }}" class="ms-2">Thêm ngay</a></span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if records %}
+  <div class="action-bar mt-1">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+  </div>
+  {% endif %}
+
+</form>
+
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initBatchList('redirect');
+</script>
+{% endblock %}

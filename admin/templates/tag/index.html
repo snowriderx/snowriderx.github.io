@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Tag {{ section_label }} — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Tag {{ section_label }}</li>
+{% endblock %}
+
+{% block content %}
+
+{# ── Section tabs ────────────────────────────────────────────────── #}
+<div class="mb-3">
+  <div class="btn-group btn-group-sm" role="group" aria-label="Loại tag">
+    <a href="{{ url_for('tag.index', section='news') }}"
+       class="btn {% if section == 'news' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-newspaper me-1"></i>Tin tức
+    </a>
+    <a href="{{ url_for('tag.index', section='menu') }}"
+       class="btn {% if section == 'menu' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-list-nested me-1"></i>Menu
+    </a>
+    <a href="{{ url_for('tag.index', section='website') }}"
+       class="btn {% if section == 'website' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-globe me-1"></i>Website
+    </a>
+  </div>
+</div>
+
+{# ── Owner selector (news / menu only) ──────────────────────────── #}
+{% if section != 'website' %}
+<div class="card shadow-sm mb-3">
+  <div class="card-body py-2">
+    <form method="get" action="{{ url_for('tag.index', section=section) }}"
+          class="d-flex align-items-center gap-2 flex-wrap">
+      <label class="form-label mb-0 text-nowrap small fw-medium">
+        {% if section == 'news' %}Tin tức:{% else %}Menu:{% endif %}
+      </label>
+      {% if owners %}
+      <select name="owner_id" class="form-select form-select-sm"
+              style="max-width:420px;" onchange="this.form.submit()">
+        {% for oid, olabel in owners %}
+          <option value="{{ oid }}" {% if oid == owner_id %}selected{% endif %}>
+            {{ olabel }}
+          </option>
+        {% endfor %}
+      </select>
+      {% else %}
+      <span class="text-muted small">
+        Chưa có {{ 'tin tức' if section == 'news' else 'menu cấp 1' }} nào.
+      </span>
+      {% endif %}
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{# ── Batch form ──────────────────────────────────────────────────── #}
+<form method="post"
+      id="batchForm"
+      action="{{ url_for('tag.index', section=section, owner_id=owner_id) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+  <input type="hidden" name="owner_id" value="{{ owner_id }}">
+
+  <div class="action-bar">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    <span class="action-bar-spacer"></span><span class="action-bar-count">{{ total }} tag</span>
+    <a href="{{ url_for('tag.create', section=section, owner_id=owner_id) }}"
+       class="btn btn-sm btn-primary">
+      <i class="bi bi-plus-lg me-1"></i>Thêm mới
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;">
+            <input type="checkbox" id="selectAll" title="Chọn tất cả">
+          </th>
+          <th>Tiêu đề</th>
+          <th style="width:220px;">Link</th>
+          {% if section == 'menu' %}
+          <th style="width:80px;">Sắp xếp</th>
+          <th style="width:180px;">Rel</th>
+          {% endif %}
+          <th style="width:120px;">Trạng thái</th>
+          <th style="width:80px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tag in tags %}
+        <tr>
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ tag.ID }}">
+            <input type="hidden" name="row_id" value="{{ tag.ID }}">
+          </td>
+          <td>
+            <input type="text" name="title_{{ tag.ID }}"
+                   value="{{ tag.title or '' }}"
+                   class="form-control form-control-sm"
+                   maxlength="300">
+          </td>
+          <td>
+            <input type="text" name="link_{{ tag.ID }}"
+                   value="{{ tag.display_link }}"
+                   class="form-control form-control-sm"
+                   maxlength="300">
+          </td>
+          {% if section == 'menu' %}
+          <td>
+            <input type="text" name="sort_{{ tag.ID }}"
+                   value="{{ tag.sort or '00' }}"
+                   class="form-control form-control-sm font-monospace"
+                   maxlength="10" style="width:60px;">
+          </td>
+          <td>
+            <input type="text" name="rel_{{ tag.ID }}"
+                   value="{{ tag.rel or '' }}"
+                   class="form-control form-control-sm"
+                   maxlength="50"
+                   placeholder="rel=nofollow">
+          </td>
+          {% endif %}
+          <td>
+            <select name="ac_{{ tag.ID }}" class="form-select form-select-sm">
+              <option value="1" {% if tag.is_active != 0 %}selected{% endif %}>Hiển thị</option>
+              <option value="0" {% if tag.is_active == 0 %}selected{% endif %}>Ẩn</option>
+            </select>
+          </td>
+          <td class="text-center text-nowrap">
+            <a href="{{ url_for('tag.edit', section=section, tag_id=tag.ID) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1" title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne({{ tag.ID }}, '{{ tag.title|e }}', '{{ url_for('tag.delete', section=section, tag_id=tag.ID) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="{{ 7 if section == 'menu' else 5 }}" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">{% if section == 'website' %}Chưa có tag website nào.{% elif not owner_id %}Chọn {{ 'tin tức' if section == 'news' else 'menu' }} để xem tag.{% else %}Chưa có tag nào cho mục này. <a href="{{ url_for('tag.create', section=section, owner_id=owner_id) }}" class="ms-2">Thêm ngay</a>{% endif %}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if tags %}
+  <div class="action-bar mt-1">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+  </div>
+  {% endif %}
+
+</form>
+
+{# Shared single-delete form — outside batchForm to avoid nesting #}
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initBatchList('tag');
+</script>
+{% endblock %}

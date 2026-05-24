@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Menu — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Quản lý Menu</li>
+{% endblock %}
+
+{% block content %}
+
+{# ── Language filter ──────────────────────────────────────────────── #}
+{% if langs %}
+<div class="mb-2">
+  <div class="btn-group btn-group-sm">
+    <a href="{{ url_for('menu.index') }}"
+       class="btn {% if lang_filter == '' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-globe me-1"></i>Tất cả
+    </a>
+    {% for lang in langs %}
+    <a href="{{ url_for('menu.index', lang=lang.ID) }}"
+       class="btn {% if lang_filter == lang.ID|string %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      {{ lang.name }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{# ── Batch form wraps the whole table (mirrors product/index.html) ─── #}
+<form method="post" id="batchForm" action="{{ url_for('menu.index') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+
+  {# ── Top action bar ─────────────────────────────────────────────── #}
+  <div class="action-bar">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger"
+            onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    <span class="action-bar-spacer"></span><span class="action-bar-count">{{ total }} danh mục</span>
+    <a href="{{ url_for('menu.create') }}" class="btn btn-sm btn-primary">
+      <i class="bi bi-plus-lg me-1"></i>Thêm mới
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;">
+            <input type="checkbox" id="selectAll" title="Chọn tất cả">
+          </th>
+          <th>Tên danh mục</th>
+          <th style="width:90px;">Mã IDM</th>
+          <th style="width:80px;">Cấp</th>
+          <th style="width:90px;">Loại</th>
+          <th style="width:80px;">Sắp xếp</th>
+          <th style="width:130px;">Trạng thái</th>
+          <th style="width:100px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+
+        {% for node1 in tree %}
+
+        {# ── Level 1 row ──────────────────────────────────────────── #}
+        {% set m1 = node1.menu %}
+        <tr class="table-secondary">
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ m1.IDM }}">
+          </td>
+          <td>
+            <strong>
+              <i class="bi bi-folder2 me-1 text-warning"></i>{{ m1.name or '—' }}
+            </strong>
+            {% if m1.slug %}
+              <span class="text-muted small ms-2">
+                <i class="bi bi-link-45deg"></i>{{ m1.slug }}
+              </span>
+            {% endif %}
+          </td>
+          <td class="font-monospace small text-muted">{{ m1.IDM }}</td>
+          <td><span class="badge bg-primary">{{ m1.level_label }}</span></td>
+          <td class="small text-muted">{{ m1.type_label }}</td>
+          <td>
+            <input type="text" name="sort_{{ m1.IDM }}"
+                   value="{{ m1.sort_order or '00' }}"
+                   class="form-control form-control-sm font-monospace"
+                   maxlength="10" style="width:60px;">
+          </td>
+          <td>
+            <select name="ac_{{ m1.IDM }}" class="form-select form-select-sm">
+              {% for val, label in menu_ac.items() %}
+                <option value="{{ val }}"
+                  {% if (m1.is_active if m1.is_active is not none else 1) == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </td>
+          <td class="text-center text-nowrap">
+            <a href="{{ url_for('menu.create', parent_idm=m1.IDM) }}"
+               class="btn btn-xs btn-outline-success py-0 px-1"
+               title="Thêm danh mục con">
+              <i class="bi bi-plus"></i>
+            </a>
+            <a href="{{ url_for('menu.edit', menu_idm=m1.IDM) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1"
+               title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne('{{ m1.IDM }}', '{{ m1.name|e }}', '{{ url_for('menu.delete', menu_idm=m1.IDM) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+
+        {# ── Level 2 rows ─────────────────────────────────────────── #}
+        {% for node2 in node1.children %}
+        {% set m2 = node2.menu %}
+        <tr>
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ m2.IDM }}">
+          </td>
+          <td style="padding-left:2rem;">
+            <i class="bi bi-folder me-1 text-secondary"></i>{{ m2.name or '—' }}
+            {% if m2.slug %}
+              <span class="text-muted small ms-2">
+                <i class="bi bi-link-45deg"></i>{{ m2.slug }}
+              </span>
+            {% endif %}
+          </td>
+          <td class="font-monospace small text-muted">{{ m2.IDM }}</td>
+          <td><span class="badge bg-secondary">{{ m2.level_label }}</span></td>
+          <td class="small text-muted">{{ m2.type_label }}</td>
+          <td>
+            <input type="text" name="sort_{{ m2.IDM }}"
+                   value="{{ m2.sort_order or '00' }}"
+                   class="form-control form-control-sm font-monospace"
+                   maxlength="10" style="width:60px;">
+          </td>
+          <td>
+            <select name="ac_{{ m2.IDM }}" class="form-select form-select-sm">
+              {% for val, label in menu_ac.items() %}
+                <option value="{{ val }}"
+                  {% if (m2.is_active if m2.is_active is not none else 1) == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </td>
+          <td class="text-center text-nowrap">
+            <a href="{{ url_for('menu.create', parent_idm=m2.IDM) }}"
+               class="btn btn-xs btn-outline-success py-0 px-1"
+               title="Thêm danh mục con">
+              <i class="bi bi-plus"></i>
+            </a>
+            <a href="{{ url_for('menu.edit', menu_idm=m2.IDM) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1"
+               title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne('{{ m2.IDM }}', '{{ m2.name|e }}', '{{ url_for('menu.delete', menu_idm=m2.IDM) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+
+        {# ── Level 3 rows ─────────────────────────────────────────── #}
+        {% for node3 in node2.children %}
+        {% set m3 = node3.menu %}
+        <tr class="table-light">
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ m3.IDM }}">
+          </td>
+          <td style="padding-left:4rem;">
+            <i class="bi bi-file-text me-1 text-muted"></i>{{ m3.name or '—' }}
+            {% if m3.slug %}
+              <span class="text-muted small ms-2">
+                <i class="bi bi-link-45deg"></i>{{ m3.slug }}
+              </span>
+            {% endif %}
+          </td>
+          <td class="font-monospace small text-muted">{{ m3.IDM }}</td>
+          <td><span class="badge bg-light text-dark border">{{ m3.level_label }}</span></td>
+          <td class="small text-muted">{{ m3.type_label }}</td>
+          <td>
+            <input type="text" name="sort_{{ m3.IDM }}"
+                   value="{{ m3.sort_order or '00' }}"
+                   class="form-control form-control-sm font-monospace"
+                   maxlength="10" style="width:60px;">
+          </td>
+          <td>
+            <select name="ac_{{ m3.IDM }}" class="form-select form-select-sm">
+              {% for val, label in menu_ac.items() %}
+                <option value="{{ val }}"
+                  {% if (m3.is_active if m3.is_active is not none else 1) == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </td>
+          <td class="text-center text-nowrap">
+            {# Level 3 is a leaf — no add-child button #}
+            <a href="{{ url_for('menu.edit', menu_idm=m3.IDM) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1"
+               title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne('{{ m3.IDM }}', '{{ m3.name|e }}', '{{ url_for('menu.delete', menu_idm=m3.IDM) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% endfor %}{# level 3 #}
+
+        {% else %}
+        {# Level 2 placeholder when a Level-1 has no children #}
+        <tr>
+          <td></td>
+          <td colspan="6" class="text-muted small ps-4 fst-italic">
+            — chưa có danh mục con —
+            <a href="{{ url_for('menu.create', parent_idm=m1.IDM) }}"
+               class="ms-2 small">Thêm ngay</a>
+          </td>
+          <td></td>
+        </tr>
+        {% endfor %}{# level 2 #}
+
+        {% else %}
+        <tr>
+          <td colspan="8" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">Chưa có danh mục nào. <a href="{{ url_for('menu.create') }}">Thêm danh mục đầu tiên</a></span>
+          </td>
+        </tr>
+        {% endfor %}{# level 1 #}
+
+      </tbody>
+    </table>
+  </div>
+
+  {% if tree %}
+  <div class="action-bar mt-1">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger"
+            onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+  </div>
+  {% endif %}
+
+</form>
+
+{# ── Legend ─────────────────────────────────────────────────────────── #}
+<div class="text-muted small mt-3 d-flex gap-3 flex-wrap">
+  <span><i class="bi bi-folder2 text-warning"></i> Cấp 1</span>
+  <span><i class="bi bi-folder text-secondary"></i> Cấp 2</span>
+  <span><i class="bi bi-file-text text-muted"></i> Cấp 3 (lá)</span>
+  <span class="ms-3 fst-italic">
+    Thứ tự hiển thị theo cột Sắp xếp (SortM) — nhỏ hơn lên trước.
+  </span>
+</div>
+
+{# Shared single-row delete form — outside batchForm to avoid nesting #}
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initBatchList('danh mục');
+</script>
+{% endblock %}

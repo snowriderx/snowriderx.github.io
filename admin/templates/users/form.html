@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% set page_title = "Sửa thành viên: " ~ (form_data.username or '') if is_edit else "Thêm thành viên mới" %}
+
+{% block title %}{{ page_title }} — {{ site_name }}{% endblock %}
+
+{# CKEditor for DescU (Thông tin chi tiết) — matches VB CKEditorControl txtDescs #}
+{% block head %}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('users.index') }}">Quản lý Thành viên</a>
+</li>
+<li class="breadcrumb-item active">{{ page_title }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <div class="col-12">
+    <div class="card shadow-sm card-form">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-person-gear"></i>
+        <span>{{ page_title }}</span>
+        {% if is_edit and user %}
+        <span class="badge bg-secondary ms-auto">#{{ user.IDU }}</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+
+        <form method="post" enctype="multipart/form-data" id="userForm" novalidate>
+
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          {# ── Actions (top) ────────────────────────────────────────── #}
+          <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('users.index') }}" class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+          {# ── 1. Tài khoản (username) ──────────────────────────────── #}
+          {# VB: txtUser, MaxLength=30, RequiredFieldValidator, KillChars applied #}
+          <div class="mb-3">
+            <label for="username" class="form-label">
+              Tài khoản <span class="text-danger">*</span>
+            </label>
+            <input type="text" class="form-control{% if form_errors.get('username') %} is-invalid{% endif %}"
+              id="username" name="username" value="{{ form_data.username or '' }}" maxlength="30" required autofocus {%
+              if is_edit and user and user.IDU==1 %}readonly{% endif %}>
+            {% if form_errors.get('username') %}
+            <div class="invalid-feedback">{{ form_errors['username'] }}</div>
+            {% endif %}
+          </div>
+
+          {# ── 2. Mật khẩu ──────────────────────────────────────────── #}
+          {# VB: txtPass, MaxLength=30, TextMode=Password, RequiredFieldValidator.
+          VB decrypts and shows password in edit form (unsafe).
+          Flask: always blank in edit — leave empty to keep existing password. #}
+          <div class="mb-3">
+            <label for="password" class="form-label">
+              Mật khẩu
+              {% if not is_edit %}<span class="text-danger">*</span>{% endif %}
+            </label>
+            <input type="password" class="form-control{% if form_errors.get('password') %} is-invalid{% endif %}"
+              id="password" name="password" autocomplete="new-password" maxlength="100">
+            {% if form_errors.get('password') %}
+            <div class="invalid-feedback">{{ form_errors['password'] }}</div>
+            {% endif %}
+            {% if is_edit %}
+            <div class="form-text">Để trống nếu không muốn thay đổi mật khẩu. Tối thiểu 6 ký tự.</div>
+            {% else %}
+            <div class="form-text">Tối thiểu 6 ký tự.</div>
+            {% endif %}
+          </div>
+
+          {# ── 3. Email ─────────────────────────────────────────────── #}
+          {# VB: txtEmail, MaxLength=100 #}
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{ form_data.email or '' }}"
+              maxlength="100">
+          </div>
+
+          {# ── 4. Họ tên ────────────────────────────────────────────── #}
+          {# VB: txtFullName → Name column, MaxLength=50 #}
+          <div class="mb-3">
+            <label for="full_name" class="form-label">Họ tên</label>
+            <input type="text" class="form-control" id="full_name" name="full_name"
+              value="{{ form_data.full_name or '' }}" maxlength="50">
+          </div>
+
+          {# ── 5. Page Facebook ─────────────────────────────────────── #}
+          {# VB: txtFbL → FbL column, MaxLength=500 (DB: nvarchar(200)) #}
+          <div class="mb-3">
+            <label for="fb_link" class="form-label">Page Facebook</label>
+            <input type="url" class="form-control" id="fb_link" name="fb_link" value="{{ form_data.fb_link or '' }}"
+              maxlength="200" placeholder="https://facebook.com/...">
+          </div>
+
+          {# ── 6. Website ───────────────────────────────────────────── #}
+          {# VB: txtWbL → WebL column, MaxLength=500 (DB: nvarchar(200))
+          VB bug: edit load reads "WbL" (typo) → always blank. Flask reads "WebL" correctly. #}
+          <div class="mb-3">
+            <label for="web_link" class="form-label">Website</label>
+            <input type="url" class="form-control" id="web_link" name="web_link" value="{{ form_data.web_link or '' }}"
+              maxlength="200" placeholder="https://...">
+          </div>
+
+          {# ── 7. Thông tin chi tiết (DescU) — CKEditor ─────────────── #}
+          {# VB: CKEditorControl txtDescs → DescU ntext column #}
+          <div class="mb-4">
+            <label for="bio" class="form-label">Thông tin chi tiết</label>
+            <textarea class="form-control" id="bio" name="bio" rows="8">{{ form_data.bio or '' }}</textarea>
+          </div>
+
+          {# ── 8. Trạng thái ────────────────────────────────────────── #}
+          {# VB: chkAc (AcU=1 mở/khóa) + chkType (Type=1 admin) #}
+          <div class="mb-4 d-flex align-items-center gap-4">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" {% if
+                form_data.get('is_active')==1 or form_data.get('is_active') is none %}checked{% endif %} {% if is_edit
+                and user and user.IDU==1 %}disabled{% endif %}>
+              <label class="form-check-label" for="is_active">Mở/khóa tài khoản</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="role" name="role" value="1" {% if
+                form_data.get('role')==1 %}checked{% endif %} {% if is_edit and user and user.IDU==1 %}disabled{% endif
+                %}>
+              <label class="form-check-label" for="role">Tài khoản admin</label>
+            </div>
+          </div>
+          {% if is_edit and user and user.IDU == 1 %}
+          <div class="alert alert-warning py-2 mb-3 small">
+            <i class="bi bi-shield-lock me-1"></i>
+            Tài khoản quản trị viên gốc — không thể thay đổi quyền hoặc trạng thái.
+          </div>
+          {% endif %}
+
+          {# ── 9. Ảnh đại diện ──────────────────────────────────────── #}
+          <div class="mb-4">
+            <label class="form-label">Ảnh đại diện</label>
+            <input type="hidden" name="delete_avatar" id="deleteAvatarFlag" value="0">
+
+            {% if is_edit and user and user.avatar and user.avatar != 'null.gif' %}
+            <div id="avatarPreview" class="mb-2 d-flex align-items-center gap-3">
+              <img src="{{ img_url('user', user.avatar) }}" alt="avatar"
+                style="width:80px; height:80px; object-fit:cover; border-radius:50%;">
+              <button type="button" class="btn btn-sm btn-outline-danger" onclick="markDeleteAvatar()">
+                <i class="bi bi-x-circle me-1"></i>Xóa ảnh
+              </button>
+            </div>
+            <div id="avatarDeletedNotice" class="mb-2 d-none">
+              <span class="text-danger small">
+                <i class="bi bi-exclamation-circle me-1"></i>
+                Ảnh sẽ bị xóa khi bạn nhấn <strong>Ghi nhận</strong>.
+              </span>
+              <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                      onclick="undoDeleteAvatar()">Hoàn tác</button>
+            </div>
+            {% endif %}
+
+            <input type="file" class="form-control{% if form_errors.get('avatar_file') %} is-invalid{% endif %}"
+              id="avatar_file" name="avatar_file" accept=".jpg,.jpeg,.gif,.png,.webp">
+            {% if form_errors.get('avatar_file') %}
+            <div class="invalid-feedback">{{ form_errors['avatar_file'] }}</div>
+            {% endif %}
+            <div class="form-text">
+              Chỉ hỗ trợ ảnh *.jpg, *.gif, *.png, *.webp — dung lượng &lt; 2MB.
+              Ảnh được thu nhỏ về tối đa 400px.
+            </div>
+          </div>
+
+          {# ── Actions (bottom) ─────────────────────────────────────── #}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('users.index') }}" class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initCKEditors(['bio'], 'userForm');
+
+  function markDeleteAvatar() {
+    document.getElementById('deleteAvatarFlag').value = '1';
+    document.getElementById('avatarPreview').classList.add('d-none');
+    document.getElementById('avatarDeletedNotice').classList.remove('d-none');
+  }
+  function undoDeleteAvatar() {
+    document.getElementById('deleteAvatarFlag').value = '0';
+    document.getElementById('avatarPreview').classList.remove('d-none');
+    document.getElementById('avatarDeletedNotice').classList.add('d-none');
+  }
+</script>
+{% endblock %}

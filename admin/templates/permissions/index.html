@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Phân quyền — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Phân quyền</li>
+{% endblock %}
+
+{% block content %}
+<div class="row h-100">
+  <div class="col-12 h-100">
+    <div class="card shadow-sm card-form d-flex flex-column" style="min-height: calc(100vh - 104px);">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-shield-lock"></i>
+        <span>Phân quyền thành viên</span>
+      </div>
+      <div class="card-body d-flex flex-column pb-0">
+
+        {# ── User picker (GET) ────────────────────────────────────────── #}
+        {# VB: ddlUser dropdown — SELECT IDU, Users WHERE Type=1 AND IDU<>1 #}
+          <form method="get" class="row g-2 mb-4 align-items-end">
+            <div class="col-auto">
+              <label class="form-label mb-1">Chọn thành viên cần phân quyền</label>
+              <select name="user_id" class="form-select" style="min-width:220px;" onchange="this.form.submit()">
+                <option value="">— Chọn thành viên —</option>
+                {% for u in admin_users %}
+                <option value="{{ u.IDU }}" {% if u.IDU==sel_user_id %}selected{% endif %}>
+                  {{ u.username }}{% if u.full_name %} ({{ u.full_name }}){% endif %}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </form>
+
+          {% if sel_user %}
+          {# ── Permission save form (POST) ──────────────────────────────── #}
+          {# VB: btnPQ_Click — DELETE + INSERT tblPermissions #}
+          <form method="post" class="d-flex flex-column flex-grow-1 overflow-hidden">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="user_id" value="{{ sel_user_id }}">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h6 class="mb-0">
+                Quyền của: <strong>{{ sel_user.username }}</strong>
+                {% if sel_user.full_name %}
+                <span class="text-muted fw-normal">({{ sel_user.full_name }})</span>
+                {% endif %}
+              </h6>
+              <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                  <i class="bi bi-check-lg me-1"></i>Phân quyền
+                </button>
+                <a href="{{ url_for('permissions.index') }}" class="btn btn-outline-secondary">Hủy</a>
+              </div>
+            </div>
+
+            <div class="table-responsive flex-grow-1 overflow-auto border-top border-1">
+              <table class="table table-bordered table-hover table-striped table-sm align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Chuyên mục</th>
+                    <th class="text-center" style="width:80px;">Thêm</th>
+                    <th class="text-center" style="width:80px;">Sửa</th>
+                    <th class="text-center" style="width:80px;">Xóa</th>
+                    <th class="text-center" style="width:80px;">Duyệt</th>
+                    <th class="text-center" style="width:80px;">Up file</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                  {# VB: DataList repeater — 3-level menu tree with Permission lookup #}
+                  {% for l1 in tree %}
+                  {% set m1 = l1.menu %}
+                  {% set p1 = perm_map.get(m1.IDM) %}
+                  <tr class="table-secondary">
+                    <td class="fw-semibold">
+                      <i class="bi bi-folder me-1 text-muted"></i>{{ m1.name }}
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="add_{{ m1.IDM }}" value="1" {% if p1 and p1.can_add %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="edit_{{ m1.IDM }}" value="1" {% if p1 and p1.can_edit %}checked{%
+                        endif %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="del_{{ m1.IDM }}" value="1" {% if p1 and p1.can_del %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="chk_{{ m1.IDM }}" value="1" {% if p1 and p1.can_chk %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="up_{{ m1.IDM }}" value="1" {% if p1 and p1.can_up %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                  </tr>
+
+                  {% for l2 in l1.children %}
+                  {% set m2 = l2.menu %}
+                  {% set p2 = perm_map.get(m2.IDM) %}
+                  <tr>
+                    <td class="ps-4">
+                      <i class="bi bi-folder2 me-1 text-muted"></i>{{ m2.name }}
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="add_{{ m2.IDM }}" value="1" {% if p2 and p2.can_add %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="edit_{{ m2.IDM }}" value="1" {% if p2 and p2.can_edit %}checked{%
+                        endif %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="del_{{ m2.IDM }}" value="1" {% if p2 and p2.can_del %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="chk_{{ m2.IDM }}" value="1" {% if p2 and p2.can_chk %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="up_{{ m2.IDM }}" value="1" {% if p2 and p2.can_up %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                  </tr>
+
+                  {% for l3 in l2.children %}
+                  {% set m3 = l3.menu %}
+                  {% set p3 = perm_map.get(m3.IDM) %}
+                  <tr class="table-light">
+                    <td class="ps-5">
+                      <i class="bi bi-file-earmark me-1 text-muted"></i>{{ m3.name }}
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="add_{{ m3.IDM }}" value="1" {% if p3 and p3.can_add %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="edit_{{ m3.IDM }}" value="1" {% if p3 and p3.can_edit %}checked{%
+                        endif %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="del_{{ m3.IDM }}" value="1" {% if p3 and p3.can_del %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="chk_{{ m3.IDM }}" value="1" {% if p3 and p3.can_chk %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                    <td class="text-center">
+                      <input type="checkbox" name="up_{{ m3.IDM }}" value="1" {% if p3 and p3.can_up %}checked{% endif
+                        %} class="form-check-input">
+                    </td>
+                  </tr>
+                  {% endfor %}
+
+                  {% endfor %}
+
+                  {% else %}
+                  <tr>
+                    <td colspan="6" class="text-center py-5">
+                      <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+                      <span class="text-muted small">Chưa có chuyên mục nào (TypeM=1).</span>
+                    </td>
+                  </tr>
+                  {% endfor %}
+
+                </tbody>
+              </table>
+            </div>
+          </form>
+
+          {% else %}
+          <div class="text-muted py-4 text-center">
+            <i class="bi bi-arrow-up-circle me-1"></i>
+            Chọn một thành viên để xem và chỉnh sửa quyền.
+          </div>
+          {% endif %}
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

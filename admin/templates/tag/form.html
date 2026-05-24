@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Sửa' if is_edit else 'Thêm' }} Tag {{ section_label }} — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('tag.index', section=section, owner_id=owner_id) }}">
+    Tag {{ section_label }}
+  </a>
+</li>
+<li class="breadcrumb-item active">{{ 'Sửa tag' if is_edit else 'Thêm mới' }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <div class="col-12">
+    <div class="card shadow-sm card-form">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-tag"></i>
+        <span>{{ 'Sửa tag' if is_edit else 'Thêm tag mới' }} — {{ section_label }}</span>
+      </div>
+      <div class="card-body">
+
+        <form method="post" id="tagForm" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('tag.index', section=section, owner_id=owner_id) }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+          {# ── Owner field ─────────────────────────────────────────── #}
+          {% if section != 'website' %}
+          <div class="mb-3">
+            <label class="form-label">
+              {{ 'Tin tức' if section == 'news' else 'Menu' }}
+              {% if not is_edit %}<span class="text-danger">*</span>{% endif %}
+            </label>
+                <select name="owner_id"
+                      class="form-select {% if form_errors.get('owner_id') %}is-invalid{% endif %}">
+                <option value="">
+                  — Chọn {{ 'tin tức' if section == 'news' else 'menu' }} —
+                </option>
+                {% for oid, olabel in owners %}
+                  <option value="{{ oid }}" {% if oid == owner_id %}selected{% endif %}>
+                    {{ olabel }}
+                  </option>
+                {% endfor %}
+              </select>
+              {% if form_errors.get('owner_id') %}
+                <div class="invalid-feedback">{{ form_errors['owner_id'] }}</div>
+              {% endif %}
+          </div>
+          {% endif %}
+
+          {# ── Title ───────────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="title" class="form-label">
+              Tiêu đề <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   class="form-control {% if form_errors.get('title') %}is-invalid{% endif %}"
+                   id="title" name="title"
+                   value="{{ record.title or '' }}"
+                   maxlength="300" autofocus>
+            {% if form_errors.get('title') %}
+              <div class="invalid-feedback">{{ form_errors['title'] }}</div>
+            {% endif %}
+          </div>
+
+          {# ── Link ────────────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="link" class="form-label">Link</label>
+            <input type="text" class="form-control"
+                   id="link" name="link"
+                   value="{{ record.display_link }}"
+                   maxlength="300"
+                   placeholder="#">
+            <div class="form-text">URL slug hoặc <code>#</code> nếu không có link.</div>
+          </div>
+
+          {# ── Sort + Rel (menu only) ───────────────────────────────── #}
+          {% if section == 'menu' %}
+          <div class="mb-3">
+            <label for="sort" class="form-label">Sắp xếp</label>
+            <input type="text" class="form-control font-monospace"
+                   id="sort" name="sort"
+                   value="{{ record.sort or '00' }}"
+                   maxlength="10" style="max-width:120px;">
+            <div class="form-text text-nowrap">
+              Sắp xếp tăng dần, VD: 01, 02, 03 … | 01.1, 01.2 …
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="rel" class="form-label">Rel</label>
+            <input type="text" class="form-control"
+                   id="rel" name="rel"
+                   value="{{ record.rel or '' }}"
+                   maxlength="50"
+                   placeholder="rel=nofollow target=_blank">
+            <div class="form-text">Thuộc tính link, VD: <code>rel=nofollow target=_blank</code></div>
+          </div>
+          {% endif %}
+
+          {# ── Status ──────────────────────────────────────────────── #}
+          <div class="mb-0">
+            <label for="is_active" class="form-label">Trạng thái</label>
+            <select class="form-select" id="is_active" name="is_active"
+                    style="max-width:200px;">
+              <option value="1" {% if record.is_active != 0 %}selected{% endif %}>Hiển thị</option>
+              <option value="0" {% if record.is_active == 0 %}selected{% endif %}>Ẩn</option>
+            </select>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('tag.index', section=section, owner_id=owner_id) }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

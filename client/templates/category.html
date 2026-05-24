@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% from "macros/ads.html" import ad_slot %}
+
+{% block extra_head %}
+{% set total_pages = (total / per_page) | round(0, 'ceil') | int %}
+{% if page > 1 %}<link rel="prev" href="{{ base_url | default(canonical_url) }}{% if page - 1 > 1 %}?page={{ page - 1 }}{% endif %}" />{% endif %}
+{% if page < total_pages %}<link rel="next" href="{{ base_url | default(canonical_url) }}?page={{ page + 1 }}" />{% endif %}
+{% if breadcrumb %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {% for crumb in breadcrumb %}
+    {
+      "@type": "ListItem",
+      "position": {{ loop.index }},
+      "name": {{ crumb.name | tojson }},
+      "item": "{{ crumb.url }}"
+    }{% if not loop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="container clearfix">
+
+  <div class="page-title">
+    <h1 class="h2 text-center mt-4 mb-4">{{ page_title }}</h1>
+  </div>
+
+  {{ ad_slot(1, is_googlebot=is_googlebot) }}
+
+  {% if articles %}
+  <div class="row">
+    {% for article in articles %}
+    <div class="col-lg-4 col-md-12">
+      <div class="single-post mb-4">
+        <a href="/{{ article.slug }}">
+          <div class="blog-thumb">
+            <img src="/images/news/{{ article.img }}" loading="lazy" alt="{{ article.title or article.name }}" />
+          </div>
+          <div class="blog-content">
+            <h3 class="h3">{{ article.title or article.name }}</h3>
+            {% if article.description %}<p class="line line-3">{{ article.description }}</p>{% endif %}
+          </div>
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-center" style="padding:2rem 0;">No articles found.</p>
+  {% endif %}
+
+  {% set total_pages = (total / per_page) | round(0, 'ceil') | int %}
+  {% if total_pages > 1 %}
+  <div class="page">
+    {% if page > 1 %}<a href="?page={{ page - 1 }}">« Prev</a>{% endif %}
+    {% for p in range([1, page - 2] | max, [total_pages + 1, page + 3] | min) %}
+    {% if p == page %}
+    <a href="?page={{ p }}" class="active">{{ p }}</a>
+    {% else %}
+    <a href="?page={{ p }}">{{ p }}</a>
+    {% endif %}
+    {% endfor %}
+    {% if page < total_pages %}<a href="?page={{ page + 1 }}">Next »</a>{% endif %}
+  </div>
+  {% endif %}
+
+  {% if menu and menu.desc_m %}
+  <div class="highlight">{{ menu.desc_m | safe }}</div>
+  {% endif %}
+
+  {% if ischema %}{{ ischema | safe }}{% endif %}
+
+  {{ ad_slot(7, is_googlebot=is_googlebot) }}
+</div>
+{% endblock %}

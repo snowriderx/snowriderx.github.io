@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+<meta name="robots" content="noindex, nofollow">
+{% endblock %}
+
+{% block content %}
+
+<div class="game-box">
+  <div class="game-container container">
+    <iframe id="gameIframe" allowtransparency="yes" allow="autoplay" frameborder="0"
+      width="100%" height="100%"
+      style="position:absolute;top:0;left:0;right:0;bottom:0;"
+      marginheight="0" marginwidth="0" scrolling="no"
+      {% if iframe_referrerpolicy | default('') %}referrerpolicy="{{ iframe_referrerpolicy }}"{% endif %}></iframe>
+  </div>
+</div>
+
+{% if game_thumbnails | default([]) %}
+<h3 class="text-center mt-4">You May Also Like</h3>
+<div class="game-list">
+  <ul>
+    {% for thumb in game_thumbnails %}
+    <li><a href="{{ thumb.url }}"><img src="{{ thumb.img }}" {% if thumb.alt %}alt="{{ thumb.alt }}"{% endif %} /></a></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endif %}
+
+<style>
+  .main-container {
+    padding: 0;
+    min-height: 75vh;
+    margin-top: 15px;
+  }
+  .game-container {
+    position: relative;
+    height: 0;
+    width: 100%;
+    padding-bottom: 42%;
+  }
+  .game-container.full {
+    position: fixed;
+    height: 75vh;
+    width: 100%;
+    padding-bottom: 0;
+    left: 0;
+    top: 0;
+  }
+  @media (max-width: 767px) {
+    .game-container { padding-bottom: 200%; }
+  }
+</style>
+
+<script>
+  var urlGameIframe = '{{ game_src }}';
+  window.onload = function () {
+    $('#gameIframe').on('load', function () {
+      var c = document.querySelector('.game-container');
+      if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    $('#gameIframe').attr('src', urlGameIframe);
+  };
+  function setGameIframe(game) { $('#gameIframe').attr('src', '/static/game/' + game + '/index.html?v=1.2.1'); }
+</script>
+
+{% endblock %}

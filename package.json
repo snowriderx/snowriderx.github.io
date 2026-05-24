@@ -1,0 +1,11 @@
+{
+  "name": "flask-games-theme",
+  "private": true,
+  "scripts": {
+    "build:css": "tailwindcss -i ./theme/static/css/input.css -o ./theme/static/css/style.css --minify",
+    "watch:css": "tailwindcss -i ./theme/static/css/input.css -o ./theme/static/css/style.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý URL — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Quản lý URL</li>
+{% endblock %}
+
+{% block content %}
+
+{# ── Filter bar ──────────────────────────────────────────────────── #}
+<div class="card shadow-sm mb-3">
+  <div class="card-body py-2">
+    <form method="get" action="{{ url_for('urlmgmt.index') }}"
+          class="d-flex align-items-center gap-2 flex-wrap">
+      <select name="row_type" class="form-select form-select-sm"
+              style="max-width:160px;" onchange="this.form.submit()">
+        <option value="">— Tất cả —</option>
+        {% for k, v in row_type_labels.items() %}
+        <option value="{{ k }}" {% if type_filter == k|string %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="q" value="{{ search }}"
+             class="form-control form-control-sm" style="max-width:280px;"
+             placeholder="Tìm slug hoặc tên...">
+      <button type="submit" class="btn btn-sm btn-outline-secondary">
+        <i class="bi bi-search"></i>
+      </button>
+      {% if type_filter or search %}
+      <a href="{{ url_for('urlmgmt.index') }}" class="btn btn-sm btn-outline-secondary">Xóa lọc</a>
+      {% endif %}
+      <span class="ms-auto text-muted small">{{ total }} URL</span>
+    </form>
+  </div>
+</div>
+
+{# ── Table ───────────────────────────────────────────────────────── #}
+<div class="table-responsive">
+  <table class="table table-bordered table-hover table-striped table-sm align-middle">
+    <thead>
+      <tr>
+        <th style="width:50px;">ID</th>
+        <th style="width:60px;">RowID</th>
+        <th>RowUrl (Slug)</th>
+        <th style="width:100px;">Loại</th>
+        <th style="width:70px;">TypeM</th>
+        <th style="width:55px;">Levels</th>
+        <th style="width:80px;">IDM</th>
+        <th>Tên nội dung</th>
+        <th>SEO Title</th>
+        <th>Keywords</th>
+        <th>Description</th>
+        <th>Rss</th>
+        <th style="width:55px;">Lang</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for rec in records %}
+      <tr>
+        <td class="text-muted small">{{ rec.ID }}</td>
+        <td class="small">{{ rec.row_id }}</td>
+        <td class="font-monospace small">{{ rec.full_url }}</td>
+        <td>
+          <span class="badge
+            {% if rec.row_type == 1 %}bg-primary
+            {% elif rec.row_type == 2 %}bg-success
+            {% else %}bg-secondary{% endif %}">
+            {{ rec.type_label }}
+          </span>
+        </td>
+        <td class="text-center small text-muted">{{ rec.row_type_m }}</td>
+        <td class="text-center small text-muted">{{ rec.row_levels }}</td>
+        <td class="small font-monospace">{{ rec.row_idm or '—' }}</td>
+        <td class="small">{{ rec.row_name or '—' }}</td>
+        <td class="small text-muted">{{ rec.title or '—' }}</td>
+        <td class="small text-muted">{{ rec.keywords or '—' }}</td>
+        <td class="small text-muted">{{ rec.description or '—' }}</td>
+        <td class="small text-muted">{{ rec.rss or '—' }}</td>
+        <td class="text-center small text-muted">{{ rec.row_lang }}</td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="13" class="text-center py-5">
+          <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+          <span class="text-muted small">Không có URL nào.</span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

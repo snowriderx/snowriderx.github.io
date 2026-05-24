@@ -1,0 +1,245 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Thành viên — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Quản lý Thành viên</li>
+{% endblock %}
+
+{% block content %}
+
+{# ── Search bar ──────────────────────────────────────────────────── #}
+{# VB: btnSearch_Click — Users LIKE '%<term>%', IDU<>1 #}
+<form method="get" class="row g-2 mb-3 align-items-end">
+  <div class="col-auto">
+    <input type="text" name="q" value="{{ search }}"
+           class="form-control form-control-sm" placeholder="Tìm tên đăng nhập…"
+           style="min-width:200px;">
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-search me-1"></i>Tìm
+    </button>
+    {% if search %}
+      <a href="{{ url_for('users.index') }}" class="btn btn-sm btn-outline-secondary ms-1">
+        <i class="bi bi-x-lg me-1"></i>Xóa lọc
+      </a>
+    {% endif %}
+  </div>
+</form>
+
+{# ── List + batch-update form ─────────────────────────────────────── #}
+{# VB: btnUpdate1_Click (AcU) + btnDel1_Click (checkbox delete) #}
+<form method="post" id="batchForm" action="{{ url_for('users.index') }}">
+
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+  {% if search %}
+    <input type="hidden" name="search_q" value="{{ search }}">
+  {% endif %}
+
+  <div class="action-bar">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    <span class="action-bar-spacer"></span><span class="action-bar-count">{{ total }} thành viên</span>
+    <a href="{{ url_for('users.create') }}" class="btn btn-sm btn-primary">
+      <i class="bi bi-plus-lg me-1"></i>Thêm mới
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;">
+            <input type="checkbox" id="selectAll" title="Chọn tất cả">
+          </th>
+          {# VB grid columns: Avatar | Username/FullName | Email | Total (month) | Total1 (last month) | AcU | Sửa | Xóa #}
+          <th style="width:60px;">Ảnh</th>
+          <th>Tài khoản / Họ tên</th>
+          <th>Email</th>
+          <th style="width:90px;" class="text-center">Tháng này</th>
+          <th style="width:100px;" class="text-center">Tháng trước</th>
+          <th style="width:120px;">Trạng thái</th>
+          <th style="width:100px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td class="text-center">
+            {# Protect super-admin and self from batch checkbox selection #}
+            {% if row.IDU != 1 and row.IDU != current_user.IDU %}
+              <input type="checkbox" name="item_id" value="{{ row.IDU }}">
+            {% endif %}
+            <input type="hidden" name="row_id" value="{{ row.IDU }}">
+          </td>
+
+          {# Avatar — VB: <img src="/images/user/<ImgU>" /> #}
+          <td class="text-center">
+            {% if row.ImgU and row.ImgU != 'null.gif' %}
+              <img src="{{ img_url('user', row.ImgU) }}"
+                   alt="" style="width:44px; height:44px; object-fit:cover; border-radius:50%;">
+            {% else %}
+              <i class="bi bi-person-circle text-muted" style="font-size:2rem;"></i>
+            {% endif %}
+          </td>
+
+          {# Username + FullName + IDU badge #}
+          <td>
+            <div class="fw-semibold">{{ row.Users }}</div>
+            {% if row.FullName %}
+              <div class="text-muted small">{{ row.FullName }}</div>
+            {% endif %}
+            <span class="badge bg-secondary" style="font-size:.65rem;">#{{ row.IDU }}</span>
+            {% if row.IDU == 1 %}
+              <span class="badge bg-danger ms-1" style="font-size:.65rem;">Super Admin</span>
+            {% endif %}
+            {% if row.IDU == current_user.IDU %}
+              <span class="badge bg-info ms-1" style="font-size:.65rem;">Bạn</span>
+            {% endif %}
+          </td>
+
+          <td>
+            <span class="small">{{ row.Email or '—' }}</span>
+          </td>
+
+          {# VB: Total (posts this month) — subquery COUNT from tblNews #}
+          <td class="text-center">
+            {% if row.posts_this_month > 0 %}
+              <span class="badge bg-primary rounded-pill">{{ row.posts_this_month }}</span>
+            {% else %}
+              <span class="text-muted">0</span>
+            {% endif %}
+          </td>
+
+          {# VB: Total1 (posts last month) #}
+          <td class="text-center">
+            {% if row.posts_last_month > 0 %}
+              <span class="badge bg-secondary rounded-pill">{{ row.posts_last_month }}</span>
+            {% else %}
+              <span class="text-muted">0</span>
+            {% endif %}
+          </td>
+
+          {# AcU dropdown — editable inline (VB: btnUpdate1_Click saves AcU) #}
+          {# IDU=1 and current user rows are read-only to prevent accidental self-lock #}
+          <td>
+            {% if row.IDU == 1 or row.IDU == current_user.IDU %}
+              <span class="badge {% if row.AcU == 1 %}bg-success{% else %}bg-secondary{% endif %}">
+                {{ 'Hoạt động' if row.AcU == 1 else 'Khóa' }}
+              </span>
+              <input type="hidden" name="ac_{{ row.IDU }}" value="{{ row.AcU }}">
+            {% else %}
+              <select name="ac_{{ row.IDU }}" class="form-select form-select-sm">
+                <option value="1" {% if row.AcU == 1 %}selected{% endif %}>Hoạt động</option>
+                <option value="0" {% if row.AcU == 0 %}selected{% endif %}>Khóa</option>
+              </select>
+            {% endif %}
+          </td>
+
+          <td class="text-center">
+            {# Edit #}
+            <a href="{{ url_for('users.edit', user_id=row.IDU) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1" title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            {# Permissions — only for admin users, not super-admin, not self #}
+            {% if row.IDU != 1 and row.IDU != current_user.IDU and row.Type == 1 %}
+              <a href="{{ url_for('permissions.index', user_id=row.IDU) }}"
+                 class="btn btn-xs btn-outline-secondary py-0 px-1" title="Phân quyền">
+                <i class="bi bi-shield-lock"></i>
+              </a>
+            {% endif %}
+            {# eTop — bump TimeU to now (VB: dtgrView_ItemCommand eTop) #}
+            {# Uses shared bumpForm outside the batch form to avoid nested-form invalid HTML #}
+            <button type="button"
+                    class="btn btn-xs btn-outline-secondary py-0 px-1"
+                    title="Đẩy lên đầu"
+                    onclick="bumpUser('{{ url_for('users.bump', user_id=row.IDU) }}')">
+              <i class="bi bi-arrow-up"></i>
+            </button>
+            {# Delete — protected for super-admin and self #}
+            {% if row.IDU != 1 and row.IDU != current_user.IDU %}
+              <button type="button"
+                      class="btn btn-xs btn-outline-danger py-0 px-1"
+                      title="Xóa"
+                      onclick="confirmDeleteOne({{ row.IDU }}, '{{ row.Users|e }}', '{{ url_for('users.delete', user_id=row.IDU) }}')">
+                <i class="bi bi-trash"></i>
+              </button>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">{% if search %}Không tìm thấy thành viên nào khớp với "<strong>{{ search }}</strong>".{% else %}Chưa có thành viên nào.{% endif %}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if rows %}
+  <div class="action-bar mt-1">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+  </div>
+  {% endif %}
+
+</form>
+
+{# ── Pagination ───────────────────────────────────────────────────── #}
+{% if total_pages > 1 %}
+<nav class="mt-3">
+  <ul class="pagination pagination-sm">
+    <li class="page-item {% if page == 1 %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('users.index', page=page-1, q=search) }}">«</a>
+    </li>
+    {% for p in range(1, total_pages + 1) %}
+    <li class="page-item {% if p == page %}active{% endif %}">
+      <a class="page-link" href="{{ url_for('users.index', page=p, q=search) }}">{{ p }}</a>
+    </li>
+    {% endfor %}
+    <li class="page-item {% if page == total_pages %}disabled{% endif %}">
+      <a class="page-link" href="{{ url_for('users.index', page=page+1, q=search) }}">»</a>
+    </li>
+  </ul>
+</nav>
+{% endif %}
+
+{# Hidden form used by confirmDeleteOne() JS helper (from admin.js) #}
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+{# Hidden form used by bumpUser() — avoids nesting a <form> inside the batch <form> #}
+<form id="bumpForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initBatchList('users');
+
+  function bumpUser(url) {
+    var f = document.getElementById('bumpForm');
+    f.action = url;
+    f.submit();
+  }
+</script>
+{% endblock %}

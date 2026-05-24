@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block title %}Cấu hình Website — {{ site_name }}{% endblock %}
+
+{% block head %}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Cấu hình Website</li>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" id="configForm" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="card shadow-sm card-form">
+
+    {# ── Card header: title only — matches news/product form ────────── #}
+    <div class="card-header d-flex align-items-center gap-2">
+      <i class="bi bi-gear"></i>
+      <span>Cấu hình Website</span>
+    </div>
+
+    {# ── Card body: buttons + tabs nav + tab content ──────────────── #}
+    <div class="card-body">
+
+      <div class="d-flex gap-2 mb-3">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg me-1"></i>Lưu cấu hình
+        </button>
+        <a href="{{ url_for('config.index') }}" class="btn btn-outline-secondary">Hủy</a>
+      </div>
+
+      <ul class="nav nav-tabs mb-3" id="configTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" id="tab-seo" data-bs-toggle="tab"
+                  data-bs-target="#pane-seo" type="button" role="tab">
+            <i class="bi bi-search me-1"></i>SEO
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-contact" data-bs-toggle="tab"
+                  data-bs-target="#pane-contact" type="button" role="tab">
+            <i class="bi bi-telephone me-1"></i>Liên hệ
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-scripts" data-bs-toggle="tab"
+                  data-bs-target="#pane-scripts" type="button" role="tab">
+            <i class="bi bi-code-slash me-1"></i>Scripts
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-layout" data-bs-toggle="tab"
+                  data-bs-target="#pane-layout" type="button" role="tab">
+            <i class="bi bi-layout-text-window me-1"></i>Layout
+          </button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" id="tab-images" data-bs-toggle="tab"
+                  data-bs-target="#pane-images" type="button" role="tab">
+            <i class="bi bi-image me-1"></i>Hình ảnh
+          </button>
+        </li>
+      </ul>
+
+      <div class="tab-content" id="configTabContent">
+
+      {# ── Tab: SEO ────────────────────────────────────────────────── #}
+      <div class="tab-pane fade show active" id="pane-seo" role="tabpanel">
+
+        <div class="mb-3">
+          <label for="meta_title" class="form-label">Meta Title</label>
+          <input type="text" class="form-control" id="meta_title" name="meta_title"
+                 value="{{ cfg.meta_title or '' }}" maxlength="200"
+                 placeholder="Tiêu đề mặc định của website (≤200 ký tự)">
+          <div class="form-text">Hiển thị trên tab trình duyệt và kết quả Google.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="meta_keyword" class="form-label">Meta Keywords</label>
+          <input type="text" class="form-control" id="meta_keyword" name="meta_keyword"
+                 value="{{ cfg.meta_keyword or '' }}" maxlength="300"
+                 placeholder="Từ khóa, cách nhau bởi dấu phẩy (≤300 ký tự)">
+        </div>
+
+        <div class="mb-3">
+          <label for="meta_description" class="form-label">Meta Description</label>
+          <textarea class="form-control" id="meta_description" name="meta_description"
+                    rows="3" maxlength="500"
+                    placeholder="Mô tả ngắn website (≤500 ký tự)">{{ cfg.meta_description or '' }}</textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="robots" class="form-label">Robots.txt</label>
+          <textarea class="form-control font-monospace" id="robots" name="robots"
+                    rows="5" maxlength="1000"
+                    placeholder="User-agent: *&#10;Disallow:">{{ cfg.robots or '' }}</textarea>
+          <div class="form-text">Nội dung file robots.txt.</div>
+        </div>
+
+        <div class="mb-0">
+          <label for="ads" class="form-label">Ads / Verify Code</label>
+          <textarea class="form-control font-monospace" id="ads" name="ads"
+                    rows="4" maxlength="1000"
+                    placeholder="Google Adsense, Facebook pixel, v.v.">{{ cfg.ads or '' }}</textarea>
+        </div>
+
+      </div>{# /pane-seo #}
+
+      {# ── Tab: Contact ─────────────────────────────────────────────── #}
+      <div class="tab-pane fade" id="pane-contact" role="tabpanel">
+
+        <div class="mb-3">
+          <label for="email" class="form-label">Email liên hệ</label>
+          <input type="text" class="form-control" id="email" name="email"
+                 value="{{ cfg.email or '' }}" maxlength="100"
+                 placeholder="contact@example.com">
+        </div>
+
+        <div class="mb-3">
+          <label for="hotline" class="form-label">Hotline</label>
+          <input type="text" class="form-control" id="hotline" name="hotline"
+                 value="{{ cfg.hotline or '' }}" maxlength="50"
+                 placeholder="0123 456 789">
+        </div>
+
+        <div class="mb-0">
+          <label for="slogan" class="form-label">Slogan</label>
+          <input type="text" class="form-control" id="slogan" name="slogan"
+                 value="{{ cfg.slogan or '' }}" maxlength="200"
+                 placeholder="Khẩu hiệu / tagline của website">
+        </div>
+
+      </div>{# /pane-contact #}
+
+      {# ── Tab: Scripts ─────────────────────────────────────────────── #}
+      <div class="tab-pane fade" id="pane-scripts" role="tabpanel">
+
+        <div class="alert alert-warning py-2 mb-3">
+          <i class="bi bi-exclamation-triangle me-1"></i>
+          Các trường này chèn code trực tiếp vào HTML. Chỉ dán code từ nguồn tin cậy.
+        </div>
+
+        <div class="mb-3">
+          <label for="script_head" class="form-label">Script &lt;head&gt;</label>
+          <textarea class="form-control font-monospace" id="script_head" name="script_head"
+                    rows="6"
+                    placeholder="&lt;!-- Google Tag Manager, v.v. --&gt;">{{ cfg.script_head or '' }}</textarea>
+          <div class="form-text">Chèn trước thẻ đóng <code>&lt;/head&gt;</code>. Không hiển thị với BOT.</div>
+        </div>
+
+        <div class="mb-3">
+          <label for="script_body" class="form-label">Script &lt;body&gt;</label>
+          <textarea class="form-control font-monospace" id="script_body" name="script_body"
+                    rows="6"
+                    placeholder="&lt;!-- Script chèn trước &lt;/body&gt; --&gt;">{{ cfg.script_body or '' }}</textarea>
+          <div class="form-text">Chèn trước thẻ đóng <code>&lt;/body&gt;</code>. Không hiển thị với BOT.</div>
+        </div>
+
+        <div class="mb-0">
+          <label for="script_verify" class="form-label">Code nhúng toàn trang</label>
+          <textarea class="form-control font-monospace" id="script_verify" name="script_verify"
+                    rows="6" maxlength="2000"
+                    placeholder="&lt;!-- HTML/script chèn vào &lt;head&gt; trên mọi trang --&gt;">{{ cfg.script_verify or '' }}</textarea>
+          <div class="form-text">Chèn vào <code>&lt;head&gt;</code> trên tất cả các trang. VD: Google Search Console, tag quảng cáo, analytics.</div>
+        </div>
+
+      </div>{# /pane-scripts #}
+
+      {# ── Tab: Layout ──────────────────────────────────────────────── #}
+      <div class="tab-pane fade" id="pane-layout" role="tabpanel">
+
+        <div class="mb-3">
+          <label for="content_home" class="form-label">Nội dung trang chủ</label>
+          <textarea id="content_home" name="content_home"
+                    rows="8">{{ cfg.content_home or '' }}</textarea>
+        </div>
+
+        <div class="mb-3">
+          <label for="footer" class="form-label">Chân trang (Footer)</label>
+          <textarea id="footer" name="footer"
+                    rows="6">{{ cfg.footer or '' }}</textarea>
+        </div>
+
+        <div class="mb-0">
+          <label for="script_home" class="form-label">Script trang chủ</label>
+          <textarea class="form-control font-monospace" id="script_home" name="script_home"
+                    rows="5"
+                    placeholder="Script dùng riêng cho trang chủ">{{ cfg.script_home or '' }}</textarea>
+        </div>
+
+      </div>{# /pane-layout #}
+
+      {# ── Tab: Images ──────────────────────────────────────────────── #}
+      <div class="tab-pane fade" id="pane-images" role="tabpanel">
+
+        <div class="alert alert-info py-2 mb-4">
+          <i class="bi bi-info-circle me-1"></i>
+          Hỗ trợ *.png, *.jpg, *.gif, *.webp — tối đa {{ config.get('UPLOAD_MAX_FILE_MB', 5) }} MB.
+          Ảnh rộng hơn 1024px sẽ tự động thu nhỏ.
+        </div>
+
+        {# Logo (50×50 natural) #}
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Logo web</label>
+          <div class="mb-2">
+            {% if icons and icons.logo %}
+            <img id="logoPreview"
+                 src="{{ img_url('icon', icons.logo) }}"
+                 alt="logo" style="max-width:800px;">
+            {% else %}
+            <img id="logoPreview" src="" alt="logo" class="d-none"
+                 style="max-width:800px;">
+            <span id="logoEmpty" class="text-muted small fst-italic">Chưa có logo.</span>
+            {% endif %}
+          </div>
+          <input type="file" class="form-control" name="file_logo" accept="image/*"
+                 onchange="previewIcon(this, 'logoPreview', 'logoEmpty')">
+          <div class="form-text">Chỉ hỗ trợ ảnh *.png, *.jpg và dung lượng &lt; 5MB.</div>
+        </div>
+
+        {# Favicon (100×100 natural) #}
+        <div class="mb-4">
+          <label class="form-label fw-semibold">Favicon web</label>
+          <div class="mb-2">
+            {% if icons and icons.favicon %}
+            <img id="faviconPreview"
+                 src="{{ img_url('icon', icons.favicon) }}"
+                 alt="favicon" style="max-width:60px;">
+            {% else %}
+            <img id="faviconPreview" src="" alt="favicon" class="d-none"
+                 style="max-width:60px;">
+            <span id="faviconEmpty" class="text-muted small fst-italic">Chưa có favicon.</span>
+            {% endif %}
+          </div>
+          <input type="file" class="form-control" name="file_favicon" accept="image/*"
+                 onchange="previewIcon(this, 'faviconPreview', 'faviconEmpty')">
+          <div class="form-text">Chỉ hỗ trợ ảnh *.png, *.jpg và dung lượng &lt; 5MB.</div>
+        </div>
+
+        {# Share image (2000×2000 — giới hạn hiển thị 200px) #}
+        <div class="mb-0">
+          <label class="form-label fw-semibold">Ảnh chia sẻ (OG Image)</label>
+          <div class="mb-2">
+            {% if icons and icons.share %}
+            <img id="sharePreview"
+                 src="{{ img_url('icon', icons.share) }}"
+                 alt="share" style="max-width:100%;">
+            {% else %}
+            <img id="sharePreview" src="" alt="share" class="d-none"
+                 style="max-width:100%;">
+            <span id="shareEmpty" class="text-muted small fst-italic">Chưa có ảnh chia sẻ.</span>
+            {% endif %}
+          </div>
+          <input type="file" class="form-control" name="file_share" accept="image/*"
+                 onchange="previewIcon(this, 'sharePreview', 'shareEmpty')">
+          <div class="form-text">Chỉ hỗ trợ ảnh *.png, *.jpg và dung lượng &lt; 5MB.</div>
+        </div>
+
+      </div>{# /pane-images #}
+
+      </div>{# /tab-content #}
+
+    </div>{# /card-body #}
+
+  </div>{# /card #}
+
+  {# Save button — bottom #}
+  <div class="mt-3 mb-4 d-flex gap-2">
+    <button type="submit" class="btn btn-primary">
+      <i class="bi bi-check-lg me-1"></i>Lưu cấu hình
+    </button>
+    <a href="{{ url_for('config.index') }}" class="btn btn-outline-secondary">Hủy</a>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initCKEditors(['content_home', 'footer'], 'configForm');
+
+  function previewIcon(input, imgId, emptyId) {
+    var imgEl   = document.getElementById(imgId);
+    var emptyEl = document.getElementById(emptyId);
+    if (!imgEl) return;
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        imgEl.src = e.target.result;
+        imgEl.classList.remove('d-none');
+        if (emptyEl) emptyEl.classList.add('d-none');
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+</script>
+{% endblock %}

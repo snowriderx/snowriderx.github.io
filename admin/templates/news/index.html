@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Tin tức — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Quản lý Tin tức</li>
+{% endblock %}
+
+{% block content %}
+
+{# ── Language filter ──────────────────────────────────────────────── #}
+{% if langs %}
+<div class="mb-2">
+  <div class="btn-group btn-group-sm">
+    <a href="{{ url_for('news.index', id=current_menu_id, s=search_q) }}"
+       class="btn {% if lang_filter == '' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-globe me-1"></i>Tất cả
+    </a>
+    {% for lang in langs %}
+    <a href="{{ url_for('news.index', id=current_menu_id, s=search_q, lang=lang.ID) }}"
+       class="btn {% if lang_filter == lang.ID|string %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      {{ lang.name }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{# ── Filter bar ────────────────────────────────────────────────────── #}
+<div class="d-flex flex-wrap gap-2 mb-3 align-items-end">
+
+  {# Category filter #}
+  <form method="get" action="{{ url_for('news.index') }}"
+        class="d-flex gap-2 align-items-center flex-wrap" id="filterForm">
+    <select name="id" class="form-select form-select-sm" style="min-width:200px;"
+            onchange="this.form.submit()">
+      <option value="">— Tất cả danh mục —</option>
+      {% for m in menus %}
+        <option value="{{ m.IDM }}"
+          {% if m.IDM == current_menu_id %}selected{% endif %}>
+          {{ m.display_name }}
+        </option>
+      {% endfor %}
+    </select>
+
+    {# Search box — preserves current menu filter #}
+    {% if current_menu_id %}
+      <input type="hidden" name="id" value="{{ current_menu_id }}">
+    {% endif %}
+    <div class="input-group input-group-sm" style="width:260px;">
+      <input type="text" class="form-control" name="s"
+             value="{{ search_q }}"
+             placeholder="Tìm theo tiêu đề, slug…">
+      <button type="submit" class="btn btn-outline-secondary">
+        <i class="bi bi-search"></i>
+      </button>
+      {% if search_q %}
+        <a href="{{ url_for('news.index', id=current_menu_id) if current_menu_id else url_for('news.index') }}"
+           class="btn btn-outline-secondary" title="Xóa tìm kiếm">
+          <i class="bi bi-x"></i>
+        </a>
+      {% endif %}
+    </div>
+  </form>
+
+</div>
+
+{# ── Batch form ────────────────────────────────────────────────────── #}
+<form method="post" id="batchForm" action="{{ url_for('news.index') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+  {# Preserve filter state across batch POST → redirect #}
+  <input type="hidden" name="current_menu_id" value="{{ current_menu_id }}">
+  <input type="hidden" name="current_search"  value="{{ search_q }}">
+
+  <div class="action-bar">
+    {# VB: btnUpdate1.Visible = ChkNews #}
+    {% if can_chk %}
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    {% endif %}
+    {# VB: btnDel1.Visible = DelNews #}
+    {% if can_del %}
+    <button type="button" class="btn btn-sm btn-danger"
+            onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    {% endif %}
+    <span class="action-bar-spacer"></span><span class="action-bar-count">{{ news_list|length }} bài</span>
+    {# VB: btnAdd1.Visible = AddNews #}
+    {% if can_add %}
+    <a href="{{ url_for('news.create') }}{% if current_menu_id %}?menu_id={{ current_menu_id }}{% endif %}"
+       class="btn btn-sm btn-primary">
+      <i class="bi bi-plus-lg me-1"></i>Thêm mới
+    </a>
+    {% endif %}
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;">
+            <input type="checkbox" id="selectAll" title="Chọn tất cả">
+          </th>
+          <th style="width:80px;">Ảnh</th>
+          <th>Tiêu đề</th>
+          <th style="width:90px;">Ngày up</th>
+          <th style="width:130px;">Trạng thái</th>
+          <th style="width:120px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for n in news_list %}
+        <tr>
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ n.ID }}">
+            <input type="hidden"   name="row_id"  value="{{ n.ID }}">
+          </td>
+
+          {# Thumbnail #}
+          <td>
+            {% if n.has_image %}
+              <img src="{{ img_url('news', n.img) }}"
+                   alt=""
+                   style="max-width:70px; max-height:48px; object-fit:cover;"
+                   onerror="this.style.display='none';this.nextElementSibling.style.display='';">
+              <span class="text-muted small" style="display:none;">—</span>
+            {% else %}
+              <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+
+          {# Title + slug + type badge #}
+          <td>
+            <div class="fw-semibold">
+              {% if can_edit %}
+              <a href="{{ url_for('news.edit', news_id=n.ID) }}">{{ n.name or '—' }}</a>
+              {% else %}
+              {{ n.name or '—' }}
+              {% endif %}
+              {% if n.news_type == 2 %}
+                <span class="badge bg-info text-dark ms-1" style="font-size:.7em;">
+                  Landing
+                </span>
+              {% endif %}
+            </div>
+            {% if n.slug %}
+              <div class="text-muted small">
+                <i class="bi bi-link-45deg"></i>{{ n.slug }}
+              </div>
+            {% endif %}
+          </td>
+
+          {# TimeN #}
+          <td class="small text-muted text-nowrap">
+            {{ n.created_at.strftime('%d/%m/%Y') if n.created_at else '—' }}
+          </td>
+
+          {# AcN — 3-state select; VB: drlAc.Enabled = ChkNews #}
+          <td>
+            <select name="ac_{{ n.ID }}" class="form-select form-select-sm"
+                    {% if not can_chk %}disabled{% endif %}>
+              {% for val, label in news_status.items() %}
+                <option value="{{ val }}"
+                  {% if n.is_active == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </td>
+
+          {# Actions #}
+          <td class="text-center text-nowrap">
+
+            {# eTop — bump to top #}
+            {% if can_edit %}
+            <form method="post"
+                  action="{{ url_for('news.bump', news_id=n.ID) }}"
+                  class="d-inline">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input type="hidden" name="current_menu_id" value="{{ current_menu_id }}">
+              <button type="submit"
+                      class="btn btn-xs btn-outline-secondary py-0 px-1"
+                      title="Đẩy lên đầu">
+                <i class="bi bi-arrow-up"></i>
+              </button>
+            </form>
+
+            <a href="{{ url_for('news.edit', news_id=n.ID) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1"
+               title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            {% endif %}
+
+            {# VB: deleteButton.Visible = DelNews #}
+            {% if can_del %}
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne({{ n.ID }}, '{{ n.name|e }}', '{{ url_for('news.delete', news_id=n.ID) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+            {% endif %}
+
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">{% if search_q %}Không tìm thấy kết quả cho "<strong>{{ search_q }}</strong>".{% elif current_menu_id %}Danh mục này chưa có bài nào.{% else %}Chưa có tin tức nào.{% endif %}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if news_list %}
+  <div class="action-bar mt-1">
+    {% if can_chk %}
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    {% endif %}
+    {% if can_del %}
+    <button type="button" class="btn btn-sm btn-danger"
+            onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    {% endif %}
+  </div>
+  {% endif %}
+
+</form>
+
+{# Shared single-row delete form — outside batchForm to avoid nesting #}
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>initBatchList('tin tức');</script>
+{% endblock %}

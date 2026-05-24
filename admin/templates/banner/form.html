@@ -1,0 +1,211 @@
+{% extends "base.html" %}
+
+{% set is_edit = advert.ID is not none and advert.ID %}
+{% set page_title = "Sửa nội dung" if is_edit else "Thêm nội dung mới" %}
+
+{% block title %}{{ page_title }} — {{ site_name }}{% endblock %}
+
+{% block head %}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('banner.index', type=current_zone, langid=current_langid) }}">
+    Quản lý Banner
+  </a>
+</li>
+<li class="breadcrumb-item active">{{ page_title }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow-sm card-form">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-image"></i>
+        <span>{{ page_title }}</span>
+        {% if is_edit %}
+          <span class="badge bg-secondary ms-auto">#{{ advert.ID }}</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+
+        <form method="post"
+              enctype="multipart/form-data"
+              id="bannerForm"
+              novalidate>
+
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          {# ── Actions (top) ─────────────────────────────────────────── #}
+          <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('banner.index', type=current_zone, langid=current_langid) }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+          {# ── Title ───────────────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="title" class="form-label">
+              Tiêu đề <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('title') %} is-invalid{% endif %}"
+                   id="title" name="title"
+                   value="{{ advert.title or '' }}" maxlength="100" required autofocus>
+            {% if form_errors.get('title') %}
+              <div class="invalid-feedback">{{ form_errors['title'] }}</div>
+            {% else %}
+              <div class="invalid-feedback">Tiêu đề là trường bắt buộc.</div>
+            {% endif %}
+          </div>
+
+          {# ── Nội dung (Html) via CKEditor ────────────────────────────── #}
+          {# VB advert.aspx: CKEditorControl txtDescsHTML (main content field) #}
+          <div class="mb-3">
+            <label for="html" class="form-label">Nội dung</label>
+            <textarea class="form-control" id="html" name="html"
+                      rows="8">{{ advert.html or '' }}</textarea>
+          </div>
+
+          {# ── Vùng hiển thị (Type) ────────────────────────────────────── #}
+          {# VB advert.aspx drlType: 96/95/91/92/93/94/97/98 #}
+          <div class="row g-3 mb-3">
+            <div class="col-md-5">
+              <label for="zone_type" class="form-label">Vùng hiển thị</label>
+              <select class="form-select" id="zone_type" name="zone_type">
+                {% for val, label in form_zone_types.items() %}
+                  <option value="{{ val }}"
+                    {% if val == (advert.zone_type or current_zone) %}selected{% endif %}>
+                    {{ label }}
+                  </option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label for="sort" class="form-label">Sắp xếp</label>
+              <input type="text" class="form-control" id="sort" name="sort"
+                     value="{{ advert.sort or '' }}" maxlength="10">
+              <div class="form-text">VD: 01, 02 hoặc 01.1</div>
+            </div>
+
+            <div class="col-md-4 d-flex align-items-end gap-4 pb-1">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="is_active"
+                       name="is_active" value="1"
+                       {% if advert.is_active != 0 %}checked{% endif %}>
+                <label class="form-check-label" for="is_active">Hiển thị</label>
+              </div>
+              {# VB: chkHeading checkbox "Đặt làm tiêu đề" #}
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="is_heading"
+                       name="is_heading" value="1"
+                       {% if advert.is_heading %}checked{% endif %}>
+                <label class="form-check-label" for="is_heading">Đặt làm tiêu đề</label>
+              </div>
+            </div>
+          </div>
+
+          {# ── Language (LangID) — content language filter tag ────────────── #}
+          {% if langs %}
+          <div class="mb-3">
+            <label for="lang_id" class="form-label">Ngôn ngữ</label>
+            <select class="form-select" id="lang_id" name="lang_id" style="max-width:220px;">
+              <option value="">— Mặc định —</option>
+              {% for lang in langs %}
+              <option value="{{ lang.ID }}" {% if advert.lang_id == lang.ID %}selected{% endif %}>{{ lang.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+
+          {# ── Mô tả ngắn (Contents) — hidden in VB but saved ───────────── #}
+          <div class="mb-3" style="display:none;">
+            <textarea class="form-control" name="contents"
+                      rows="2">{{ advert.contents or '' }}</textarea>
+          </div>
+
+          {# ── Link (Name) — hidden in VB form (display:none) ──────────── #}
+          <input type="hidden" name="link" value="{{ advert.link or '#' }}">
+
+          {# ── Ảnh đại diện ─────────────────────────────────────────────── #}
+          {# VB: FilePro FileUpload + ibtnDelImgT1 ImageButton #}
+          <div class="mb-4">
+            <label class="form-label">Ảnh đại diện</label>
+            <input type="hidden" name="delete_img" id="deleteImgFlag" value="0">
+
+            {% if is_edit and advert.has_image %}
+              <div id="imgPreview" class="mb-2 d-flex align-items-center gap-3">
+                <img src="{{ img_url('media', advert.img) }}"
+                     alt="current" style="max-height:120px; max-width:300px;">
+                <button type="button" class="btn btn-sm btn-outline-danger"
+                        onclick="markDeleteImg()">
+                  <i class="bi bi-x-circle me-1"></i>Xóa ảnh
+                </button>
+              </div>
+              <div id="imgDeletedNotice" class="mb-2 d-none">
+                <span class="text-danger small">
+                  <i class="bi bi-exclamation-circle me-1"></i>
+                  Ảnh sẽ bị xóa khi bạn nhấn <strong>Ghi nhận</strong>.
+                </span>
+                <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                        onclick="undoDeleteImg()">Hoàn tác</button>
+              </div>
+            {% endif %}
+
+            <input type="file"
+                   class="form-control{% if form_errors.get('img_file') %} is-invalid{% endif %}"
+                   id="img_file" name="img_file"
+                   accept=".jpg,.jpeg,.gif,.png,.webp,.swf">
+            {% if form_errors.get('img_file') %}
+              <div class="invalid-feedback">{{ form_errors['img_file'] }}</div>
+            {% endif %}
+            <div class="form-text">Hỗ trợ: jpg, gif, png, webp. Dung lượng &lt; 2MB.</div>
+          </div>
+
+          {# ── Actions (bottom) ────────────────────────────────────────── #}
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('banner.index', type=current_zone, langid=current_langid) }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('bannerForm').addEventListener('submit', function (e) {
+    var title = document.getElementById('title');
+    title.classList.remove('is-invalid');
+    if (!title.value.trim()) {
+      title.classList.add('is-invalid');
+      e.preventDefault();
+    }
+  });
+
+  initCKEditors(['html'], 'bannerForm');
+
+  function markDeleteImg() {
+    document.getElementById('deleteImgFlag').value = '1';
+    document.getElementById('imgPreview').classList.add('d-none');
+    document.getElementById('imgDeletedNotice').classList.remove('d-none');
+  }
+  function undoDeleteImg() {
+    document.getElementById('deleteImgFlag').value = '0';
+    document.getElementById('imgPreview').classList.remove('d-none');
+    document.getElementById('imgDeletedNotice').classList.add('d-none');
+  }
+</script>
+{% endblock %}

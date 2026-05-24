@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% from "macros/ads.html" import ad_slot %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "NewsArticle",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ canonical_url }}"
+  },
+  "headline": {{ (news.title or news.name or '') | tojson }},
+  "image": {
+    "@type": "ImageObject",
+    "url": "https://{{ request.host }}{% if news.img and news.img != 'null.gif' %}/images/news/{{ news.img }}{% endif %}",
+    "height": 600,
+    "width": 800
+  },
+  "datePublished": "{{ news.created_at.isoformat() if news.created_at else '' }}",
+  "dateModified": "{{ (news.updated_at or news.created_at).isoformat() if (news.updated_at or news.created_at) else '' }}",
+  "author": {
+    "@type": "Organization",
+    "name": "{{ request.host }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "{{ request.host }}",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://{{ request.host }}{{ logo_url | default('') }}",
+      "width": 300,
+      "height": 300
+    }
+  },
+  "description": {{ (news.description or '') | tojson }}
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container clearfix">
+
+  <div class="page-title"></div>
+
+  {% if breadcrumb %}
+  <ul class='breadcrumb' itemscope='' itemtype='http://schema.org/BreadcrumbList'>
+    {%- for crumb in breadcrumb %}
+    <li itemprop="itemListElement" itemscope itemtype="http://schema.org/ListItem">
+      <a itemscope itemtype="http://schema.org/Thing" itemprop="item" href='{{ crumb.url }}'><span itemprop="name">{{ crumb.name }}</span></a>
+      <meta itemprop="position" content="{{ loop.index }}" />
+    </li>
+    {%- endfor %}
+  </ul>
+  {% endif %}
+
+  {{ ad_slot(1, is_googlebot=is_googlebot) }}
+
+  <div class="article mb-5 highlight">
+    <h1 class="h3 article-title">{{ page_title }}</h1>
+    {% if news.created_at %}
+    <time datetime="{{ news.created_at.isoformat() }}" style="display:none;">{{ news.created_at.strftime('%B %d, %Y') }}</time>
+    {% endif %}
+    <hr />
+    <div class="article-body">
+      {{ news.desc | safe }}
+    </div>
+  </div>
+
+  {% if related %}
+  <div style="margin-top:2rem;">
+    <div class="h3 mb-3">Related Post</div>
+    <div class="row">
+      {% for r in related %}
+      <div class="col-lg-4 col-md-12">
+        <div class="single-post mb-4">
+          <a href="/{{ r.slug }}">
+            <div class="blog-thumb">
+              <img src="/images/news/{{ r.img }}" loading="lazy" alt="{{ r.title or r.name }}" />
+            </div>
+            <div class="blog-content">
+              <h3 class="h3">{{ r.title or r.name }}</h3>
+              {% if r.description %}<p class="line line-3">{{ r.description }}</p>{% endif %}
+            </div>
+          </a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  {{ ad_slot(7, is_googlebot=is_googlebot) }}
+</div>
+{% endblock %}

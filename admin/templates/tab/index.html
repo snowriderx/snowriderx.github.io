@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Tab — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Quản lý Tab</li>
+{% endblock %}
+
+{% block content %}
+
+{# ── Type filter ───────────────────────────────────────────────────── #}
+{% set type_icons = {1: 'bi-box-seam', 2: 'bi-newspaper', 3: 'bi-list'} %}
+<div class="d-flex gap-2 mb-3 align-items-center flex-wrap">
+  {% for type_val, type_label in tab_type_labels.items() %}
+  <a href="{{ url_for('tab.index', type=type_val) }}"
+     class="btn btn-sm {% if current_type == type_val %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+    <i class="bi {{ type_icons.get(type_val, 'bi-collection') }} me-1"></i>{{ type_label }}
+  </a>
+  {% endfor %}
+  <span class="ms-auto text-muted small">
+    {{ tabs|length }} tab — {{ tab_type_labels[current_type] }}
+  </span>
+</div>
+
+{# ── Batch form ────────────────────────────────────────────────────── #}
+<form method="post" id="batchForm"
+      action="{{ url_for('tab.index', type=current_type) }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+  <input type="hidden" name="_type" value="{{ current_type }}">
+
+  <div class="action-bar">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger"
+            onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    <a href="{{ url_for('tab.create') }}?type={{ current_type }}"
+       class="btn btn-sm btn-primary ms-auto">
+      <i class="bi bi-plus-lg me-1"></i>Thêm mới
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;">
+            <input type="checkbox" id="selectAll" title="Chọn tất cả">
+          </th>
+          <th>Tiêu đề tab</th>
+          <th style="width:80px;">Sắp xếp</th>
+          <th style="width:90px;">SL bản ghi</th>
+          <th style="width:120px;">Trạng thái</th>
+          <th style="width:130px;">Hiện sidebar</th>
+          <th style="width:80px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tabs %}
+        <tr>
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ t.ID }}">
+            <input type="hidden" name="row_id" value="{{ t.ID }}">
+          </td>
+
+          {# Name — inline editable #}
+          <td>
+            <input type="text" name="name_{{ t.ID }}" value="{{ t.name or '' }}"
+                   class="form-control form-control-sm" maxlength="200">
+            {% if t.slug %}
+            <div class="text-muted small mt-1">
+              <i class="bi bi-link-45deg"></i>{{ t.slug }}
+            </div>
+            {% endif %}
+          </td>
+
+          {# Sort — inline editable #}
+          <td>
+            <input type="text" name="sort_{{ t.ID }}" value="{{ t.sort or '00' }}"
+                   class="form-control form-control-sm" maxlength="10">
+          </td>
+
+          {# Total — inline editable #}
+          <td>
+            <input type="number" name="total_{{ t.ID }}" value="{{ t.total or 0 }}"
+                   class="form-control form-control-sm" min="0">
+          </td>
+
+          {# Ac — active flag #}
+          <td>
+            <select name="ac_{{ t.ID }}" class="form-select form-select-sm">
+              <option value="1" {% if t.is_active == 1 %}selected{% endif %}>Hiển thị</option>
+              <option value="0" {% if t.is_active == 0 %}selected{% endif %}>Ẩn</option>
+            </select>
+          </td>
+
+          {# Hot — sidebar flag #}
+          <td>
+            <select name="hot_{{ t.ID }}" class="form-select form-select-sm">
+              <option value="1" {% if t.hot == 1 %}selected{% endif %}>Active</option>
+              <option value="0" {% if t.hot == 0 %}selected{% endif %}>Ẩn</option>
+            </select>
+          </td>
+
+          {# Actions #}
+          <td class="text-center">
+            <a href="{{ url_for('tab.edit', tab_id=t.ID) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1"
+               title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne({{ t.ID }}, '{{ t.name|e }}', '{{ url_for('tab.delete', tab_id=t.ID) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">Chưa có tab nào trong nhóm này.</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if tabs %}
+  <div class="action-bar mt-1">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger"
+            onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+  </div>
+  {% endif %}
+
+</form>
+
+{# Shared single-row delete form — outside batchForm to avoid nesting #}
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_type" value="{{ current_type }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>initBatchList('tab');</script>
+{% endblock %}

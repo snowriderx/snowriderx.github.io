@@ -1,0 +1,302 @@
+{% extends "base.html" %}
+
+{% set page_title = "Sửa trang layout" if is_edit else "Thêm trang layout" %}
+
+{% block title %}{{ page_title }} — {{ site_name }}{% endblock %}
+
+{% block head %}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('layout.index') }}">Quản lý Layout</a>
+</li>
+<li class="breadcrumb-item active">{{ page_title }}</li>
+{% endblock %}
+
+{% block content %}
+<form method="post" id="layoutForm" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="row g-3">
+
+    {# ── Left column: main content ────────────────────────────────── #}
+    <div class="col-lg-8">
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-layout-text-window"></i>
+          <span>{{ page_title }}</span>
+          {% if is_edit %}
+            <span class="badge bg-secondary ms-auto">{{ page.IDM }}</span>
+          {% endif %}
+        </div>
+        <div class="card-body">
+
+          <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('layout.index') }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+          {# Name #}
+          <div class="mb-3">
+            <label for="name" class="form-label">
+              Tiêu đề trang <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('name') %} is-invalid{% endif %}"
+                   id="name" name="name"
+                   value="{{ page.name or '' }}" maxlength="100"
+                   required autofocus>
+            {% if form_errors.get('name') %}
+              <div class="invalid-feedback">{{ form_errors['name'] }}</div>
+            {% endif %}
+          </div>
+
+          {# Slug #}
+          <div class="mb-3">
+            <label for="slug" class="form-label">Slug</label>
+            <div class="input-group" style="max-width:400px;">
+              <span class="input-group-text text-muted">/</span>
+              <input type="text" class="form-control" id="slug" name="slug"
+                     value="{{ page.slug or '' }}" maxlength="100">
+              <button type="button" class="btn btn-outline-secondary"
+                      onclick="regenSlug()" title="Tạo lại từ tiêu đề">
+                <i class="bi bi-arrow-clockwise"></i>
+              </button>
+            </div>
+            <div class="form-text small">Dùng làm định danh vị trí trên frontend.</div>
+          </div>
+
+          {# DescM — CKEditor #}
+          <div class="mb-3">
+            <label for="desc_m" class="form-label">Nội dung</label>
+            <textarea class="form-control" id="desc_m" name="desc_m"
+                      rows="14">{{ page.desc_m or '' }}</textarea>
+          </div>
+
+          {# Css — custom CSS block (VB: txtCss, ValidateRequestMode=Disabled) #}
+          {% if has_col('css_m') %}
+          <div class="mb-0">
+            <label for="css_m" class="form-label">Code CSS</label>
+            <textarea class="form-control font-monospace" id="css_m" name="css_m"
+                      rows="5" style="font-size:0.85rem;">{{ page.css_m or '' }}</textarea>
+            <div class="form-text small">CSS riêng cho trang này (không có thẻ &lt;style&gt;).</div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+
+    {# ── Right column ─────────────────────────────────────────────── #}
+    <div class="col-lg-4">
+
+      {# Settings #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-sliders me-1"></i>Cài đặt
+        </div>
+        <div class="card-body">
+
+          {# Sort #}
+          <div class="mb-3">
+            <label for="sort_order" class="form-label">Sắp xếp</label>
+            <input type="text" class="form-control" id="sort_order" name="sort_order"
+                   value="{{ page.sort_order or '10' }}" maxlength="10" placeholder="10"
+                   style="max-width:100px;">
+            <div class="form-text small text-nowrap">
+              Sắp xếp tăng dần, VD: 01, 02, 03, ...
+            </div>
+          </div>
+
+          {# Status #}
+          <div class="mb-3">
+            <label for="is_active" class="form-label">Trạng thái</label>
+            <select class="form-select" id="is_active" name="is_active"
+                    style="max-width:180px;">
+              <option value="1" {% if (page.is_active or 1) == 1 %}selected{% endif %}>Hiển thị</option>
+              <option value="2" {% if page.is_active == 2 %}selected{% endif %}>Ẩn trên menu</option>
+              <option value="0" {% if page.is_active == 0 %}selected{% endif %}>Ẩn</option>
+            </select>
+          </div>
+
+          {# HomeM — slide integration #}
+          {% if has_col('home_m') %}
+          <div class="mb-3">
+            <label for="home_m" class="form-label">Tích hợp slide</label>
+            <select class="form-select" id="home_m" name="home_m"
+                    style="max-width:220px;">
+              <option value="0" {% if not page.home_m or page.home_m == 0 %}selected{% endif %}>---- Chọn slide ----</option>
+              <option value="1" {% if page.home_m == 1 %}selected{% endif %}>Banner Slides trên</option>
+              <option value="6" {% if page.home_m == 6 %}selected{% endif %}>Banner Slides dưới</option>
+            </select>
+          </div>
+          {% endif %}
+
+          {# URL override #}
+          {% if has_col('url') %}
+          <div class="mb-3">
+            <label for="url" class="form-label">URL override</label>
+            <input type="text" class="form-control" id="url" name="url"
+                   value="{{ page.url or '' }}" maxlength="200">
+            <div class="form-text small">Để trống → dùng slug.</div>
+          </div>
+          {% endif %}
+
+          {# Background color #}
+          {% if has_col('bg_m') %}
+          <div class="mb-0">
+            <label for="bg_m" class="form-label">Màu nền (BgM)</label>
+            <div class="input-group" style="max-width:160px;">
+              <span class="input-group-text">#</span>
+              <input type="text" class="form-control" id="bg_m" name="bg_m"
+                     value="{{ (page.bg_m or '').lstrip('#') }}"
+                     maxlength="9" placeholder="ffffff">
+            </div>
+            <div class="form-text small">Mã màu hex, VD: <code>f5f5f5</code></div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+      {# ── Mẫu nội dung — reference panel ────────────────────────── #}
+      <div class="card shadow-sm card-form">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-file-text"></i>
+          <span>Mẫu nội dung</span>
+          <span class="badge bg-secondary ms-auto">{{ intro_blocks|length }}</span>
+        </div>
+        <div class="card-body p-0">
+          {% if intro_blocks %}
+          <div class="list-group list-group-flush" style="max-height:340px; overflow-y:auto;">
+            {% for item in intro_blocks %}
+            <div class="list-group-item list-group-item-action p-2"
+                 style="cursor:pointer;"
+                 onclick="insertIntroBlock({{ item.ID }}, this)"
+                 title="Nhấn để chèn nội dung vào Editor">
+              <div class="d-flex align-items-center gap-2">
+                {% if item.has_image %}
+                <img src="{{ img_url('intro', item.img) }}"
+                     style="width:32px;height:32px;object-fit:cover;border-radius:3px;flex-shrink:0;">
+                {% else %}
+                <div style="width:32px;height:32px;background:#f0f0f0;border-radius:3px;flex-shrink:0;
+                            display:flex;align-items:center;justify-content:center;">
+                  <i class="bi bi-file-text text-muted small"></i>
+                </div>
+                {% endif %}
+                <div class="overflow-hidden">
+                  <div class="small fw-medium text-truncate">{{ item.name or '—' }}</div>
+                  <div class="text-muted" style="font-size:0.7rem;">ID #{{ item.ID }}</div>
+                </div>
+              </div>
+              {# Hidden content for insertion #}
+              <div id="intro-descs-{{ item.ID }}" class="d-none">{{ item.descs | safe }}</div>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="p-2 border-top bg-light">
+            <div class="text-muted" style="font-size:0.7rem;">
+              <i class="bi bi-info-circle me-1"></i>
+              Nhấn vào mẫu để chèn nội dung vào Editor.
+            </div>
+          </div>
+          {% else %}
+          <div class="p-3 text-muted small text-center">
+            Chưa có mẫu nội dung nào.<br>
+            <a href="{{ url_for('template.create') }}" class="small">Thêm mẫu</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      {# Action buttons bottom #}
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg me-1"></i>Ghi nhận
+        </button>
+        <a href="{{ url_for('layout.index') }}"
+           class="btn btn-outline-secondary">Hủy</a>
+      </div>
+
+    </div>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initCKEditors(['desc_m'], 'layoutForm', {
+    imageBaseUrl:    '{{ config.IMAGE_BASE_URL }}',
+    uploadUrl:       '{{ config.UPLOAD_API_URL }}',
+    uploadApiKey:    '{{ config.UPLOAD_API_KEY }}',
+    uploadSubfolder: 'media',
+    deleteUrl:       '/api/ck-delete',
+  });
+
+  /* Vietnamese slug generator */
+  var VI_MAP = { 'đ': 'd', 'Đ': 'D' };
+  function slugifyVi(text) {
+    if (!text) return '';
+    text = text.replace(/[đĐ]/g, function(c) { return VI_MAP[c] || c; });
+    text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    text = text.toLowerCase().replace(/[^a-z0-9\s-]/g, '');
+    text = text.trim().replace(/[\s\-]+/g, '-').replace(/^-+|-+$/g, '');
+    return text;
+  }
+
+  var nameInput = document.getElementById('name');
+  var slugInput = document.getElementById('slug');
+  var slugAutoMode = !slugInput.value;
+
+  if (nameInput && slugInput) {
+    nameInput.addEventListener('input', function () {
+      if (slugAutoMode) slugInput.value = slugifyVi(nameInput.value);
+    });
+    slugInput.addEventListener('input', function () {
+      slugAutoMode = (slugInput.value === '');
+    });
+  }
+
+  function regenSlug() {
+    if (nameInput) {
+      slugInput.value = slugifyVi(nameInput.value);
+      slugAutoMode = false;
+    }
+  }
+
+  /* Insert intro block content into CKEditor at cursor position.
+     VB: CKEDITOR.instances['id'].insertHtml(html)
+     CKEditor 5 equivalent: parse HTML → model fragment → insertContent() */
+  function insertIntroBlock(id, el) {
+    var contentEl = document.getElementById('intro-descs-' + id);
+    if (!contentEl) return;
+    var html = contentEl.innerHTML;
+    if (!html.trim()) {
+      alert('Mẫu nội dung này chưa có nội dung.');
+      return;
+    }
+    var editor = CKEditors['desc_m'];
+    if (editor) {
+      editor.model.change(function() {
+        var viewFragment = editor.data.processor.toView(html);
+        var modelFragment = editor.data.toModel(viewFragment);
+        editor.model.insertContent(modelFragment);
+      });
+    } else {
+      /* Fallback: append to textarea before CKEditor initialises */
+      var editorEl = document.getElementById('desc_m');
+      if (editorEl) editorEl.value += html;
+    }
+    /* Visual feedback */
+    el.classList.add('list-group-item-success');
+    setTimeout(function() { el.classList.remove('list-group-item-success'); }, 800);
+  }
+</script>
+{% endblock %}

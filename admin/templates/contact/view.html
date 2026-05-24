@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Liên hệ #{{ record.ID }} — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('contact.index') }}">Liên hệ</a>
+</li>
+<li class="breadcrumb-item active">#{{ record.ID }} — {{ record.name or '' }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <div class="col-12">
+    <div class="card shadow-sm card-form">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-envelope"></i>
+        <span>Liên hệ #{{ record.ID }}</span>
+        <span class="badge bg-{{ record.status_class }} ms-auto">{{ record.status_label }}</span>
+      </div>
+      <div class="card-body">
+
+        <dl class="row mb-0">
+          <dt class="col-sm-3">Họ tên</dt>
+          <dd class="col-sm-9">{{ record.name or '—' }}</dd>
+
+          <dt class="col-sm-3">Email</dt>
+          <dd class="col-sm-9">
+            {% if record.email %}
+              <a href="mailto:{{ record.email }}">{{ record.email }}</a>
+            {% else %}—{% endif %}
+          </dd>
+
+          <dt class="col-sm-3">Điện thoại</dt>
+          <dd class="col-sm-9">{{ record.tel or '—' }}</dd>
+
+          <dt class="col-sm-3">Di động</dt>
+          <dd class="col-sm-9">{{ record.mobile or '—' }}</dd>
+
+          <dt class="col-sm-3">Địa chỉ</dt>
+          <dd class="col-sm-9">{{ record.address or '—' }}</dd>
+
+          <dt class="col-sm-3">Thời gian</dt>
+          <dd class="col-sm-9 text-muted small">
+            {{ record.created_at.strftime('%d/%m/%Y %H:%M:%S') if record.created_at else '—' }}
+          </dd>
+
+          {% if linked_news %}
+          <dt class="col-sm-3">Bài viết liên quan</dt>
+          <dd class="col-sm-9">
+            <a href="{{ url_for('news.edit', news_id=linked_news.ID) }}" target="_blank">
+              #{{ linked_news.ID }} — {{ linked_news.name }}
+            </a>
+          </dd>
+          {% endif %}
+
+          {% if handler %}
+          <dt class="col-sm-3">Xử lý bởi</dt>
+          <dd class="col-sm-9 text-muted small">{{ handler.username }}</dd>
+          {% endif %}
+
+          <dt class="col-sm-3 mt-2">Nội dung</dt>
+          <dd class="col-sm-9 mt-2">
+            <div class="p-3 border rounded small" style="white-space:pre-wrap; background:var(--bs-gray-100);">{{ record.content or '—' }}</div>
+          </dd>
+        </dl>
+
+      </div>
+      <div class="card-footer d-flex gap-2">
+        <a href="{{ url_for('contact.index') }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i>Quay lại
+        </a>
+        <a href="{{ url_for('contact.edit', contact_id=record.ID) }}"
+           class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-pencil me-1"></i>Sửa
+        </a>
+        <button type="button" class="btn btn-sm btn-danger ms-auto"
+                onclick="confirmDeleteOne({{ record.ID }}, '{{ record.name|e }}', '{{ url_for('contact.delete', contact_id=record.ID) }}')">
+          <i class="bi bi-trash me-1"></i>Xóa
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="ac_filter" value="1">
+</form>
+{% endblock %}

@@ -1,0 +1,584 @@
+{% extends "base.html" %}
+
+{% set is_edit = product.ID is not none and product.ID %}
+{% set page_title = "Sửa sản phẩm" if is_edit else "Thêm mới sản phẩm" %}
+
+{% block title %}{{ page_title }} — {{ site_name }}{% endblock %}
+
+{% block head %}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('product.index') }}">Quản lý Sản phẩm</a>
+</li>
+<li class="breadcrumb-item active">{{ page_title }}</li>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" id="productForm" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="row g-3">
+
+    {# ── Left column: main content ──────────────────────────────────── #}
+    <div class="col-lg-8">
+
+      {# ── Basic info ──────────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-box-seam"></i>
+          <span>{{ page_title }}</span>
+          {% if is_edit %}
+            <span class="badge bg-secondary ms-auto">#{{ product.ID }}</span>
+          {% endif %}
+        </div>
+        <div class="card-body">
+
+          {# Action buttons — top #}
+          <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('product.index') }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+          {# Name #}
+          <div class="mb-3">
+            <label for="name" class="form-label">
+              Tên sản phẩm <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('name') %} is-invalid{% endif %}"
+                   id="name" name="name"
+                   value="{{ product.name or '' }}" maxlength="150"
+                   required autofocus>
+            {% if form_errors.get('name') %}
+              <div class="invalid-feedback">{{ form_errors['name'] }}</div>
+            {% else %}
+              <div class="invalid-feedback">Tên sản phẩm là trường bắt buộc.</div>
+            {% endif %}
+          </div>
+
+          {# URL slug — auto-filled from name, editable manually #}
+          <div class="mb-3">
+            <label for="slug" class="form-label">
+              URL slug
+              <button type="button"
+                      class="btn btn-link btn-sm p-0 ms-1 align-baseline"
+                      id="btnRegenSlug"
+                      title="Tạo lại từ tên sản phẩm"
+                      onclick="regenSlug()"
+                      style="font-size:.8em;">
+                <i class="bi bi-arrow-clockwise"></i> Tạo lại
+              </button>
+            </label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('slug') %} is-invalid{% endif %}"
+                   id="slug" name="slug"
+                   value="{{ product.slug or '' }}" maxlength="150"
+                   placeholder="Để trống → tự động tạo từ tên">
+            {% if form_errors.get('slug') %}
+              <div class="invalid-feedback">{{ form_errors['slug'] }}</div>
+            {% else %}
+              <div class="invalid-feedback">
+                Slug chỉ được chứa chữ thường không dấu, số và dấu gạch ngang.
+              </div>
+            {% endif %}
+            <div class="form-text">
+              VD: <code>ten-san-pham</code>.
+              Để trống khi lưu → server tự tạo.
+            </div>
+          </div>
+
+          {# Language (LangID) — content language filter tag #}
+          {% if langs %}
+          <div class="mb-3">
+            <label for="lang_id" class="form-label">Ngôn ngữ</label>
+            <select class="form-select" id="lang_id" name="lang_id" style="max-width:220px;">
+              <option value="">— Mặc định —</option>
+              {% for lang in langs %}
+              <option value="{{ lang.ID }}" {% if product.lang_id == lang.ID %}selected{% endif %}>{{ lang.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+
+          {# Locale #}
+          <div class="mb-3">
+            <label for="locale" class="form-label">Locale URL</label>
+            <input type="text" class="form-control" id="locale" name="locale"
+                   value="{{ product.locale or '' }}" maxlength="50">
+            <div class="form-text">
+              Dùng cho tblLink SEO routing, VD:
+              <code>/san-pham/ten-sp</code>
+            </div>
+            {% if locale_warning %}
+            <div class="alert alert-warning py-1 px-2 mt-1 mb-0 small">
+              ⚠️ {{ locale_warning }}
+            </div>
+            {% endif %}
+          </div>
+
+          {# Flags row #}
+          <div class="d-flex gap-4 mb-3">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="is_active"
+                     name="is_active" value="1"
+                     {% if product.is_active != 0 %}checked{% endif %}>
+              <label class="form-check-label" for="is_active">Hiển thị</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="is_home"
+                     name="is_home" value="1"
+                     {% if product.is_home %}checked{% endif %}>
+              <label class="form-check-label" for="is_home">
+                Nổi bật (HomeP)
+              </label>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {# ── Content (CKEditor fields) ──────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-file-richtext me-1"></i>Nội dung
+        </div>
+        <div class="card-body">
+
+          <div class="mb-3">
+            <label for="source" class="form-label">Source (HTML)</label>
+            <textarea class="form-control" id="source" name="source"
+                      rows="5">{{ product.source or '' }}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="content" class="form-label">Nội dung (ContentP)</label>
+            <textarea class="form-control" id="content" name="content"
+                      rows="8">{{ product.content or '' }}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="desc" class="form-label">
+              Mô tả (DescP)
+              <span class="text-muted small">
+                — thẻ &lt;h1&gt; tự động chuyển thành &lt;h2&gt; khi lưu
+              </span>
+            </label>
+            <textarea class="form-control" id="desc" name="desc"
+                      rows="8">{{ product.desc or '' }}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="footer" class="form-label">Footer (FooterP)</label>
+            <textarea class="form-control" id="footer" name="footer"
+                      rows="4">{{ product.footer or '' }}</textarea>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+    {# ── Right column: meta, images, advanced ─────────────────────── #}
+    <div class="col-lg-4">
+
+      {# ── SEO meta ────────────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-search me-1"></i>SEO
+        </div>
+        <div class="card-body">
+
+          <div class="mb-3">
+            <label for="title" class="form-label">
+              Tiêu đề trang (TitleP)
+            </label>
+            <input type="text" class="form-control" id="title" name="title"
+                   value="{{ product.title or '' }}" maxlength="200">
+            <div class="form-text">Để trống → dùng tên sản phẩm.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="keywords" class="form-label">Keywords</label>
+            <input type="text" class="form-control" id="keywords"
+                   name="keywords"
+                   value="{{ product.keywords or '' }}" maxlength="300">
+          </div>
+
+          <div class="mb-3">
+            <label for="description" class="form-label">
+              Meta description
+            </label>
+            <textarea class="form-control" id="description" name="description"
+                      rows="3" maxlength="500">
+              {{- product.description or '' -}}
+            </textarea>
+          </div>
+
+        </div>
+      </div>
+
+      {# ── Images ──────────────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-images me-1"></i>Hình ảnh
+        </div>
+        <div class="card-body">
+
+          {# ── Thumbnail (ImgP) — sm-<id>.<ext>, max 600px ─────────── #}
+          <p class="fw-semibold mb-1 small text-muted text-uppercase">
+            Ảnh thu nhỏ <span class="fw-normal">(sm-, tối đa 600px)</span>
+          </p>
+
+          {# Deferred delete flag for thumbnail only #}
+          <input type="hidden" name="delete_img" id="deleteImgFlag" value="0">
+
+          {% if is_edit and product.has_image %}
+            <div id="thumbPreview" class="mb-2">
+              <img id="thumbCurrent"
+                   src="{{ img_url('pro', product.img) }}"
+                   alt="thumbnail"
+                   style="max-height:100px; max-width:160px; object-fit:contain; border:1px solid #dee2e6; border-radius:4px; padding:2px;">
+              <div class="mt-1 d-flex gap-2 align-items-center">
+                <button type="button" class="btn btn-sm btn-outline-danger"
+                        id="btnDeleteThumb" onclick="markDelete('thumb')">
+                  <i class="bi bi-x-circle me-1"></i>Xóa
+                </button>
+              </div>
+            </div>
+            <div id="thumbDeletedNotice" class="mb-2 d-none">
+              <span class="text-danger small">
+                <i class="bi bi-exclamation-circle me-1"></i>
+                Ảnh thu nhỏ sẽ bị xóa khi nhấn <strong>Ghi nhận</strong>.
+              </span>
+              <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                      onclick="undoDelete('thumb')">Hoàn tác</button>
+            </div>
+          {% endif %}
+
+          {# New-file live preview (shows when user picks a file) #}
+          <div id="thumbNewPreview" class="mb-2 d-none">
+            <img id="thumbNewImg" src="" alt="preview"
+                 style="max-height:100px; max-width:160px; object-fit:contain; border:1px solid #0d6efd; border-radius:4px; padding:2px;">
+            <div class="small text-primary mt-1">
+              <i class="bi bi-arrow-repeat me-1"></i>
+              Sẽ được <strong>{{ 'thay thế' if (is_edit and product.has_image) else 'tải lên' }}</strong> khi nhấn Ghi nhận.
+            </div>
+          </div>
+
+          <input type="file"
+                 class="form-control mb-1{% if form_errors.get('img_file') %} is-invalid{% endif %}"
+                 id="img_file" name="img_file"
+                 accept=".jpg,.jpeg,.gif,.png,.webp"
+                 onchange="previewFile(this, 'thumbNewImg', 'thumbNewPreview')">
+          <div class="invalid-feedback mb-2">
+            {{ form_errors.get('img_file', '') }}
+          </div>
+
+          <hr class="my-3">
+
+          {# ── Large image (Img1P) — lg_<id>.<ext>, max 1920px ──────── #}
+          <p class="fw-semibold mb-1 small text-muted text-uppercase">
+            Ảnh lớn <span class="fw-normal">(lg_, tối đa 1920px)</span>
+          </p>
+
+          {# Deferred delete flag for large image only #}
+          <input type="hidden" name="delete_img1" id="deleteImg1Flag" value="0">
+
+          {% if is_edit and product.has_image1 %}
+            <div id="largePreview" class="mb-2">
+              <img id="largeCurrent"
+                   src="{{ img_url('pro', product.img1) }}"
+                   alt="large"
+                   style="max-height:100px; max-width:160px; object-fit:contain; border:1px solid #dee2e6; border-radius:4px; padding:2px;">
+              <div class="mt-1 d-flex gap-2 align-items-center">
+                <button type="button" class="btn btn-sm btn-outline-danger"
+                        id="btnDeleteLarge" onclick="markDelete('large')">
+                  <i class="bi bi-x-circle me-1"></i>Xóa
+                </button>
+              </div>
+            </div>
+            <div id="largeDeletedNotice" class="mb-2 d-none">
+              <span class="text-danger small">
+                <i class="bi bi-exclamation-circle me-1"></i>
+                Ảnh lớn sẽ bị xóa khi nhấn <strong>Ghi nhận</strong>.
+              </span>
+              <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                      onclick="undoDelete('large')">Hoàn tác</button>
+            </div>
+          {% endif %}
+
+          {# New-file live preview (shows when user picks a file) #}
+          <div id="largeNewPreview" class="mb-2 d-none">
+            <img id="largeNewImg" src="" alt="preview"
+                 style="max-height:100px; max-width:160px; object-fit:contain; border:1px solid #0d6efd; border-radius:4px; padding:2px;">
+            <div class="small text-primary mt-1">
+              <i class="bi bi-arrow-repeat me-1"></i>
+              Sẽ được <strong>{{ 'thay thế' if (is_edit and product.has_image1) else 'tải lên' }}</strong> khi nhấn Ghi nhận.
+            </div>
+          </div>
+
+          <input type="file"
+                 class="form-control{% if form_errors.get('img1_file') %} is-invalid{% endif %}"
+                 id="img1_file" name="img1_file"
+                 accept=".jpg,.jpeg,.gif,.png,.webp"
+                 onchange="previewFile(this, 'largeNewImg', 'largeNewPreview')">
+          <div class="invalid-feedback">
+            {{ form_errors.get('img1_file', '') }}
+          </div>
+
+          <div class="form-text mt-2">
+            Hỗ trợ: jpg, gif, png, webp.
+            Ảnh quá rộng sẽ tự động thu nhỏ.
+          </div>
+
+        </div>
+      </div>
+
+      {# ── Tab grouping (only when TabIDP column exists in DB) ───────── #}
+      {% if tab_ready and tabs %}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-tags me-1"></i>Tab nhóm sản phẩm
+        </div>
+        <div class="card-body">
+          <div class="mb-0">
+            <label for="tab_id" class="form-label">Chọn tab</label>
+            <select class="form-select" id="tab_id" name="tab_id">
+              <option value="">— Không có tab —</option>
+              {% for t in tabs %}
+              <option value="{{ t.ID }}"
+                      {% if product.tab_id == t.ID %}selected{% endif %}>
+                {{ t.name }}
+              </option>
+              {% endfor %}
+            </select>
+            <div class="form-text">
+              Tab nhóm sản phẩm hiển thị trên frontend.
+              Quản lý tab tại
+              <a href="{{ url_for('tab.index') }}" target="_blank">Quản lý Tab</a>.
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      {# ── Advanced ────────────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-gear me-1"></i>Nâng cao
+        </div>
+        <div class="card-body">
+
+          <div class="mb-3">
+            <label for="style" class="form-label">CSS class (StyleP)</label>
+            <input type="text" class="form-control" id="style" name="style"
+                   value="{{ product.style or '' }}" maxlength="50">
+          </div>
+
+          <div class="mb-3">
+            <label for="script" class="form-label">Script/Embed</label>
+            <textarea class="form-control font-monospace" id="script"
+                      name="script" rows="4"
+                      maxlength="2000">{{ product.script or '' }}</textarea>
+          </div>
+
+        </div>
+      </div>
+
+      {# ── Actions (bottom) ────────────────────────────────────────── #}
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg me-1"></i>Ghi nhận
+        </button>
+        <a href="{{ url_for('product.index') }}"
+           class="btn btn-outline-secondary">Hủy</a>
+      </div>
+
+    </div>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // ── Client-side form validation ───────────────────────────────────
+  document.getElementById('productForm').addEventListener('submit', function (e) {
+    var ok = true;
+
+    function setError(id, msg) {
+      var el = document.getElementById(id);
+      el.classList.add('is-invalid');
+      var fb = el.parentElement.querySelector('.invalid-feedback');
+      if (fb) fb.textContent = msg;
+      ok = false;
+    }
+    function clearError(id) {
+      document.getElementById(id).classList.remove('is-invalid');
+    }
+
+    clearError('name');
+    clearError('slug');
+    clearError('img_file');
+    clearError('img1_file');
+
+    var name = document.getElementById('name');
+    if (!name.value.trim())
+      setError('name', 'Tên sản phẩm là trường bắt buộc.');
+    else if (name.value.length > 150)
+      setError('name', 'Tên sản phẩm không được vượt quá 150 ký tự.');
+
+    var slug = document.getElementById('slug');
+    if (slug.value && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug.value))
+      setError('slug', 'Slug chỉ được chứa chữ thường không dấu, số và dấu gạch ngang.');
+
+    // File size limit: 5 MB per image
+    var MAX = 5 * 1024 * 1024;  // mirror UPLOAD_MAX_FILE_MB default
+    ['img_file', 'img1_file'].forEach(function (id) {
+      var inp = document.getElementById(id);
+      if (inp && inp.files[0] && inp.files[0].size > MAX)
+        setError(id, 'Kích thước file không được vượt quá 5 MB.');
+    });
+
+    if (!ok) e.preventDefault();
+  });
+
+  // ── Vietnamese slug generator ─────────────────────────────────────
+  // Must produce the same output as app/utils/text.py slugify_vi().
+  //
+  // Steps (mirror Python):
+  //   1. Explicit map: đ→d, Đ→D
+  //   2. NFD decompose via normalize() → strip combining marks (Mn)
+  //   3. Lowercase
+  //   4. Keep [a-z0-9] and whitespace/hyphen
+  //   5. Collapse runs of whitespace/hyphen → single hyphen
+  //   6. Strip leading/trailing hyphens
+
+  var VI_MAP = {
+    'đ':'d','Đ':'D'
+  };
+
+  function slugifyVi(text) {
+    if (!text) return '';
+
+    // Step 1 — explicit replacements
+    text = text.replace(/[đĐ]/g, function(c) { return VI_MAP[c] || c; });
+
+    // Step 2 — NFD decompose then strip combining diacritical marks
+    // String.prototype.normalize is supported in all modern browsers.
+    text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+    // Steps 3-6
+    text = text.toLowerCase();
+    text = text.replace(/[^a-z0-9\s-]/g, '');
+    text = text.trim().replace(/[\s\-]+/g, '-');
+    text = text.replace(/^-+|-+$/g, '');
+
+    return text;
+  }
+
+  // Auto-fill slug as the user types the name (only when slug is empty
+  // or was previously auto-generated, i.e. still matches the name).
+  var slugAutoMode = true;  // false once user manually edits slug
+
+  var nameInput = document.getElementById('name');
+  var slugInput = document.getElementById('slug');
+
+  if (nameInput && slugInput) {
+    // If there's already a saved slug, don't overwrite it automatically
+    if (slugInput.value) slugAutoMode = false;
+
+    nameInput.addEventListener('input', function () {
+      if (slugAutoMode) {
+        slugInput.value = slugifyVi(nameInput.value);
+      }
+    });
+
+    slugInput.addEventListener('input', function () {
+      // User typed in slug field → stop auto-mode
+      slugAutoMode = (slugInput.value === '');
+    });
+  }
+
+  // "Tạo lại" button — regenerate from current name regardless
+  function regenSlug() {
+    if (nameInput) {
+      slugInput.value = slugifyVi(nameInput.value);
+      slugAutoMode = false;
+    }
+  }
+
+  // ── CKEditor 5 on all four HTML fields ───────────────────────────
+  initCKEditors(['source', 'content', 'desc', 'footer'], 'productForm', {
+    imageBaseUrl:    '{{ config.IMAGE_BASE_URL }}',
+    uploadUrl:       '{{ config.UPLOAD_API_URL }}',
+    uploadApiKey:    '{{ config.UPLOAD_API_KEY }}',
+    uploadSubfolder: 'pro',
+    deleteUrl:       '/api/ck-delete',
+  });
+
+  // ── Image helpers ─────────────────────────────────────────────────
+
+  // cfg maps slot name → { flag, preview, notice }
+  var IMG_CFG = {
+    thumb: {
+      flag:    'deleteImgFlag',
+      preview: 'thumbPreview',
+      notice:  'thumbDeletedNotice',
+    },
+    large: {
+      flag:    'deleteImg1Flag',
+      preview: 'largePreview',
+      notice:  'largeDeletedNotice',
+    },
+  };
+
+  // Deferred delete: mark flag, hide current preview, show notice
+  function markDelete(slot) {
+    var c = IMG_CFG[slot];
+    if (!c) return;
+    document.getElementById(c.flag).value = '1';
+    var prev = document.getElementById(c.preview);
+    if (prev) prev.classList.add('d-none');
+    var note = document.getElementById(c.notice);
+    if (note) note.classList.remove('d-none');
+  }
+
+  // Undo: clear flag, restore preview, hide notice
+  function undoDelete(slot) {
+    var c = IMG_CFG[slot];
+    if (!c) return;
+    document.getElementById(c.flag).value = '0';
+    var prev = document.getElementById(c.preview);
+    if (prev) prev.classList.remove('d-none');
+    var note = document.getElementById(c.notice);
+    if (note) note.classList.add('d-none');
+  }
+
+  // Live preview: read selected file and show inline before upload
+  function previewFile(input, imgId, containerId) {
+    var container = document.getElementById(containerId);
+    var imgEl = document.getElementById(imgId);
+    if (!container || !imgEl) return;
+
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        imgEl.src = e.target.result;
+        container.classList.remove('d-none');
+      };
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      container.classList.add('d-none');
+      imgEl.src = '';
+    }
+  }
+</script>
+{% endblock %}

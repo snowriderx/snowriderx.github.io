@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}{{ 'Sửa' if is_edit else 'Thêm' }} Redirect 301 — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('urlredirect.index') }}">Redirect 301</a>
+</li>
+<li class="breadcrumb-item active">{{ 'Sửa' if is_edit else 'Thêm mới' }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row g-3">
+  <div class="col-12">
+    <div class="card shadow-sm card-form">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-link-45deg"></i>
+        <span>{{ 'Sửa redirect' if is_edit else 'Thêm redirect mới' }}</span>
+      </div>
+      <div class="card-body">
+        <form method="post" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('urlredirect.index') }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+          <div class="mb-3">
+            <label for="url_type" class="form-label">Loại link</label>
+            <select class="form-select" id="url_type" name="url_type"
+                    style="max-width:220px;">
+              <option value="3" {% if record.url_type == 3 %}selected{% endif %}>Link tin tức</option>
+              <option value="1" {% if record.url_type == 1 %}selected{% endif %}>Link chuyên mục</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="old_url" class="form-label">
+              URL cũ <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   class="form-control {% if form_errors.get('old_url') %}is-invalid{% endif %}"
+                   id="old_url" name="old_url"
+                   value="{{ record.old_url or '' }}"
+                   maxlength="255" autofocus
+                   placeholder="https://escaperoadx.com/trang-cu">
+            {% if form_errors.get('old_url') %}
+              <div class="invalid-feedback">{{ form_errors['old_url'] }}</div>
+            {% endif %}
+            <div class="form-text">Nhập URL đầy đủ — VD: <code>https://escaperoadx.com/trang-cu</code>. Hoặc chỉ path: <code>/trang-cu</code>.</div>
+          </div>
+
+          <div class="mb-3">
+            <label for="new_url" class="form-label">
+              URL mới <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   class="form-control {% if form_errors.get('new_url') %}is-invalid{% endif %}"
+                   id="new_url" name="new_url"
+                   value="{{ record.new_url or '' }}"
+                   maxlength="255"
+                   placeholder="https://escaperoadx.com/trang-moi">
+            {% if form_errors.get('new_url') %}
+              <div class="invalid-feedback">{{ form_errors['new_url'] }}</div>
+            {% endif %}
+            <div class="form-text">URL đích sau khi redirect 301.</div>
+          </div>
+
+          <div class="mb-0">
+            <label for="is_active" class="form-label">Trạng thái</label>
+            <select class="form-select" id="is_active" name="is_active"
+                    style="max-width:200px;">
+              <option value="1" {% if record.is_active != 0 %}selected{% endif %}>Hoạt động</option>
+              <option value="0" {% if record.is_active == 0 %}selected{% endif %}>Tắt</option>
+            </select>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('urlredirect.index') }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

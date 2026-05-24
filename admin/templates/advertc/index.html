@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+
+{% block title %}Danh mục Adsense No-Ads — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Quản lý quảng cáo</li>
+{% endblock %}
+
+{% block content %}
+
+{# ── Menu filter ──────────────────────────────────────────────────── #}
+<form method="get" class="row g-2 mb-3 align-items-end">
+  <div class="col-auto">
+    <label class="form-label mb-1 small">Trang / Menu</label>
+    <select name="menu_id" class="form-select form-select-sm" style="min-width:220px;"
+            onchange="this.form.submit()">
+      {% for val, label in menu_options %}
+        <option value="{{ val }}" {% if val == current_menu_id %}selected{% endif %}>
+          {{ label }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <span class="badge bg-secondary align-self-center">{{ zone_label }}</span>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-sm btn-outline-secondary">Lọc</button>
+  </div>
+</form>
+
+{# ── List + batch-update form ─────────────────────────────────────── #}
+<form method="post" id="batchForm"
+      action="{{ url_for('advertc.index', menu_id=current_menu_id) }}">
+
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+
+  {# Top action bar #}
+  <div class="action-bar">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    <span class="action-bar-spacer"></span><span class="action-bar-count">{{ adverts|length }} banner</span>
+    <a href="{{ url_for('advertc.create', menu_id=current_menu_id) }}"
+       class="btn btn-sm btn-primary">
+      <i class="bi bi-plus-lg me-1"></i>Thêm mới
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;">
+            <input type="checkbox" id="selectAll" title="Chọn tất cả">
+          </th>
+          <th style="width:100px;">Ảnh</th>
+          {# advertc.aspx: inline editable — Title, Name, sCode #}
+          <th>Tiêu đề</th>
+          <th>Link</th>
+          <th>Mã code</th>
+          <th style="width:55px;">Loại</th>
+          <th style="width:80px;">Sắp xếp</th>
+          <th style="width:110px;">Trạng thái</th>
+          <th style="width:80px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for advert in adverts %}
+        <tr>
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ advert.ID }}">
+            <input type="hidden" name="row_id" value="{{ advert.ID }}">
+          </td>
+
+          {# Image preview #}
+          <td>
+            {% if advert.has_image %}
+              <img src="{{ img_url('media', advert.img) }}"
+                   alt="" style="max-width:90px; max-height:50px; object-fit:cover;">
+            {% else %}
+              <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+
+          {# Title — editable inline (VB: txtTitle in DataGrid) #}
+          <td>
+            <input type="text" name="title_{{ advert.ID }}"
+                   value="{{ advert.title or '' }}"
+                   class="form-control form-control-sm" maxlength="100">
+          </td>
+
+          {# Name/Link — editable inline (VB: txtName in DataGrid) #}
+          <td>
+            <input type="text" name="link_{{ advert.ID }}"
+                   value="{{ advert.link or '' }}"
+                   class="form-control form-control-sm" maxlength="300"
+                   placeholder="#">
+          </td>
+
+          {# sCode — editable inline multiline (VB: txtCode in DataGrid) #}
+          <td>
+            <textarea name="s_code_{{ advert.ID }}"
+                      class="form-control form-control-sm font-monospace"
+                      rows="3" maxlength="1000"
+                      style="min-width:180px;">{{ advert.s_code or '' }}</textarea>
+          </td>
+
+          {# TypeD label (VB: BoundColumn "Type" — read-only) #}
+          <td>
+            <span class="badge bg-secondary">{{ advert.type_d_label }}</span>
+          </td>
+
+          {# Sort — editable inline #}
+          <td>
+            <input type="text" name="sort_{{ advert.ID }}"
+                   value="{{ advert.sort or '' }}"
+                   class="form-control form-control-sm" style="width:60px;">
+          </td>
+
+          {# Ac dropdown — editable inline #}
+          <td>
+            <select name="ac_{{ advert.ID }}" class="form-select form-select-sm">
+              <option value="1" {% if advert.is_active == 1 %}selected{% endif %}>Hiển thị</option>
+              <option value="0" {% if advert.is_active == 0 %}selected{% endif %}>Ẩn</option>
+            </select>
+          </td>
+
+          {# Edit / Delete #}
+          <td class="text-center">
+            <a href="{{ url_for('advertc.edit', advert_id=advert.ID, menu_id=current_menu_id) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1" title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne({{ advert.ID }}, '{{ advert.title|e }}', '{{ url_for('advertc.delete', advert_id=advert.ID) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="9" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">Chưa có banner No-Ads nào cho trang này.</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {# Bottom action bar #}
+  {% if adverts %}
+  <div class="action-bar mt-1">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+  </div>
+  {% endif %}
+
+</form>
+
+{# Single-row delete form — outside batchForm to avoid nesting #}
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>initBatchList('advertc');</script>
+{% endblock %}

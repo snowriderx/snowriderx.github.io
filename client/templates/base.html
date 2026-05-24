@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="{{ page_lang | default('en') }}" xml:lang="{{ page_lang | default('en') }}">
+<head>
+<title>{{ page_title }}</title>
+<meta charset="utf-8" />
+<meta name="google" content="notranslate" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+{% if favicon_url %}<link href='{{ favicon_url }}' rel='shortcut icon' type='image/vnd.microsoft.icon' />{% endif %}
+{% if no_robots | default(False) %}
+<meta name='robots' content='noindex, nofollow' />
+{% else %}
+<meta name='robots' content='index, follow' />
+{% endif %}
+{% if canonical_url %}<link rel="canonical" href="{{ canonical_url }}" />{% endif %}
+<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet" />
+<link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}" />
+<meta name="theme-color" content="#4CAF50" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+{% if script_verify %}{{ script_verify | safe }}{% endif %}
+{% if not is_googlebot and script_head %}{{ script_head | safe }}{% endif %}
+{% block extra_head %}{% endblock %}
+<meta name="author" content="{{ SITE_NAME }}" />
+<link rel="alternate" href="{{ canonical_url | default(request.url) }}" hreflang="{{ page_lang | default('en') }}" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="{{ request.host }}" />
+<meta property="og:title" content="{{ page_title }}" />
+<meta property="og:url" content="{{ canonical_url | default(request.url) }}" />
+{% set _img = og_image | default('') or share_img_url | default('') %}
+{% if _img %}<meta property="og:image" content="https://{{ request.host }}{{ _img }}" />{% endif %}
+<meta property="og:description" content="{{ meta_description | default('') }}" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@{{ request.host }}" />
+<meta name="twitter:creator" content="@{{ request.host }}" />
+<meta name="twitter:domain" content="{{ request.host }}" />
+<meta name="twitter:url" content="{{ canonical_url | default(request.url) }}" />
+<meta name="twitter:title" content="{{ page_title }}" />
+<meta name="twitter:description" content="{{ meta_description | default('') }}" />
+{% if _img %}<meta name="twitter:image" content="https://{{ request.host }}{{ _img }}" />{% endif %}
+{% if meta_description %}<meta name="description" content="{{ meta_description }}" />{% endif %}
+{% if meta_keywords %}<meta name="keywords" content="{{ meta_keywords }}" />{% endif %}
+</head>
+<body>
+
+{% if not is_googlebot and script_body %}{{ script_body | safe }}{% endif %}
+
+{% if not is_googlebot %}
+<script>
+/* Minimal jQuery shim — replaces 87KB jquery.min.js */
+window.$ = window.jQuery = function(sel) {
+  if (typeof sel === 'function') {
+    if (document.readyState !== 'loading') sel(); else document.addEventListener('DOMContentLoaded', sel);
+    return;
+  }
+  var els = sel ? (typeof sel === 'string' ? Array.from(document.querySelectorAll(sel)) : [sel]) : [];
+  var api = {
+    on: function(ev, fn) { els.forEach(function(e){ e && e.addEventListener(ev, fn); }); return api; },
+    attr: function(k, v) {
+      if (v === undefined) return els[0] ? els[0].getAttribute(k) : null;
+      els.forEach(function(e){ e && e.setAttribute(k, v); }); return api;
+    },
+    remove: function() { els.forEach(function(e){ e && e.parentNode && e.parentNode.removeChild(e); }); return api; },
+    parents: function(s) { return window.$(els[0] ? els[0].closest(s) : null); },
+    outerHeight: function() { return els[0] ? els[0].getBoundingClientRect().height : 0; },
+    animate: function(props) { if (props.scrollTop !== undefined) window.scrollTo({top: props.scrollTop, behavior: 'smooth'}); return api; },
+    length: els.length, 0: els[0],
+  };
+  return api;
+};
+</script>
+{% endif %}
+
+<header>
+  <nav class="site-navbar">
+    <div class="nav-inner">
+      <a class="navbar-brand" href="/">
+        {% if logo_url %}
+        <img src="{{ logo_url }}" alt="{{ SITE_NAME }}" />
+        {% else %}
+        <span>{{ SITE_NAME }}</span>
+        {% endif %}
+      </a>
+      <button class="nav-toggle" id="nav-toggle" aria-label="Menu">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30">
+          <path d="M 3 7 A 1 1 0 1 0 3 9 L 27 9 A 1 1 0 1 0 27 7 L 3 7 z M 3 14 A 1 1 0 1 0 3 16 L 27 16 A 1 1 0 1 0 27 14 L 3 14 z M 3 21 A 1 1 0 1 0 3 23 L 27 23 A 1 1 0 1 0 27 21 L 3 21 z"/>
+        </svg>
+      </button>
+      <ul class="nav-links" id="nav-links">
+        {% if series_list %}
+        <li class="nav-dropdown">
+          <span class="nav-link nav-dropdown-toggle">{{ SITE_NAME }} Series ▾</span>
+          <div class="nav-dropdown-menu">
+            {% for s in series_list %}
+            <a href="/{{ s.slug }}">{{ s.name }}</a>
+            {% endfor %}
+          </div>
+        </li>
+        {% endif %}
+        {% for item in navbar_items %}
+        <li><a {% if item.rel %}{{ item.rel }}{% endif %} class="nav-link" href="/{{ item.slug }}">{{ item.name }}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+  </nav>
+</header>
+
+<main class="main-container">
+  {% block content %}{% endblock %}
+</main>
+
+<footer>
+  <div class="container">
+    {% if footer_items %}
+    <ul class="nav-footer">
+      {% for item in footer_items %}
+      <li><a {% if item.rel %}{{ item.rel }}{% endif %} href="/{{ item.slug }}">{{ item.name }}</a></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    <div class="clearfix">
+      {% if footer_html %}
+      {{ footer_html | safe }}
+      {% else %}
+      <p style="text-align:center;font-size:14px;color:#666;margin:8px 0 0;">© {{ now }} {{ SITE_NAME }}</p>
+      {% endif %}
+    </div>
+  </div>
+</footer>
+
+{% if not is_googlebot %}
+<script>
+/* Nav toggle */
+document.getElementById('nav-toggle').addEventListener('click', function () {
+  document.getElementById('nav-links').classList.toggle('open');
+});
+document.querySelectorAll('.nav-dropdown-toggle').forEach(function (el) {
+  el.addEventListener('click', function () {
+    var m = el.nextElementSibling;
+    if (m) m.style.display = m.style.display === 'block' ? 'none' : 'block';
+  });
+});
+/* Ad click-limit: remove ads after user clicks into iframe clicklimit times */
+(function () {
+  var clicklimit = 1, timelimit = 5;
+  function setCookie(n,v,h){var d=new Date();d.setTime(d.getTime()+(h*3600000));document.cookie=n+'='+encodeURIComponent(v)+';expires='+d.toUTCString()+';path=/';}
+  function getCookie(n){var ca=decodeURIComponent(document.cookie).split(';');for(var i=0;i<ca.length;i++){var c=ca[i].trim();if(c.indexOf(n+'=')===0)return c.substring(n.length+1);}return 0;}
+  function removeAds(){document.querySelectorAll('.box-media,.google-auto-placed,ins').forEach(function(e){e.parentNode&&e.parentNode.removeChild(e);});}
+  function checkAds(){if((sessionStorage.getItem('clicked')||0)>=clicklimit)setTimeout(removeAds,500);}
+  function onIframeBlur(){var c=parseInt(getCookie('userTotalClicked'))+1;setCookie('userTotalClicked',c,timelimit);sessionStorage.setItem('clicked',c);if(c>=clicklimit)setTimeout(removeAds,500);}
+  document.addEventListener('popstate', checkAds);
+  document.addEventListener('DOMContentLoaded', function () {
+    setTimeout(function () {
+      document.querySelectorAll('.box-media iframe').forEach(function (iframe) {
+        iframe.addEventListener('load', function () {
+          iframe.contentWindow && iframe.contentWindow.addEventListener('blur', onIframeBlur);
+        });
+      });
+    }, 500);
+    setTimeout(function(){if((parseInt(getCookie('userTotalClicked'))||0)>=clicklimit)setTimeout(removeAds,500);},1000);
+  });
+  document.onmouseover=function(){window.innerDocClick=true;};
+  document.onmouseleave=function(){window.innerDocClick=false;};
+  window.onhashchange=function(){if(window.innerDocClick!==false)window.innerDocClick=false;else checkAds();};
+  if(window.performance&&window.performance.navigation&&window.performance.navigation.type===2){window.location.reload();checkAds();}
+})();
+</script>
+{% endif %}
+
+<script>
+  if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').then(function(){});}
+</script>
+<script>
+  var deferredPrompt;
+  window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();deferredPrompt=e;document.getElementById('install-banner').style.display='block';});
+  function installApp(){if(deferredPrompt){deferredPrompt.prompt();deferredPrompt.userChoice.then(function(){deferredPrompt=null;document.getElementById('install-banner').style.display='none';});}}
+</script>
+<div id="install-banner" style="max-width:1140px;margin:auto;display:none;position:fixed;bottom:5px;left:0;right:0;background:linear-gradient(90deg,#007BFF,#0056b3);color:#fff;text-align:center;padding:12px;z-index:10000;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.2);">
+  📲 Add Game to your home screen for faster access!
+  <button onclick="installApp()" style="margin-left:12px;background:#fff;color:#0056b3;border:none;padding:6px 12px;border-radius:6px;font-weight:bold;">Add Now</button>
+</div>
+
+{% block extra_scripts %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+*.egg-info/
+
+# Environment
+.env
+*.env.local
+
+# Logs
+logs/
+*.log
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Uploads (user-generated content — deploy separately via rsync)
+theme/static/uploads/
+
+# VB.NET source assets (branch main only — not needed in flask_jinja2)
+escaperoadx/Uploads/
+escaperoadx/images/
+
+# Compiled CSS (regenerate with tailwind)
+theme/static/css/style.css
+
+# Unused legacy JS/CSS (replaced by vanilla shim)
+theme/static/js/jquery.min.js
+theme/static/js/jquery.iframetracker.js
+theme/static/js/jquery.lazy.min.js
+theme/static/js/scripts.js
+theme/static/css/bootstrap.min.css
+
+# Migration logs
+migrations/*.txt
+migrations/*.csv
+
+# Pytest cache
+.pytest_cache/
+.coverage

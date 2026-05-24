@@ -1,0 +1,38 @@
+{% macro game_iframe(src, referrerpolicy="", delay_ms=0, iframe_id="game-iframe") %}
+{% if delay_ms > 0 %}
+<div id="game-placeholder" class="flex items-center justify-center bg-gray-900 text-white text-lg" style="aspect-ratio:16/9;">
+  <span>Loading...</span>
+</div>
+<iframe id="{{ iframe_id }}"
+  src=""
+  data-src="{{ src }}"
+  {% if referrerpolicy %}referrerpolicy="{{ referrerpolicy }}"{% endif %}
+  class="hidden w-full border-0"
+  style="aspect-ratio:16/9;"
+  allowfullscreen
+  loading="lazy"
+></iframe>
+<script>
+(function() {
+  setTimeout(function() {
+    var ph = document.getElementById('game-placeholder');
+    var fr = document.getElementById('{{ iframe_id }}');
+    if (ph) ph.classList.add('hidden');
+    if (fr) {
+      fr.src = fr.dataset.src;
+      fr.classList.remove('hidden');
+    }
+  }, {{ delay_ms }});
+})();
+</script>
+{% else %}
+<iframe id="{{ iframe_id }}"
+  src="{{ src }}"
+  {% if referrerpolicy %}referrerpolicy="{{ referrerpolicy }}"{% endif %}
+  class="w-full border-0"
+  style="aspect-ratio:16/9;"
+  allowfullscreen
+  loading="lazy"
+></iframe>
+{% endif %}
+{% endmacro %}

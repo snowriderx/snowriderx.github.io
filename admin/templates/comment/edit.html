@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Sửa comment #{{ record.ID }} — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{{ url_for('comment.index') }}">Comment</a></li>
+<li class="breadcrumb-item active">Sửa #{{ record.ID }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow-sm card-form">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-chat-left-text"></i>
+        <span>Sửa comment</span>
+        <span class="badge bg-secondary ms-auto">#{{ record.ID }}</span>
+      </div>
+      <div class="card-body">
+        <form method="post" action="{{ url_for('comment.edit', comment_id=record.ID) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('comment.index') }}" class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+          <div class="mb-3">
+            <label for="name" class="form-label">Họ tên</label>
+            <input type="text" class="form-control" id="name" name="name"
+                   value="{{ record.name or '' }}" maxlength="100">
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email"
+                   value="{{ record.email or '' }}" maxlength="100">
+          </div>
+
+          {% if linked %}
+          <div class="mb-3">
+            <label class="form-label">Tin bài</label>
+            <div class="form-control-plaintext">
+              {% if record.type_c != 1 %}
+                <a href="{{ url_for('news.edit', news_id=linked.ID) }}" target="_blank">{{ linked.name }}</a>
+              {% else %}
+                {{ linked.name }}
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label for="content" class="form-label">Comment</label>
+            <textarea class="form-control" id="content" name="content"
+                      rows="5" maxlength="500">{{ record.content or '' }}</textarea>
+          </div>
+
+          <div class="mb-3">
+            <label for="is_show" class="form-label">Trạng thái</label>
+            <select class="form-select" id="is_show" name="is_show">
+              <option value="1" {% if record.is_show == 1 %}selected{% endif %}>Hiển thị</option>
+              <option value="0" {% if record.is_show == 0 %}selected{% endif %}>Ẩn</option>
+            </select>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('comment.index') }}" class="btn btn-outline-secondary">Hủy</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

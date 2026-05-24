@@ -1,0 +1,494 @@
+{% extends "base.html" %}
+
+{% set is_edit     = news.ID is not none and news.ID %}
+{% set page_title  = "Sửa tin tức" if is_edit else "Thêm mới tin tức" %}
+
+{% block title %}{{ page_title }} — {{ site_name }}{% endblock %}
+
+{# ── CKEditor — reuse shared setup, NO reimplementation ──────────── #}
+{% block head %}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('news.index') }}">Quản lý Tin tức</a>
+</li>
+<li class="breadcrumb-item active">{{ page_title }}</li>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" id="newsForm" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="row g-3">
+
+    {# ── Left column: main content ──────────────────────────────────── #}
+    <div class="col-lg-8">
+
+      {# ── Basic info ──────────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header d-flex align-items-center gap-2">
+          <i class="bi bi-newspaper"></i>
+          <span>{{ page_title }}</span>
+          {% if is_edit %}
+            <span class="badge bg-secondary ms-auto">#{{ news.ID }}</span>
+          {% endif %}
+        </div>
+        <div class="card-body">
+
+          {# Action buttons — top #}
+          <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('news.index') }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+          {# Title / Name #}
+          <div class="mb-3">
+            <label for="name" class="form-label">
+              Tiêu đề <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('name') %} is-invalid{% endif %}"
+                   id="name" name="name"
+                   value="{{ news.name or '' }}" maxlength="200"
+                   required autofocus>
+            {% if form_errors.get('name') %}
+              <div class="invalid-feedback">{{ form_errors['name'] }}</div>
+            {% else %}
+              <div class="invalid-feedback">Tiêu đề là trường bắt buộc.</div>
+            {% endif %}
+          </div>
+
+          {# URL slug #}
+          <div class="mb-3">
+            <label for="slug" class="form-label">
+              URL slug
+              <button type="button"
+                      class="btn btn-link btn-sm p-0 ms-1 align-baseline"
+                      onclick="regenSlug()"
+                      style="font-size:.8em;">
+                <i class="bi bi-arrow-clockwise"></i> Tạo lại
+              </button>
+            </label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('slug') %} is-invalid{% endif %}"
+                   id="slug" name="slug"
+                   value="{{ news.slug or '' }}" maxlength="200"
+                   placeholder="Để trống → tự động tạo từ tiêu đề">
+            {% if form_errors.get('slug') %}
+              <div class="invalid-feedback">{{ form_errors['slug'] }}</div>
+            {% else %}
+              <div class="invalid-feedback">
+                Slug chỉ được chứa chữ thường không dấu, số và dấu gạch ngang.
+              </div>
+            {% endif %}
+            <div class="form-text">VD: <code>ten-bai-viet</code>. Để trống → server tự tạo.</div>
+          </div>
+
+          {# Short description — ContentN (plain text, max 500) #}
+          <div class="mb-3">
+            <label for="content" class="form-label">
+              Mô tả ngắn
+              <span class="text-muted small">(ContentN — tối đa 500 ký tự)</span>
+            </label>
+            <textarea class="form-control" id="content" name="content"
+                      rows="4" maxlength="500"
+                      placeholder="Tóm tắt ngắn, dùng cho listing và SEO snippet…">{{ news.content or '' }}</textarea>
+            <div class="form-text text-end">
+              <span id="contentCount">{{ (news.content or '')|length }}</span>/500
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {# ── Body content (CKEditor) ────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form" id="bodyCard"
+           style="{{ 'display:none;' if (news.news_type == 2) else '' }}">
+        <div class="card-header">
+          <i class="bi bi-file-richtext me-1"></i>Nội dung bài viết
+          <span class="text-muted small ms-2">
+            — dùng cho Loại tin: <strong>Tin bài</strong>
+          </span>
+        </div>
+        <div class="card-body">
+          <textarea class="form-control" id="desc" name="desc"
+                    rows="20">{{ news.desc or '' }}</textarea>
+        </div>
+      </div>
+
+      {# ── Landing page HTML (raw textarea) ──────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form" id="landingCard"
+           style="{{ '' if (news.news_type == 2) else 'display:none;' }}">
+        <div class="card-header">
+          <i class="bi bi-code-slash me-1"></i>Mã HTML — Dành cho tin Landing page
+        </div>
+        <div class="card-body">
+          <textarea class="form-control font-monospace" id="html_raw"
+                    name="html_raw" rows="18"
+                    placeholder="Dán HTML tùy chỉnh cho landing page…">{{ news.desc or '' if news.news_type == 2 else '' }}</textarea>
+          <div class="form-text text-danger mt-1">
+            <i class="bi bi-exclamation-triangle me-1"></i>
+            Nội dung HTML thô sẽ được sanitize trước khi lưu (xóa script, event handlers).
+          </div>
+        </div>
+      </div>
+
+      {# ── Script / Embed code ────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-braces me-1"></i>Code nhúng (ScriptCode)
+        </div>
+        <div class="card-body">
+          <textarea class="form-control font-monospace" id="script_code"
+                    name="script_code" rows="6"
+                    placeholder="Adsense, Google Tag, iframe nhúng…">{{ news.script_code or '' }}</textarea>
+          <div class="form-text">
+            Không bị sanitize — dành cho embed code hợp lệ (ví dụ: Adsense).
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    {# ── Right column: meta, category, image ──────────────────────── #}
+    <div class="col-lg-4">
+
+      {# ── Publish settings ────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-sliders me-1"></i>Xuất bản
+        </div>
+        <div class="card-body">
+
+          {# Category (MenuIDN) #}
+          <div class="mb-3">
+            <label for="menu_id" class="form-label">
+              Danh mục <span class="text-danger">*</span>
+            </label>
+            <select class="form-select" id="menu_id" name="menu_id">
+              <option value="">— Chọn danh mục —</option>
+              {% for m in menus %}
+                <option value="{{ m.IDM }}"
+                  {% if news.menu_id == m.IDM %}selected{% endif %}>
+                  {{ m.display_name }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          {# Tags (KeyN) — prominent tag input #}
+          <div class="mb-3">
+            <label for="keywords" class="form-label">Tags</label>
+            <input type="text" class="form-control" id="keywords"
+                   name="keywords"
+                   value="{{ news.keywords or '' }}" maxlength="300"
+                   placeholder="VD: kinh-te, xa-hoi, the-thao…">
+            <div class="form-text">Phân cách bằng dấu phẩy.</div>
+          </div>
+
+          {# News type (TypeN) — radio #}
+          <div class="mb-3">
+            <label class="form-label d-block">Loại tin</label>
+            {% for val, label in news_types.items() %}
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio"
+                       name="news_type" id="type_{{ val }}"
+                       value="{{ val }}"
+                       {% if (news.news_type or 1) == val %}checked{% endif %}
+                       onchange="toggleLandingCard(this.value)">
+                <label class="form-check-label" for="type_{{ val }}">
+                  {{ label }}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+
+          {# Language (LangID) — content language filter tag #}
+          {% if langs %}
+          <div class="mb-3">
+            <label for="lang_id" class="form-label">Ngôn ngữ</label>
+            <select class="form-select" id="lang_id" name="lang_id" style="max-width:220px;">
+              <option value="">— Mặc định —</option>
+              {% for lang in langs %}
+              <option value="{{ lang.ID }}" {% if news.lang_id == lang.ID %}selected{% endif %}>{{ lang.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% endif %}
+
+          {# Status (AcN) — 3-state select; VB: dCheck.Visible = ChkNews #}
+          <div class="mb-0">
+            <label for="is_active" class="form-label">Trạng thái</label>
+            {% set cur_status = (news.is_active if news.is_active is not none else 1) %}
+            {% if not can_chk %}
+              {# Preserve value on submit — disabled select is not submitted #}
+              <input type="hidden" name="is_active" value="{{ cur_status }}">
+            {% endif %}
+            <select class="form-select" id="is_active" name="is_active"
+                    {% if not can_chk %}disabled{% endif %}>
+              {% for val, label in news_status.items() %}
+                <option value="{{ val }}"
+                  {% if cur_status == val %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      {# ── SEO meta ────────────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-search me-1"></i>SEO
+        </div>
+        <div class="card-body">
+
+          <div class="mb-3">
+            <label for="title" class="form-label">Meta Title (TitleN)</label>
+            <input type="text" class="form-control" id="title" name="title"
+                   value="{{ news.title or '' }}" maxlength="200">
+            <div class="form-text">Để trống → dùng tiêu đề bài.</div>
+          </div>
+
+          <div class="mb-0">
+            <label for="description" class="form-label">
+              Meta Description (DecripN)
+            </label>
+            <textarea class="form-control" id="description"
+                      name="description" rows="3"
+                      maxlength="500">{{ news.description or '' }}</textarea>
+          </div>
+
+        </div>
+      </div>
+
+      {# ── Thumbnail image ─────────────────────────────────────────── #}
+      <div class="card shadow-sm mb-3 card-form">
+        <div class="card-header">
+          <i class="bi bi-image me-1"></i>Ảnh đại diện
+        </div>
+        <div class="card-body">
+
+          <input type="hidden" name="delete_img" id="deleteImgFlag" value="0">
+
+          {% if is_edit and news.has_image %}
+            <div id="imgPreview" class="mb-2">
+              <img id="imgCurrent"
+                   src="{{ img_url('news', news.img) }}"
+                   alt="thumbnail"
+                   style="max-height:120px; max-width:100%; object-fit:contain;
+                          border:1px solid #dee2e6; border-radius:4px; padding:2px;"
+                   onerror="this.style.display='none';
+                            this.parentElement.nextElementSibling.style.display='none';">
+              <div class="form-text text-muted mt-1">
+                <i class="bi bi-file-image me-1"></i>{{ news.img }}
+              </div>
+              <div class="mt-1">
+                <button type="button" class="btn btn-sm btn-outline-danger"
+                        onclick="markDeleteImg()">
+                  <i class="bi bi-x-circle me-1"></i>Xóa ảnh
+                </button>
+              </div>
+            </div>
+            <div id="imgDeletedNotice" class="mb-2 d-none">
+              <span class="text-danger small">
+                <i class="bi bi-exclamation-circle me-1"></i>
+                Ảnh sẽ bị xóa khi nhấn <strong>Ghi nhận</strong>.
+              </span>
+              <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                      onclick="undoDeleteImg()">Hoàn tác</button>
+            </div>
+          {% endif %}
+
+          {# Live preview for new file pick #}
+          <div id="imgNewPreview" class="mb-2 d-none">
+            <img id="imgNewImg" src="" alt="preview"
+                 style="max-height:120px; max-width:100%; object-fit:contain;
+                        border:1px solid #0d6efd; border-radius:4px; padding:2px;">
+            <div class="small text-primary mt-1">
+              <i class="bi bi-arrow-repeat me-1"></i>
+              Sẽ được <strong>{{ 'thay thế' if (is_edit and news.has_image) else 'tải lên' }}</strong> khi nhấn Ghi nhận.
+            </div>
+          </div>
+
+          <input type="file"
+                 class="form-control{% if form_errors.get('img_file') %} is-invalid{% endif %}"
+                 id="img_file" name="img_file"
+                 accept=".jpg,.jpeg,.gif,.png,.webp"
+                 onchange="previewImg(this)">
+          {% if form_errors.get('img_file') %}
+            <div class="invalid-feedback">{{ form_errors['img_file'] }}</div>
+          {% endif %}
+
+          <div class="form-text mt-1">
+            Hỗ trợ: jpg, gif, png, webp. Ảnh quá rộng tự thu nhỏ về 600px.
+          </div>
+
+        </div>
+      </div>
+
+      {# ── Actions (bottom) ────────────────────────────────────────── #}
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg me-1"></i>Ghi nhận
+        </button>
+        <a href="{{ url_for('news.index') }}"
+           class="btn btn-outline-secondary">Hủy</a>
+      </div>
+
+    </div>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  /* ── Vietnamese slug generator (mirrors slugify_vi in text.py) ─── */
+  var VI_MAP = { 'đ': 'd', 'Đ': 'D' };
+  function slugifyVi(text) {
+    if (!text) return '';
+    text = text.replace(/[đĐ]/g, function(c) { return VI_MAP[c] || c; });
+    text = text.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    text = text.toLowerCase().replace(/[^a-z0-9\s-]/g, '');
+    text = text.trim().replace(/[\s\-]+/g, '-').replace(/^-+|-+$/g, '');
+    return text;
+  }
+
+  /* Auto-fill slug from title */
+  var slugAutoMode = !document.getElementById('slug').value;
+  var nameInput = document.getElementById('name');
+  var slugInput = document.getElementById('slug');
+
+  if (nameInput && slugInput) {
+    nameInput.addEventListener('input', function() {
+      if (slugAutoMode) slugInput.value = slugifyVi(nameInput.value);
+    });
+    slugInput.addEventListener('input', function() {
+      slugAutoMode = (slugInput.value === '');
+    });
+  }
+  function regenSlug() {
+    if (nameInput) { slugInput.value = slugifyVi(nameInput.value); slugAutoMode = false; }
+  }
+
+  /* ── Character counter for short description ─────────────────── */
+  var contentArea  = document.getElementById('content');
+  var contentCount = document.getElementById('contentCount');
+  if (contentArea && contentCount) {
+    contentArea.addEventListener('input', function() {
+      contentCount.textContent = contentArea.value.length;
+    });
+  }
+
+  /* ── Toggle landing page card vs body card ─────────────────────── */
+  function toggleLandingCard(val) {
+    var landing  = document.getElementById('landingCard');
+    var bodyCard = document.getElementById('bodyCard');
+    var isLanding = (val === '2');
+    if (landing)  landing.style.display  = isLanding ? '' : 'none';
+    if (bodyCard) bodyCard.style.display = isLanding ? 'none' : '';
+  }
+
+  /* ── CKEditor 5 — reuse shared initCKEditors() — no reimplementation ─
+     Initialise only the desc textarea with the shared configuration.
+     The html_raw textarea is plain (no CKEditor).
+  ──────────────────────────────────────────────────────────────────── */
+  initCKEditors(['desc'], 'newsForm', {
+    imageBaseUrl:    '{{ config.IMAGE_BASE_URL }}',
+    uploadUrl:       '{{ config.UPLOAD_API_URL }}',
+    uploadApiKey:    '{{ config.UPLOAD_API_KEY }}',
+    uploadSubfolder: 'news',
+    deleteUrl:       '/api/ck-delete',
+  });
+
+  /* Before submit: if landing page mode, copy html_raw → desc textarea
+     so the server receives the raw HTML value in the 'desc' field.
+     The CKEditor sync listener (inside initCKEditors) also fires, but
+     html_raw wins because we overwrite the textarea directly. */
+  document.getElementById('newsForm').addEventListener('submit', function() {
+    var typeInput = document.querySelector('input[name="news_type"]:checked');
+    if (typeInput && typeInput.value === '2') {
+      var raw = document.getElementById('html_raw');
+      var descEl = document.getElementById('desc');
+      if (raw && descEl) descEl.value = raw.value;
+    }
+  });
+
+  /* ── Client-side validation ────────────────────────────────────── */
+  document.getElementById('newsForm').addEventListener('submit', function(e) {
+    var ok = true;
+    function setErr(id, msg) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('is-invalid');
+      var fb = el.parentElement.querySelector('.invalid-feedback');
+      if (fb) fb.textContent = msg;
+      ok = false;
+    }
+    function clrErr(id) {
+      var el = document.getElementById(id);
+      if (el) el.classList.remove('is-invalid');
+    }
+
+    clrErr('name'); clrErr('slug'); clrErr('img_file');
+
+    var n = document.getElementById('name');
+    if (n && !n.value.trim())
+      setErr('name', 'Tiêu đề là trường bắt buộc.');
+    else if (n && n.value.length > 200)
+      setErr('name', 'Tiêu đề không được vượt quá 200 ký tự.');
+
+    var s = document.getElementById('slug');
+    if (s && s.value && !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s.value))
+      setErr('slug', 'Slug chỉ được chứa chữ thường không dấu, số và dấu gạch ngang.');
+
+    var MAX = 5 * 1024 * 1024;
+    var img = document.getElementById('img_file');
+    if (img && img.files[0] && img.files[0].size > MAX)
+      setErr('img_file', 'Kích thước file không được vượt quá 5 MB.');
+
+    if (!ok) e.preventDefault();
+  }, true);  /* capture=true → fires BEFORE the CKEditor sync listener */
+
+  /* ── Image delete / preview helpers ───────────────────────────── */
+  function markDeleteImg() {
+    document.getElementById('deleteImgFlag').value = '1';
+    var prev = document.getElementById('imgPreview');
+    if (prev) prev.classList.add('d-none');
+    var note = document.getElementById('imgDeletedNotice');
+    if (note) note.classList.remove('d-none');
+  }
+  function undoDeleteImg() {
+    document.getElementById('deleteImgFlag').value = '0';
+    var prev = document.getElementById('imgPreview');
+    if (prev) prev.classList.remove('d-none');
+    var note = document.getElementById('imgDeletedNotice');
+    if (note) note.classList.add('d-none');
+  }
+  function previewImg(input) {
+    var container = document.getElementById('imgNewPreview');
+    var imgEl = document.getElementById('imgNewImg');
+    if (!container || !imgEl) return;
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        imgEl.src = e.target.result;
+        container.classList.remove('d-none');
+      };
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      container.classList.add('d-none');
+      imgEl.src = '';
+    }
+  }
+</script>
+{% endblock %}

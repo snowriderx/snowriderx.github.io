@@ -1,0 +1,214 @@
+{# ================================================================
+   Admin Panel — Reusable UI Macros
+   ================================================================
+   Import in any template:
+     {% from 'macros.html' import page_header, status_badge,
+        row_actions, batch_toolbar, empty_row, card_header %}
+   ================================================================ #}
+
+
+{# ----------------------------------------------------------------
+   page_header
+   Renders a consistent page title bar with optional add button.
+
+   Params:
+     title      (str)  — page title
+     icon       (str)  — Bootstrap icon class, e.g. 'bi-newspaper'
+     subtitle   (str)  — optional subtitle / count line
+     add_url    (str)  — if set, renders an "Add" button
+     add_label  (str)  — button label (default 'Thêm mới')
+
+   Example:
+     {{ page_header('Tin tức', 'bi-newspaper', total ~ ' bài viết',
+                    url_for('news.create'), 'Thêm bài') }}
+   ---------------------------------------------------------------- #}
+{% macro page_header(title, icon='bi-grid', subtitle='', add_url='', add_label='Thêm mới') %}
+<div class="page-header">
+  <div class="page-header-left">
+    <i class="bi {{ icon }} page-header-icon"></i>
+    <div>
+      <h1 class="page-title">{{ title }}</h1>
+      {% if subtitle %}<p class="page-subtitle">{{ subtitle }}</p>{% endif %}
+    </div>
+  </div>
+  {% if add_url %}
+  <a href="{{ add_url }}" class="btn btn-primary btn-sm">
+    <i class="bi bi-plus-lg me-1"></i>{{ add_label }}
+  </a>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{# ----------------------------------------------------------------
+   card_header
+   Renders a consistent card-header with icon + title + optional badge.
+
+   Example:
+     {{ card_header('bi-newspaper', 'Tin tức', '#' ~ record.ID) }}
+   ---------------------------------------------------------------- #}
+{% macro card_header(icon, title, badge='') %}
+<div class="card-header d-flex align-items-center gap-2">
+  <i class="bi {{ icon }}"></i>
+  <span>{{ title }}</span>
+  {% if badge %}
+  <span class="badge bg-secondary ms-auto">{{ badge }}</span>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{# ----------------------------------------------------------------
+   status_badge
+   Renders a soft pill badge for active/inactive status.
+
+   Params:
+     value          — truthy = active
+     label_active   (str)  — default 'Hiển thị'
+     label_inactive (str)  — default 'Ẩn'
+
+   Example:
+     {{ status_badge(record.is_active) }}
+     {{ status_badge(record.is_active, 'Hoạt động', 'Dừng') }}
+   ---------------------------------------------------------------- #}
+{% macro status_badge(value, label_active='Hiển thị', label_inactive='Ẩn') %}
+{% if value and value != 0 %}
+<span class="badge-status badge-status-active">{{ label_active }}</span>
+{% else %}
+<span class="badge-status badge-status-inactive">{{ label_inactive }}</span>
+{% endif %}
+{% endmacro %}
+
+
+{# ----------------------------------------------------------------
+   row_actions
+   Renders the action button group for a table row.
+
+   Params:
+     edit_url      (str)  — edit page URL
+     delete_url    (str)  — delete action URL (optional)
+     delete_name   (str)  — record name for confirm dialog
+     record_id     (int)  — record ID for confirmDeleteOne
+     view_url      (str)  — optional view/preview URL
+     extra_buttons (str)  — optional raw HTML for extra buttons
+
+   Example:
+     {{ row_actions(url_for('news.edit', news_id=n.ID),
+                   url_for('news.delete', news_id=n.ID),
+                   n.name, n.ID) }}
+   ---------------------------------------------------------------- #}
+{% macro row_actions(edit_url='', delete_url='', delete_name='', record_id=0, view_url='') %}
+<div class="d-flex justify-content-center gap-1 text-nowrap">
+  {% if view_url %}
+  <a href="{{ view_url }}"
+     class="btn btn-xs btn-outline-info py-0 px-1" title="Xem">
+    <i class="bi bi-eye"></i>
+  </a>
+  {% endif %}
+  {% if edit_url %}
+  <a href="{{ edit_url }}"
+     class="btn btn-xs btn-outline-primary py-0 px-1" title="Sửa">
+    <i class="bi bi-pencil"></i>
+  </a>
+  {% endif %}
+  {% if delete_url %}
+  <button type="button"
+          class="btn btn-xs btn-outline-danger py-0 px-1" title="Xóa"
+          onclick="confirmDeleteOne({{ record_id }}, '{{ delete_name|e }}', '{{ delete_url }}')">
+    <i class="bi bi-trash"></i>
+  </button>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{# ----------------------------------------------------------------
+   batch_toolbar
+   Renders the action toolbar above/below a batch-edit table.
+
+   Params:
+     count      (int)   — record count
+     entity     (str)   — entity label, e.g. 'bài viết'
+     add_url    (str)   — optional Add button URL
+     add_label  (str)   — Add button label
+     can_add    (bool)  — show Add button
+     can_del    (bool)  — show Delete button
+     can_chk    (bool)  — show Update button
+
+   Example:
+     {{ batch_toolbar(news_list|length, 'bài viết',
+                      url_for('news.create'), 'Thêm bài',
+                      can_add, can_del, can_chk) }}
+   ---------------------------------------------------------------- #}
+{% macro batch_toolbar(count=0, entity='bản ghi', add_url='', add_label='Thêm mới',
+                        can_add=true, can_del=true, can_chk=true) %}
+<div class="action-bar">
+  {% if can_chk %}
+  <button type="submit" class="btn btn-sm btn-success"
+          onclick="document.getElementById('formAction').value='update'">
+    <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+  </button>
+  {% endif %}
+  {% if can_del %}
+  <button type="button" class="btn btn-sm btn-danger"
+          onclick="submitBatchDelete()">
+    <i class="bi bi-trash me-1"></i>Xóa chọn
+  </button>
+  {% endif %}
+  <span class="action-bar-spacer"></span>
+  <span class="action-bar-count">{{ count }} {{ entity }}</span>
+  {% if can_add and add_url %}
+  <a href="{{ add_url }}" class="btn btn-sm btn-primary">
+    <i class="bi bi-plus-lg me-1"></i>{{ add_label }}
+  </a>
+  {% endif %}
+</div>
+{% endmacro %}
+
+
+{# ----------------------------------------------------------------
+   empty_row
+   Renders a "no records" table row with icon + message.
+
+   Params:
+     colspan  (int) — number of columns to span
+     message  (str) — empty state message
+     icon     (str) — Bootstrap icon class
+
+   Example:
+     {{ empty_row(6, 'Chưa có bài viết nào.', 'bi-newspaper') }}
+   ---------------------------------------------------------------- #}
+{% macro empty_row(colspan=5, message='Không có dữ liệu.', icon='bi-inbox') %}
+<tr>
+  <td colspan="{{ colspan }}">
+    <div class="empty-state">
+      <i class="bi {{ icon }} empty-state-icon"></i>
+      <p class="empty-state-title">{{ message }}</p>
+    </div>
+  </td>
+</tr>
+{% endmacro %}
+
+
+{# ----------------------------------------------------------------
+   form_actions
+   Renders the top or bottom save/cancel button bar in forms.
+
+   Params:
+     cancel_url  (str)  — cancel link href
+     save_label  (str)  — save button label
+     mb          (str)  — margin class: 'mb-4' (top) or 'mt-4' (bottom)
+
+   Example:
+     {{ form_actions(url_for('news.index'), 'Ghi nhận', 'mb-4') }}
+   ---------------------------------------------------------------- #}
+{% macro form_actions(cancel_url='', save_label='Ghi nhận', mb='mb-4') %}
+<div class="d-flex gap-2 {{ mb }}">
+  <button type="submit" class="btn btn-primary">
+    <i class="bi bi-check-lg me-1"></i>{{ save_label }}
+  </button>
+  {% if cancel_url %}
+  <a href="{{ cancel_url }}" class="btn btn-outline-secondary">Hủy</a>
+  {% endif %}
+</div>
+{% endmacro %}

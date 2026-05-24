@@ -1,0 +1,10 @@
+{% macro ad_slot(zone_type, menu_id="000000", lang=1, is_googlebot=False, is_noads=False) %}
+{% if not is_googlebot and not is_noads %}
+{% set html = get_ads(zone_type, menu_id, lang) %}
+{% if html %}
+<div class="ad-slot ad-zone-{{ zone_type }}">
+  {{ html | safe }}
+</div>
+{% endif %}
+{% endif %}
+{% endmacro %}

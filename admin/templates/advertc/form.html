@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% set is_edit = advert.ID is not none and advert.ID %}
+{% set page_title = "Sửa quảng cáo" if is_edit else "Thêm quảng cáo mới" %}
+
+{% block title %}{{ page_title }} — {{ site_name }}{% endblock %}
+
+{% block head %}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('advertc.index', menu_id=current_menu_id) }}">Quản lý quảng cáo</a>
+</li>
+<li class="breadcrumb-item active">{{ page_title }}</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-12">
+    <div class="card shadow-sm card-form">
+      <div class="card-header d-flex align-items-center gap-2">
+        <i class="bi bi-code-square"></i>
+        <span>{{ page_title }}</span>
+        {% if is_edit %}
+          <span class="badge bg-secondary ms-auto">#{{ advert.ID }}</span>
+        {% endif %}
+      </div>
+      <div class="card-body">
+
+        <form method="post"
+              enctype="multipart/form-data"
+              id="advertcForm"
+              novalidate>
+
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          {# ── Actions (top) ─────────────────────────────────────────── #}
+          <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('advertc.index', menu_id=current_menu_id) }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+          {# ── Zone type — fixed, read-only (VB: drlType only has 1 option) #}
+          <div class="mb-3">
+            <label class="form-label">Vùng hiển thị</label>
+            <input type="text" class="form-control" value="{{ zone_label }}" disabled>
+            <input type="hidden" name="zone_type" value="1">
+          </div>
+
+          {# ── Trang / MenuID ──────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="menu_id" class="form-label">Trang</label>
+            <select class="form-select" id="menu_id" name="menu_id">
+              {% for val, label in menu_options %}
+                <option value="{{ val }}"
+                  {% if val == (advert.menu_id or current_menu_id) %}selected{% endif %}>
+                  {{ label }}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+
+          {# ── Title ──────────────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="title" class="form-label">
+              Tiêu đề <span class="text-danger">*</span>
+            </label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('title') %} is-invalid{% endif %}"
+                   id="title" name="title"
+                   value="{{ advert.title or '' }}" maxlength="100" required autofocus>
+            {% if form_errors.get('title') %}
+              <div class="invalid-feedback">{{ form_errors['title'] }}</div>
+            {% else %}
+              <div class="invalid-feedback">Tiêu đề là trường bắt buộc.</div>
+            {% endif %}
+          </div>
+
+          {# ── Link (Name) ─────────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="link" class="form-label">Link URL</label>
+            <input type="text"
+                   class="form-control{% if form_errors.get('link') %} is-invalid{% endif %}"
+                   id="link" name="link"
+                   value="{{ advert.link or '#' }}" maxlength="300">
+            {% if form_errors.get('link') %}
+              <div class="invalid-feedback">{{ form_errors['link'] }}</div>
+            {% endif %}
+          </div>
+
+          {# ── Sort + Status ───────────────────────────────────────────── #}
+          <div class="row g-3 mb-3">
+            <div class="col-md-3">
+              <label for="sort" class="form-label">Sắp xếp</label>
+              <input type="text" class="form-control" id="sort" name="sort"
+                     value="{{ advert.sort or '' }}" maxlength="10">
+            </div>
+            <div class="col-md-5 d-flex align-items-end gap-4 pb-1">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="is_active"
+                       name="is_active" value="1"
+                       {% if advert.is_active != 0 %}checked{% endif %}>
+                <label class="form-check-label" for="is_active">Hiển thị</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="is_heading"
+                       name="is_heading" value="1"
+                       {% if advert.is_heading %}checked{% endif %}>
+                <label class="form-check-label" for="is_heading">Đặt làm tiêu đề</label>
+              </div>
+            </div>
+          </div>
+
+          {# ── Loại adv (TypeD) — 3 radio giống VB: value 1/3/0 #}
+          <div class="mb-3">
+            <label class="form-label">Loại adv</label>
+            <div class="d-flex gap-4">
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="type_d"
+                       id="type_d_1" value="1"
+                       {% if (advert.type_d or 1) == 1 %}checked{% endif %}>
+                <label class="form-check-label" for="type_d_1">Banner</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="type_d"
+                       id="type_d_3" value="3"
+                       {% if (advert.type_d or 1) == 3 %}checked{% endif %}>
+                <label class="form-check-label" for="type_d_3">Mã code</label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="type_d"
+                       id="type_d_0" value="0"
+                       {% if (advert.type_d or 1) == 0 %}checked{% endif %}>
+                <label class="form-check-label" for="type_d_0">Html</label>
+              </div>
+            </div>
+          </div>
+
+          {# ── Mã code (sCode) ─────────────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="s_code" class="form-label">
+              Mã code
+              <span class="text-muted small">(Google Ads, iframe, ...)</span>
+            </label>
+            <textarea class="form-control font-monospace" id="s_code" name="s_code"
+                      rows="5" maxlength="1000">{{ advert.s_code or '' }}</textarea>
+          </div>
+
+          {# ── Short description (Contents) ────────────────────────────── #}
+          <div class="mb-3">
+            <label for="contents" class="form-label">Mô tả ngắn</label>
+            <textarea class="form-control" id="contents" name="contents"
+                      rows="2" maxlength="500">{{ advert.contents or '' }}</textarea>
+          </div>
+
+          {# ── Rich HTML via CKEditor ───────────────────────────────────── #}
+          <div class="mb-3">
+            <label for="html" class="form-label">Nội dung (HTML)</label>
+            <textarea class="form-control" id="html" name="html"
+                      rows="6">{{ advert.html or '' }}</textarea>
+          </div>
+
+          {# ── Image upload ─────────────────────────────────────────────── #}
+          <div class="mb-4">
+            <label class="form-label">Ảnh banner</label>
+
+            <input type="hidden" name="delete_img" id="deleteImgFlag" value="0">
+
+            {% if is_edit and advert.has_image %}
+              <div id="imgPreview" class="mb-2 d-flex align-items-center gap-3">
+                <img src="{{ img_url('media', advert.img) }}"
+                     alt="current" style="max-height:120px; max-width:300px;">
+                <button type="button" class="btn btn-sm btn-outline-danger"
+                        onclick="markDeleteImg()">
+                  <i class="bi bi-x-circle me-1"></i>Xóa ảnh
+                </button>
+              </div>
+              <div id="imgDeletedNotice" class="mb-2 d-none">
+                <span class="text-danger small">
+                  <i class="bi bi-exclamation-circle me-1"></i>
+                  Ảnh sẽ bị xóa khi bạn nhấn <strong>Ghi nhận</strong>.
+                </span>
+                <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                        onclick="undoDeleteImg()">Hoàn tác</button>
+              </div>
+            {% endif %}
+
+            <input type="file"
+                   class="form-control{% if form_errors.get('img_file') %} is-invalid{% endif %}"
+                   id="img_file" name="img_file"
+                   accept=".jpg,.jpeg,.gif,.png,.webp">
+            {% if form_errors.get('img_file') %}
+              <div class="invalid-feedback">{{ form_errors['img_file'] }}</div>
+            {% endif %}
+            <div class="form-text">
+              Hỗ trợ: jpg, gif, png, webp. Dung lượng &lt; 2MB.
+            </div>
+          </div>
+
+          {# ── Actions (bottom) ────────────────────────────────────────── #}
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary">
+              <i class="bi bi-check-lg me-1"></i>Ghi nhận
+            </button>
+            <a href="{{ url_for('advertc.index', menu_id=current_menu_id) }}"
+               class="btn btn-outline-secondary">Hủy</a>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  document.getElementById('advertcForm').addEventListener('submit', function (e) {
+    var ok = true;
+
+    function setError(id, msg) {
+      var el = document.getElementById(id);
+      el.classList.add('is-invalid');
+      var fb = el.parentElement.querySelector('.invalid-feedback');
+      if (fb) fb.textContent = msg;
+      ok = false;
+    }
+    function clearError(id) {
+      document.getElementById(id).classList.remove('is-invalid');
+    }
+
+    clearError('title');
+    clearError('link');
+
+    var title = document.getElementById('title');
+    if (!title.value.trim())
+      setError('title', 'Tiêu đề là trường bắt buộc.');
+    else if (title.value.length > 100)
+      setError('title', 'Tiêu đề không được vượt quá 100 ký tự.');
+
+    var link = document.getElementById('link');
+    if (link.value.length > 300)
+      setError('link', 'URL không được vượt quá 300 ký tự.');
+
+    if (!ok) e.preventDefault();
+  });
+
+  initCKEditors(['html'], 'advertcForm');
+
+  function markDeleteImg() {
+    document.getElementById('deleteImgFlag').value = '1';
+    document.getElementById('imgPreview').classList.add('d-none');
+    document.getElementById('imgDeletedNotice').classList.remove('d-none');
+  }
+
+  function undoDeleteImg() {
+    document.getElementById('deleteImgFlag').value = '0';
+    document.getElementById('imgPreview').classList.remove('d-none');
+    document.getElementById('imgDeletedNotice').classList.add('d-none');
+  }
+</script>
+{% endblock %}

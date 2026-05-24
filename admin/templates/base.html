@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ site_name }}{% endblock %}</title>
+  {% if site_config %}
+  {% if site_config.meta_description %}<meta name="description" content="{{ site_config.meta_description }}">{% endif %}
+  {% if site_config.meta_keyword %}<meta name="keywords" content="{{ site_config.meta_keyword }}">{% endif %}
+  {% if site_config.script_verify and site_config.script_verify.strip().startswith('<') %}{{ site_config.script_verify | safe }}{% endif %}
+  {% endif %}
+
+  <!-- Bootstrap 5 (CDN — swap for local in prod if needed) -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+
+  {% block head %}{% endblock %}
+  {% if site_config and site_config.script_head %}{{ site_config.script_head | safe }}{% endif %}
+</head>
+<body class="admin-body">
+
+  <!-- ============================================================ -->
+  <!-- Sidebar                                                       -->
+  <!-- ============================================================ -->
+  <nav id="sidebar" class="admin-sidebar d-flex flex-column">
+    <div class="sidebar-brand">
+      <a href="{{ url_for('dashboard.index') if current_user.is_authenticated and current_user.IDU == 1 else url_for('news.index') }}"
+         class="text-decoration-none d-flex align-items-center gap-2">
+        <div class="sidebar-brand-icon">
+          <i class="bi bi-grid-3x3-gap-fill"></i>
+        </div>
+        <span class="sidebar-brand-name">{{ site_name }}</span>
+      </a>
+    </div>
+
+    <ul class="nav flex-column mt-1 flex-grow-1 pb-2">
+
+      {% if current_user.is_authenticated %}
+
+      {# ── Super-admin: Analytics ──────────────────────────────────── #}
+      {% if current_user.IDU == 1 %}
+      <li class="nav-section-label">Tổng quan</li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'dashboard' %}active{% endif %}"
+           href="{{ url_for('dashboard.index') }}">
+          <i class="bi bi-speedometer2"></i> Dashboard
+        </a>
+      </li>
+      {% endif %}
+
+      {# ── Nội dung — visible to all authenticated users ──────────── #}
+      <li class="nav-section-label">Nội dung</li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'news' %}active{% endif %}"
+           href="{{ url_for('news.index') }}">
+          <i class="bi bi-newspaper"></i> Tin tức
+        </a>
+      </li>
+
+      {% if current_user.IDU == 1 %}
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'product' %}active{% endif %}"
+           href="{{ url_for('product.index') }}">
+          <i class="bi bi-box-seam"></i> Sản phẩm
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'menu' %}active{% endif %}"
+           href="{{ url_for('menu.index') }}">
+          <i class="bi bi-list-nested"></i> Quản lý Menu
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'layout' %}active{% endif %}"
+           href="{{ url_for('layout.index') }}">
+          <i class="bi bi-layout-text-window"></i> Quản lý Layout
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'template' %}active{% endif %}"
+           href="{{ url_for('template.index') }}">
+          <i class="bi bi-file-text"></i> Mẫu nội dung
+        </a>
+      </li>
+
+      {# ── Super-admin: Tiện ích ───────────────────────────────────── #}
+      <li class="nav-section-label">Tiện ích</li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'tab' %}active{% endif %}"
+           href="{{ url_for('tab.index') }}">
+          <i class="bi bi-tags"></i> Quản lý Tab
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'lang' %}active{% endif %}"
+           href="{{ url_for('lang.index') }}">
+          <i class="bi bi-globe"></i> Quản lý Ngôn ngữ
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'tag' %}active{% endif %}"
+           href="{{ url_for('tag.index', section='news') }}">
+          <i class="bi bi-tag"></i> Quản lý Tag
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'advertc' %}active{% endif %}"
+           href="{{ url_for('advertc.index') }}">
+          <i class="bi bi-megaphone"></i> Quản lý quảng cáo
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'urlmgmt' %}active{% endif %}"
+           href="{{ url_for('urlmgmt.index') }}">
+          <i class="bi bi-link-45deg"></i> Quản lý URL
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'urlredirect' %}active{% endif %}"
+           href="{{ url_for('urlredirect.index') }}">
+          <i class="bi bi-arrow-left-right"></i> Redirect 301
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'config' %}active{% endif %}"
+           href="{{ url_for('config.index') }}">
+          <i class="bi bi-gear"></i> Cấu hình Website
+        </a>
+      </li>
+
+      {# ── Super-admin: Quản trị ───────────────────────────────────── #}
+      <li class="nav-section-label">Quản trị</li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'contact' %}active{% endif %}"
+           href="{{ url_for('contact.index') }}">
+          <i class="bi bi-envelope"></i> Liên hệ
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'comment' %}active{% endif %}"
+           href="{{ url_for('comment.index') }}">
+          <i class="bi bi-chat-left-text"></i> Comment
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'users' %}active{% endif %}"
+           href="{{ url_for('users.index') }}">
+          <i class="bi bi-people"></i> Thành viên
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link {% if request.blueprint == 'permissions' %}active{% endif %}"
+           href="{{ url_for('permissions.index') }}">
+          <i class="bi bi-shield-lock"></i> Phân quyền
+        </a>
+      </li>
+      {% endif %}{# IDU == 1 #}
+
+      {% endif %}{# is_authenticated #}
+
+    </ul>
+
+    {% if current_user.is_authenticated %}
+    <div class="sidebar-footer">
+      <div class="d-flex align-items-center gap-2 px-3 py-2">
+        <div class="sidebar-avatar">
+          <i class="bi bi-person-fill"></i>
+        </div>
+        <div class="flex-grow-1 overflow-hidden">
+          <div class="sidebar-username text-truncate">{{ current_user.username }}</div>
+        </div>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-logout-btn" title="Đăng xuất">
+          <i class="bi bi-box-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+    {% endif %}
+  </nav>
+
+  <!-- ============================================================ -->
+  <!-- Main content area                                             -->
+  <!-- ============================================================ -->
+  <div class="admin-main">
+
+    <!-- Top header bar -->
+    <header class="admin-topbar d-flex align-items-center px-4">
+      <button class="btn btn-sm btn-outline-secondary me-3" id="sidebarToggle">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb" class="flex-grow-1">
+        <ol class="breadcrumb mb-0">
+          <li class="breadcrumb-item">
+            <a href="{{ url_for('dashboard.index') if current_user.is_authenticated and current_user.IDU == 1 else url_for('news.index') }}">Home</a>
+          </li>
+          {% block breadcrumb %}{% endblock %}
+        </ol>
+      </nav>
+
+      <!-- User info dropdown -->
+      {% if current_user.is_authenticated %}
+      <div class="ms-auto dropdown">
+        <button class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2"
+                type="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-person-circle fs-5"></i>
+          <span class="small">{{ current_user.username }}</span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <a class="dropdown-item" href="{{ url_for('auth.change_password') }}">
+              <i class="bi bi-key me-2"></i>Đổi mật khẩu
+            </a>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <a class="dropdown-item text-danger" href="{{ url_for('auth.logout') }}">
+              <i class="bi bi-box-arrow-right me-2"></i>Đăng xuất
+            </a>
+          </li>
+        </ul>
+      </div>
+      {% endif %}
+    </header>
+
+    <!-- Flash messages -->
+    <div class="px-4 pt-3">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <!-- Page content -->
+    <main class="admin-content px-4 py-3">
+      {% block content %}{% endblock %}
+    </main>
+
+  </div><!-- /.admin-main -->
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+  {% block scripts %}{% endblock %}
+  {% if site_config and site_config.script_body %}{{ site_config.script_body | safe }}{% endif %}
+</body>
+</html>

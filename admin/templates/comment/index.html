@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý comment — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Comment</li>
+{% endblock %}
+
+{% block content %}
+
+<div class="mb-3 d-flex gap-2 flex-wrap align-items-center">
+  <div class="btn-group btn-group-sm" role="group">
+    <a href="{{ url_for('comment.index') }}"
+       class="btn {% if ac_filter == '' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-list-ul me-1"></i>Tất cả
+    </a>
+    <a href="{{ url_for('comment.index', ac='0') }}"
+       class="btn {% if ac_filter == '0' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-eye-slash me-1"></i>Ẩn
+      {% if hidden_count %}<span class="badge bg-danger ms-1">{{ hidden_count }}</span>{% endif %}
+    </a>
+    <a href="{{ url_for('comment.index', ac='1') }}"
+       class="btn {% if ac_filter == '1' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-eye me-1"></i>Hiển thị
+    </a>
+  </div>
+</div>
+
+<form method="post" id="batchForm" action="{{ url_for('comment.index') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+
+  <div class="action-bar">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    <span class="action-bar-spacer"></span><span class="action-bar-count">{{ total }} comment</span>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;"><input type="checkbox" id="selectAll"></th>
+          <th style="width:50px;">#</th>
+          <th>Họ tên</th>
+          <th>Email</th>
+          <th>Tin bài</th>
+          <th>Comment</th>
+          <th style="width:50px;">Rate</th>
+          <th style="width:140px;">Trạng thái</th>
+          <th style="width:110px;">Ngày</th>
+          <th style="width:80px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for rec in records %}
+        <tr {% if rec.is_show == 0 %}class="table-warning"{% endif %}>
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ rec.ID }}">
+            <input type="hidden" name="row_id" value="{{ rec.ID }}">
+          </td>
+          <td class="text-muted small">{{ rec.ID }}</td>
+          <td class="small">{{ rec.name or '—' }}</td>
+          <td class="small">{{ rec.email or '—' }}</td>
+          <td class="small">
+            {% if rec.news_id %}
+              {% if rec.type_c == 1 %}
+                {{ menu_map.get(rec.news_id, '#' ~ rec.news_id) }}
+              {% else %}
+                {% set nname = news_map.get(rec.news_id) %}
+                {% if nname %}
+                  <a href="{{ url_for('news.edit', news_id=rec.news_id) }}" target="_blank" class="text-decoration-none">{{ nname }}</a>
+                {% else %}#{{ rec.news_id }}{% endif %}
+              {% endif %}
+            {% else %}—{% endif %}
+          </td>
+          <td class="small" style="max-width:300px; white-space:pre-wrap;">{{ rec.content or '—' }}</td>
+          <td class="text-center small">{{ rec.rate or '—' }}</td>
+          <td>
+            <select name="ac_{{ rec.ID }}" class="form-select form-select-sm">
+              <option value="1" {% if rec.is_show == 1 %}selected{% endif %}>Hiển thị</option>
+              <option value="0" {% if rec.is_show == 0 %}selected{% endif %}>Ẩn</option>
+            </select>
+          </td>
+          <td class="small text-muted">
+            {{ rec.created_at.strftime('%d/%m/%Y') if rec.created_at else '—' }}
+          </td>
+          <td class="text-center text-nowrap">
+            <a href="{{ url_for('comment.edit', comment_id=rec.ID) }}"
+               class="btn btn-xs btn-outline-secondary py-0 px-1" title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1" title="Xóa"
+                    onclick="confirmDeleteOne({{ rec.ID }}, '{{ rec.name|e }}', '{{ url_for('comment.delete', comment_id=rec.ID) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="10" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">Không có comment nào.</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if records %}
+  <div class="action-bar mt-1">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger" onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+  </div>
+  {% endif %}
+</form>
+
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>initBatchList('comment');</script>
+{% endblock %}

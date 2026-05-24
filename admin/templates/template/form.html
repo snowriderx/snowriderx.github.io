@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% set is_edit = intro.ID is not none and intro.ID %}
+{% set page_title = "Sửa mẫu nội dung" if is_edit else "Thêm mẫu nội dung" %}
+
+{% block title %}{{ page_title }} — {{ site_name }}{% endblock %}
+
+{% block head %}
+<script src="https://cdn.ckeditor.com/ckeditor5/41.4.2/super-build/ckeditor.js"></script>
+<script src="{{ url_for('static', filename='js/ckeditor.js') }}"></script>
+{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item">
+  <a href="{{ url_for('template.index') }}">Mẫu nội dung</a>
+</li>
+<li class="breadcrumb-item active">{{ page_title }}</li>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data" id="introForm" novalidate>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+  <div class="card shadow-sm card-form">
+    <div class="card-header d-flex align-items-center gap-2">
+      <i class="bi bi-file-text"></i>
+      <span>{{ page_title }}</span>
+      {% if is_edit %}
+        <span class="badge bg-secondary ms-auto">#{{ intro.ID }}</span>
+      {% endif %}
+    </div>
+    <div class="card-body">
+
+      {# Action buttons — top #}
+      <div class="d-flex gap-2 mb-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg me-1"></i>Ghi nhận
+        </button>
+        <a href="{{ url_for('template.index') }}"
+           class="btn btn-outline-secondary">Hủy</a>
+      </div>
+
+      <div class="row g-3">
+
+        {# Name #}
+        <div class="col-12">
+          <label for="name" class="form-label">Tiêu đề</label>
+          <input type="text"
+                 class="form-control{% if form_errors.get('name') %} is-invalid{% endif %}"
+                 id="name" name="name"
+                 value="{{ intro.name or '' }}" maxlength="100" autofocus>
+          {% if form_errors.get('name') %}
+            <div class="invalid-feedback">{{ form_errors['name'] }}</div>
+          {% endif %}
+        </div>
+
+        {# Descs — CKEditor #}
+        <div class="col-12">
+          <label for="descs" class="form-label">Nội dung</label>
+          <textarea class="form-control" id="descs" name="descs"
+                    rows="14">{{ intro.descs or '' }}</textarea>
+        </div>
+
+        {# Sort #}
+        <div class="col-12">
+          <div style="max-width: 200px;">
+            <label for="sort" class="form-label">Sắp xếp</label>
+            <input type="text" class="form-control" id="sort" name="sort"
+                   value="{{ intro.sort or '50' }}" maxlength="10" placeholder="50">
+            <div class="form-text small text-nowrap">
+              Sắp xếp tăng dần, VD: 01, 02, 03, ... | hoặc 01.1, 01.2, 01.3, ...
+            </div>
+          </div>
+        </div>
+
+        {# Status #}
+        <div class="col-12">
+          <div style="max-width: 200px;">
+            <label for="is_active" class="form-label">Trạng thái</label>
+            <select class="form-select" id="is_active" name="is_active">
+              {% for val, label in intro_status.items() %}
+              <option value="{{ val }}"
+                {% if (intro.is_active if intro.is_active is not none else 1) == val %}selected{% endif %}>
+                {{ label }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        {# Image #}
+        <div class="col-12">
+          <label class="form-label">Ảnh đại diện</label>
+          <input type="hidden" name="delete_img" id="deleteImgFlag" value="0">
+
+          {% if is_edit and intro.has_image %}
+            <div id="imgPreview" class="mb-2">
+              <img id="imgCurrent"
+                   src="{{ img_url('intro', intro.img) }}"
+                   alt="thumbnail"
+                   style="max-height:100px; max-width:100%; object-fit:contain;
+                          border:1px solid #dee2e6; border-radius:4px; padding:2px;">
+              <div class="form-text text-muted mt-1">
+                <i class="bi bi-file-image me-1"></i>{{ intro.img }}
+              </div>
+              <div class="mt-1">
+                <button type="button" class="btn btn-sm btn-outline-danger"
+                        onclick="markDeleteImg()">
+                  <i class="bi bi-x-circle me-1"></i>Xóa ảnh
+                </button>
+              </div>
+            </div>
+            <div id="imgDeletedNotice" class="mb-2 d-none">
+              <span class="text-danger small">
+                <i class="bi bi-exclamation-circle me-1"></i>
+                Ảnh sẽ bị xóa khi nhấn <strong>Ghi nhận</strong>.
+              </span>
+              <button type="button" class="btn btn-sm btn-link p-0 ms-2"
+                      onclick="undoDeleteImg()">Hoàn tác</button>
+            </div>
+          {% endif %}
+
+          <div id="imgNewPreview" class="mb-2 d-none">
+            <img id="imgNewImg" src="" alt="preview"
+                 style="max-height:100px; max-width:200px; object-fit:contain;
+                        border:1px solid #0d6efd; border-radius:4px; padding:2px;">
+            <div class="small text-primary mt-1">
+              <i class="bi bi-arrow-repeat me-1"></i>
+              Sẽ được <strong>{{ 'thay thế' if (is_edit and intro.has_image) else 'tải lên' }}</strong> khi nhấn Ghi nhận.
+            </div>
+          </div>
+
+          <input type="file"
+                 class="form-control{% if form_errors.get('img_file') %} is-invalid{% endif %}"
+                 id="img_file" name="img_file"
+                 accept=".jpg,.jpeg,.gif,.png,.webp"
+                 onchange="previewImg(this)"
+                 style="max-width: 400px;">
+          {% if form_errors.get('img_file') %}
+            <div class="invalid-feedback">{{ form_errors['img_file'] }}</div>
+          {% endif %}
+          <div class="form-text small mt-1">Hỗ trợ: jpg, gif, png, webp. Ảnh tự thu nhỏ về 100px.</div>
+        </div>
+
+      </div>
+
+      {# Action buttons — bottom #}
+      <div class="d-flex gap-2 mt-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-check-lg me-1"></i>Ghi nhận
+        </button>
+        <a href="{{ url_for('template.index') }}"
+           class="btn btn-outline-secondary">Hủy</a>
+      </div>
+
+    </div>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  initCKEditors(['descs'], 'introForm', {
+    imageBaseUrl:    '{{ config.IMAGE_BASE_URL }}',
+    uploadUrl:       '{{ config.UPLOAD_API_URL }}',
+    uploadApiKey:    '{{ config.UPLOAD_API_KEY }}',
+    uploadSubfolder: 'intro',
+    deleteUrl:       '/api/ck-delete',
+  });
+
+  function markDeleteImg() {
+    document.getElementById('deleteImgFlag').value = '1';
+    var preview = document.getElementById('imgPreview');
+    if (preview) preview.classList.add('d-none');
+    var notice = document.getElementById('imgDeletedNotice');
+    if (notice) notice.classList.remove('d-none');
+  }
+
+  function undoDeleteImg() {
+    document.getElementById('deleteImgFlag').value = '0';
+    var preview = document.getElementById('imgPreview');
+    if (preview) preview.classList.remove('d-none');
+    var notice = document.getElementById('imgDeletedNotice');
+    if (notice) notice.classList.add('d-none');
+  }
+
+  function previewImg(input) {
+    var container = document.getElementById('imgNewPreview');
+    var imgEl = document.getElementById('imgNewImg');
+    if (input.files && input.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        imgEl.src = e.target.result;
+        container.classList.remove('d-none');
+      };
+      reader.readAsDataURL(input.files[0]);
+    } else {
+      container.classList.add('d-none');
+    }
+  }
+</script>
+{% endblock %}

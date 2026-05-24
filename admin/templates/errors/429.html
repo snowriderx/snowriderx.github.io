@@ -1,0 +1,11 @@
+{% extends "errors/base_error.html" %}
+
+{% block error_title %}429 — Quá nhiều yêu cầu{% endblock %}
+{% block icon %}bi-hourglass-split{% endblock %}
+{% block icon_color %}text-warning{% endblock %}
+{% block code %}429{% endblock %}
+{% block heading %}Quá nhiều yêu cầu{% endblock %}
+{% block description %}
+  Bạn đã gửi quá nhiều yêu cầu trong thời gian ngắn.
+  Vui lòng chờ một lúc rồi thử lại.
+{% endblock %}

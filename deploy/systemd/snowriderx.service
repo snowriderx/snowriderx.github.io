@@ -1,0 +1,25 @@
+[Unit]
+Description=Snow Rider X Flask App
+After=network.target postgresql.service
+
+[Service]
+User=deploy
+Group=deploy
+WorkingDirectory=/opt/snowriderx
+Environment=PATH=/opt/snowriderx/.venv/bin
+EnvironmentFile=/opt/snowriderx/.env
+ExecStart=/opt/snowriderx/.venv/bin/gunicorn \
+    --workers 2 \
+    --worker-class sync \
+    --bind 127.0.0.1:8002 \
+    --timeout 30 \
+    --max-requests 1000 \
+    --max-requests-jitter 100 \
+    --access-logfile /var/log/snowriderx/access.log \
+    --error-logfile /var/log/snowriderx/error.log \
+    wsgi:application
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

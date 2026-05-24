@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://{{ domain }}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+  {% for slug in menus %}
+  <url>
+    <loc>https://{{ domain }}/{{ slug }}</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  {% endfor %}
+  {% for p in products %}
+  <url>
+    <loc>https://{{ domain }}/{{ p.slug }}</loc>
+    {% if p.lastmod %}<lastmod>{{ p.lastmod.strftime('%Y-%m-%d') }}</lastmod>{% endif %}
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  {% endfor %}
+  {% for row in news_rows %}
+  <url>
+    <loc>https://{{ domain }}/{{ row.slug }}</loc>
+    {% set _d = row.updated_at or row.created_at %}
+    {% if _d %}<lastmod>{{ _d.strftime('%Y-%m-%d') }}</lastmod>{% endif %}
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  {% endfor %}
+</urlset>

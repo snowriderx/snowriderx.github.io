@@ -1,0 +1,306 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Dashboard</li>
+{% endblock %}
+
+{% block head %}
+<style>
+.chart-wrapper { position: relative; height: 220px; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── Stat cards ──────────────────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+
+  <div class="col-sm-6 col-xl">
+    <a href="{{ url_for('news.index') }}" class="text-decoration-none">
+      <div class="card stat-card stat-card-accent accent-primary border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="stat-icon bg-primary-subtle text-primary">
+            <i class="bi bi-newspaper fs-3"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div class="stat-value text-dark">{{ stats.total_news }}</div>
+            <div class="text-muted small mt-1">Tin tức</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-sm-6 col-xl">
+    <a href="{{ url_for('product.index') }}" class="text-decoration-none">
+      <div class="card stat-card stat-card-accent accent-purple border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="stat-icon" style="background:#f3e8ff;color:#7c3aed;">
+            <i class="bi bi-box-seam fs-3"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div class="stat-value text-dark">{{ stats.total_products }}</div>
+            <div class="text-muted small mt-1">Sản phẩm</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-sm-6 col-xl">
+    <a href="{{ url_for('users.index') }}" class="text-decoration-none">
+      <div class="card stat-card stat-card-accent accent-success border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="stat-icon bg-success-subtle text-success">
+            <i class="bi bi-people fs-3"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div class="stat-value text-dark">{{ stats.total_users }}</div>
+            <div class="text-muted small mt-1">Thành viên</div>
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-sm-6 col-xl">
+    <a href="{{ url_for('contact.index') }}" class="text-decoration-none">
+      <div class="card stat-card stat-card-accent accent-danger border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="stat-icon bg-danger-subtle text-danger">
+            <i class="bi bi-envelope fs-3"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div class="stat-value text-dark">{{ stats.total_contacts }}</div>
+            <div class="text-muted small mt-1">Liên hệ chưa xử lý</div>
+          </div>
+          {% if stats.total_contacts %}
+          <span class="badge bg-danger">Mới</span>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+  </div>
+
+  <div class="col-sm-6 col-xl">
+    <a href="{{ url_for('comment.index', ac='0') }}" class="text-decoration-none">
+      <div class="card stat-card stat-card-accent accent-warning border-0 shadow-sm h-100">
+        <div class="card-body d-flex align-items-center gap-3">
+          <div class="stat-icon bg-warning-subtle text-warning">
+            <i class="bi bi-chat-left-text fs-3"></i>
+          </div>
+          <div class="flex-grow-1">
+            <div class="stat-value text-dark">{{ stats.total_comments }}</div>
+            <div class="text-muted small mt-1">Comment chờ duyệt</div>
+          </div>
+          {% if stats.total_comments %}
+          <span class="badge bg-warning text-dark">Chờ</span>
+          {% endif %}
+        </div>
+      </div>
+    </a>
+  </div>
+
+</div>
+
+{# ── Chart + Quick actions ───────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+
+  <div class="col-lg-5">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white fw-semibold py-2">
+        <i class="bi bi-bar-chart-fill text-primary me-2"></i>Tổng quan nội dung
+      </div>
+      <div class="card-body d-flex align-items-center justify-content-center">
+        <div class="chart-wrapper w-100">
+          <canvas id="overviewChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-7">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white fw-semibold py-2">
+        <i class="bi bi-lightning-charge-fill text-warning me-2"></i>Thao tác nhanh
+      </div>
+      <div class="card-body d-flex flex-wrap gap-2 align-content-start">
+        <a href="{{ url_for('news.create') }}" class="btn btn-sm btn-outline-primary">
+          <i class="bi bi-plus-circle me-1"></i>Thêm tin tức
+        </a>
+        <a href="{{ url_for('product.create') }}" class="btn btn-sm btn-outline-secondary" style="--bs-btn-border-color:#7c3aed;--bs-btn-color:#7c3aed;--bs-btn-hover-bg:#7c3aed;--bs-btn-hover-color:#fff;--bs-btn-hover-border-color:#7c3aed;">
+          <i class="bi bi-plus-circle me-1"></i>Thêm sản phẩm
+        </a>
+        <a href="{{ url_for('menu.index') }}" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-list-nested me-1"></i>Quản lý Menu
+        </a>
+        <a href="{{ url_for('contact.index') }}" class="btn btn-sm btn-outline-danger">
+          <i class="bi bi-envelope me-1"></i>Xem liên hệ
+        </a>
+        <a href="{{ url_for('comment.index', ac='0') }}" class="btn btn-sm btn-outline-warning">
+          <i class="bi bi-chat-left-text me-1"></i>Duyệt comment
+        </a>
+        <a href="{{ url_for('users.index') }}" class="btn btn-sm btn-outline-success">
+          <i class="bi bi-people me-1"></i>Thành viên
+        </a>
+        <a href="{{ url_for('config.index') }}" class="btn btn-sm btn-outline-dark">
+          <i class="bi bi-gear me-1"></i>Cấu hình
+        </a>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{# ── Recent activity ─────────────────────────────────────────────── #}
+<div class="row g-3">
+
+  {# Recent news #}
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white d-flex align-items-center justify-content-between py-2">
+        <span class="fw-semibold"><i class="bi bi-newspaper me-2 text-primary"></i>Tin tức mới nhất</span>
+        <a href="{{ url_for('news.index') }}" class="btn btn-xs btn-outline-secondary py-0 px-2 small">Xem tất cả</a>
+      </div>
+      <div class="card-body p-0">
+        {% if recent_news %}
+        <ul class="list-group list-group-flush">
+          {% for n in recent_news %}
+          <li class="list-group-item px-3 py-2 d-flex align-items-center gap-2">
+            <span class="flex-shrink-0" style="width:6px;height:6px;border-radius:50%;background:{{ '#16a34a' if n.is_active == 1 else '#94a3b8' }};display:inline-block;"></span>
+            <a href="{{ url_for('news.edit', news_id=n.ID) }}"
+               class="text-decoration-none text-truncate flex-grow-1 small">
+              {{ n.name or '(không tên)' }}
+            </a>
+            <span class="text-muted small flex-shrink-0">
+              {{ n.created_at.strftime('%d/%m') if n.created_at else '' }}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-center text-muted py-4 small">Chưa có tin tức nào.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Recent products #}
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white d-flex align-items-center justify-content-between py-2">
+        <span class="fw-semibold"><i class="bi bi-box-seam me-2" style="color:#7c3aed;"></i>Sản phẩm mới nhất</span>
+        <a href="{{ url_for('product.index') }}" class="btn btn-xs btn-outline-secondary py-0 px-2 small">Xem tất cả</a>
+      </div>
+      <div class="card-body p-0">
+        {% if recent_products %}
+        <ul class="list-group list-group-flush">
+          {% for p in recent_products %}
+          <li class="list-group-item px-3 py-2 d-flex align-items-center gap-2">
+            <span class="flex-shrink-0" style="width:6px;height:6px;border-radius:50%;background:{{ '#16a34a' if p.is_active == 1 else '#94a3b8' }};display:inline-block;"></span>
+            <a href="{{ url_for('product.edit', product_id=p.ID) }}"
+               class="text-decoration-none text-truncate flex-grow-1 small">
+              {{ p.name or '(không tên)' }}
+            </a>
+            <span class="text-muted small flex-shrink-0">
+              {{ p.created_at.strftime('%d/%m') if p.created_at else '' }}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-center text-muted py-4 small">Chưa có sản phẩm nào.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Recent contacts #}
+  <div class="col-lg-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-header bg-white d-flex align-items-center justify-content-between py-2">
+        <span class="fw-semibold"><i class="bi bi-envelope me-2 text-danger"></i>Liên hệ gần đây</span>
+        <a href="{{ url_for('contact.index') }}" class="btn btn-xs btn-outline-secondary py-0 px-2 small">Xem tất cả</a>
+      </div>
+      <div class="card-body p-0">
+        {% if recent_contacts %}
+        <ul class="list-group list-group-flush">
+          {% for c in recent_contacts %}
+          <li class="list-group-item px-3 py-2 d-flex align-items-center gap-2">
+            <span class="flex-shrink-0" style="width:6px;height:6px;border-radius:50%;background:{{ '#dc2626' if c.is_read == 0 else '#94a3b8' }};display:inline-block;"></span>
+            <a href="{{ url_for('contact.view', contact_id=c.ID) }}"
+               class="text-decoration-none text-truncate flex-grow-1 small">
+              {{ c.name or '(ẩn danh)' }}
+            </a>
+            <span class="text-muted small flex-shrink-0">
+              {{ c.created_at.strftime('%d/%m') if c.created_at else '' }}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <div class="text-center text-muted py-4 small">Chưa có liên hệ nào.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+(function () {
+  const ctx = document.getElementById('overviewChart');
+  if (!ctx) return;
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Tin tức', 'Sản phẩm', 'Thành viên', 'Liên hệ', 'Comment'],
+      datasets: [{
+        label: 'Số lượng',
+        data: [
+          {{ stats.total_news }},
+          {{ stats.total_products }},
+          {{ stats.total_users }},
+          {{ stats.total_contacts }},
+          {{ stats.total_comments }}
+        ],
+        backgroundColor: [
+          'rgba(37,99,235,0.75)',
+          'rgba(124,58,237,0.75)',
+          'rgba(22,163,74,0.75)',
+          'rgba(220,38,38,0.75)',
+          'rgba(217,119,6,0.75)'
+        ],
+        borderRadius: 6,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y } }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { precision: 0, font: { size: 11 } },
+          grid: { color: 'rgba(0,0,0,.05)' }
+        },
+        x: {
+          ticks: { font: { size: 11 } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+})();
+</script>
+{% endblock %}

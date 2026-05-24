@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block title %}Quản lý Sản phẩm — {{ site_name }}{% endblock %}
+
+{% block breadcrumb %}
+<li class="breadcrumb-item active">Quản lý Sản phẩm</li>
+{% endblock %}
+
+{% block content %}
+
+{# ── Language filter ──────────────────────────────────────────────── #}
+{% if langs %}
+<div class="mb-2">
+  <div class="btn-group btn-group-sm">
+    <a href="{{ url_for('product.index', tab=current_tab_id) if current_tab_id is not none else url_for('product.index') }}"
+       class="btn {% if lang_filter == '' %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      <i class="bi bi-globe me-1"></i>Tất cả
+    </a>
+    {% for lang in langs %}
+    <a href="{{ url_for('product.index', tab=current_tab_id, lang=lang.ID) if current_tab_id is not none else url_for('product.index', lang=lang.ID) }}"
+       class="btn {% if lang_filter == lang.ID|string %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+      {{ lang.name }}
+    </a>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+{# ── Tab filter bar (only when tab column is ready) ───────────────── #}
+{% if tab_ready and tabs %}
+<div class="d-flex gap-2 mb-3 flex-wrap align-items-center">
+  <a href="{{ url_for('product.index') }}"
+     class="btn btn-sm {% if current_tab_id is none %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+    Tất cả
+  </a>
+  {% for t in tabs %}
+  <a href="{{ url_for('product.index', tab=t.ID) }}"
+     class="btn btn-sm {% if current_tab_id == t.ID %}btn-primary{% else %}btn-outline-secondary{% endif %}">
+    {{ t.name }}
+  </a>
+  {% endfor %}
+  <span class="ms-auto text-muted small">
+    {% if current_tab_id is not none %}
+      {% set active_tab = tabs | selectattr('ID', 'equalto', current_tab_id) | list | first %}
+      {{ products|length }} sản phẩm
+      {% if active_tab %} — <strong>{{ active_tab.name }}</strong>{% endif %}
+    {% else %}
+      {{ products|length }} sản phẩm — tất cả tab
+    {% endif %}
+  </span>
+</div>
+{% endif %}
+
+{# ── Top action bar ────────────────────────────────────────────────── #}
+<form method="post" id="batchForm"
+      action="{{ url_for('product.index') }}">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  <input type="hidden" name="_action" id="formAction" value="update">
+  {% if current_tab_id is not none %}
+  <input type="hidden" name="_tab_id" value="{{ current_tab_id }}">
+  {% endif %}
+
+  <div class="action-bar">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger"
+            onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+    {% if not tab_ready or not tabs %}
+    <span class="action-bar-spacer"></span><span class="action-bar-count">{{ products|length }} sản phẩm</span>
+    {% endif %}
+    <a href="{{ url_for('product.create') }}{% if current_tab_id is not none %}?tab={{ current_tab_id }}{% endif %}"
+       class="btn btn-sm btn-primary {% if tab_ready and tabs %}{% else %}ms-auto{% endif %}">
+      <i class="bi bi-plus-lg me-1"></i>Thêm mới
+    </a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-hover table-striped table-sm align-middle">
+      <thead>
+        <tr>
+          <th style="width:36px;">
+            <input type="checkbox" id="selectAll" title="Chọn tất cả">
+          </th>
+          <th style="width:90px;">Ảnh</th>
+          <th>Tên sản phẩm</th>
+          {% if tab_ready %}<th style="width:110px;">Tab</th>{% endif %}
+          <th style="width:90px;">Ngày tạo</th>
+          <th style="width:110px;">Trạng thái</th>
+          <th style="width:110px;" class="text-center">Thao tác</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in products %}
+        <tr>
+          <td class="text-center">
+            <input type="checkbox" name="item_id" value="{{ p.ID }}">
+            <input type="hidden" name="row_id" value="{{ p.ID }}">
+          </td>
+
+          {# Thumbnail #}
+          <td>
+            {% if p.has_image %}
+              <img src="{{ img_url('pro', p.img) }}"
+                   alt="" style="max-width:80px; max-height:50px; object-fit:cover;">
+            {% else %}
+              <span class="text-muted small">—</span>
+            {% endif %}
+          </td>
+
+          {# Name + slug #}
+          <td>
+            <div class="fw-semibold">{{ p.name or '—' }}</div>
+            {% if p.slug %}
+              <div class="text-muted small">
+                <i class="bi bi-link-45deg"></i>{{ p.slug }}
+              </div>
+            {% endif %}
+          </td>
+
+          {# Tab label — only when column is mapped #}
+          {% if tab_ready %}
+          <td class="small">
+            {% if p.tab_id %}
+              {% set ptab = tabs | selectattr('ID', 'equalto', p.tab_id) | list | first %}
+              {% if ptab %}
+                <span class="badge bg-secondary">{{ ptab.name }}</span>
+              {% else %}
+                <span class="text-muted">#{{ p.tab_id }}</span>
+              {% endif %}
+            {% else %}
+              <span class="text-muted">—</span>
+            {% endif %}
+          </td>
+          {% endif %}
+
+          {# TimeP #}
+          <td class="small text-muted">
+            {{ p.created_at.strftime('%d/%m/%Y') if p.created_at else '—' }}
+          </td>
+
+          {# AcP — submitted in batch update #}
+          <td>
+            <select name="ac_{{ p.ID }}" class="form-select form-select-sm">
+              <option value="1" {% if p.is_active == 1 %}selected{% endif %}>
+                Hiển thị
+              </option>
+              <option value="0" {% if p.is_active == 0 %}selected{% endif %}>
+                Ẩn
+              </option>
+            </select>
+          </td>
+
+          {# Actions #}
+          <td class="text-center">
+            {# Bump to top (eTop) #}
+            <form method="post"
+                  action="{{ url_for('product.bump', product_id=p.ID) }}"
+                  class="d-inline"
+                  title="Đẩy lên đầu">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              {% if current_tab_id is not none %}
+              <input type="hidden" name="_tab_id" value="{{ current_tab_id }}">
+              {% endif %}
+              <button type="submit" class="btn btn-xs btn-outline-secondary py-0 px-1"
+                      title="Đẩy lên đầu">
+                <i class="bi bi-arrow-up"></i>
+              </button>
+            </form>
+            <a href="{{ url_for('product.edit', product_id=p.ID) }}"
+               class="btn btn-xs btn-outline-primary py-0 px-1"
+               title="Sửa">
+              <i class="bi bi-pencil"></i>
+            </a>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger py-0 px-1"
+                    title="Xóa"
+                    onclick="confirmDeleteOne({{ p.ID }}, '{{ p.name|e }}', '{{ url_for('product.delete', product_id=p.ID) }}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="{{ 7 if tab_ready else 6 }}" class="text-center py-5">
+            <i class="bi bi-inbox text-muted" style="font-size:2rem;opacity:.4;display:block;margin-bottom:.5rem;"></i>
+            <span class="text-muted small">{% if current_tab_id is not none %}Chưa có sản phẩm nào trong tab này.{% else %}Chưa có sản phẩm nào.{% endif %}</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if products %}
+  <div class="action-bar mt-1">
+    <button type="submit" class="btn btn-sm btn-success"
+            onclick="document.getElementById('formAction').value='update'">
+      <i class="bi bi-check-all me-1"></i>Cập nhật tất cả
+    </button>
+    <button type="button" class="btn btn-sm btn-danger"
+            onclick="submitBatchDelete()">
+      <i class="bi bi-trash me-1"></i>Xóa chọn
+    </button>
+  </div>
+  {% endif %}
+
+</form>
+
+{# Shared single-row delete form — outside batchForm to avoid nesting #}
+<form id="deleteOneForm" method="post" action="" class="d-none">
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+  {% if current_tab_id is not none %}
+  <input type="hidden" name="_tab_id" value="{{ current_tab_id }}">
+  {% endif %}
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>initBatchList('sản phẩm');</script>
+{% endblock %}

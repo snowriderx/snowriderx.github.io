@@ -1,0 +1,46 @@
+{% macro head_seo(page_title, meta_description, meta_keywords, canonical_url, share_img_url, schema_type, no_robots=False) %}
+<title>{{ page_title }}</title>
+<meta name="description" content="{{ meta_description | striptags | truncate(160, True, '...') }}">
+{% if meta_keywords %}<meta name="keywords" content="{{ meta_keywords }}">{% endif %}
+<link rel="canonical" href="{{ canonical_url }}">
+{% if no_robots %}<meta name="robots" content="noindex, nofollow">{% endif %}
+
+{# Open Graph #}
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ page_title }}">
+<meta property="og:description" content="{{ meta_description | striptags | truncate(200, True, '...') }}">
+<meta property="og:url" content="{{ canonical_url }}">
+{% if share_img_url %}<meta property="og:image" content="{{ share_img_url }}">{% endif %}
+
+{# Twitter Card #}
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ page_title }}">
+<meta name="twitter:description" content="{{ meta_description | striptags | truncate(200, True, '...') }}">
+{% if share_img_url %}<meta name="twitter:image" content="{{ share_img_url }}">{% endif %}
+{% endmacro %}
+
+
+{% macro schema_org(schema_type, page_title, meta_description, canonical_url, share_img_url) %}
+{% if schema_type == "VideoGame" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": {{ page_title | tojson }},
+  "description": {{ meta_description | striptags | tojson }},
+  "url": {{ canonical_url | tojson }}{% if share_img_url %},
+  "image": {{ share_img_url | tojson }}{% endif %}
+}
+</script>
+{% elif schema_type == "WebApplication" %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": {{ page_title | tojson }},
+  "description": {{ meta_description | striptags | tojson }},
+  "url": {{ canonical_url | tojson }}
+}
+</script>
+{% endif %}
+{% endmacro %}
