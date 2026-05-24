@@ -25,8 +25,8 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Uploads (user-generated content — deploy separately via rsync)
-theme/static/uploads/
+# Uploads — track seeded images, ignore nothing here
+# (add specific patterns below if needed in the future)
 
 # VB.NET source assets (branch main only — not needed in flask_jinja2)
 escaperoadx/Uploads/
