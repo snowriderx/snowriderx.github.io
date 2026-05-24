@@ -1,9 +1,8 @@
-import os
 from datetime import datetime
 
 from flask import (
     Blueprint, abort, make_response, redirect, render_template,
-    request, url_for, Response,
+    request, url_for, Response, send_from_directory, current_app,
 )
 from sqlalchemy import func, select
 
@@ -137,7 +136,7 @@ def page_router(slug: str):
     googlebot = is_googlebot()
     row_type = link.row_type
 
-    if row_type == 1:
+    if row_type in (0, 1):
         return _render_category(link, googlebot)
     elif row_type == 2:
         return _render_article(link, googlebot)
@@ -163,7 +162,7 @@ def _render_category(link: Link, googlebot: bool):
             menu=menu,
             link=link,
             is_googlebot=googlebot,
-            page_title=link.row_name or menu.name,
+            page_title=menu.seo_title or link.row_name or menu.name,
             meta_keywords=menu.keywords if menu.keywords else "",
             meta_description=menu.description if menu.description else "",
             canonical_url=f"{request.host_url.rstrip('/')}/{link.row_url}",
@@ -204,6 +203,7 @@ def _render_category(link: Link, googlebot: bool):
     # page=1 canonical = bare URL (no ?page=), avoid duplicate content
     canonical = base_url if page == 1 else f"{base_url}?page={page}"
 
+    is_blog = menu.type_m == 1 if menu else False
     return render_template(
         "category.html",
         link=link,
@@ -214,7 +214,9 @@ def _render_category(link: Link, googlebot: bool):
         per_page=per_page,
         breadcrumb=breadcrumb,
         is_googlebot=googlebot,
-        page_title=link.row_name or (menu.name if menu else ""),
+        is_blog=is_blog,
+        body_class="page-blog" if is_blog else "",
+        page_title=(menu.seo_title if menu and menu.seo_title else None) or link.row_name or (menu.name if menu else ""),
         meta_keywords=menu.keywords if menu and menu.keywords else "",
         meta_description=menu.description if menu and menu.description else "",
         canonical_url=canonical,
@@ -258,10 +260,9 @@ def _render_article(link: Link, googlebot: bool):
     breadcrumb = get_breadcrumb(idm)
 
     canonical = f"{request.host_url.rstrip('/')}/{link.row_url}"
-    # Use article's own thumbnail for og:image (same as VB6 /images/news/{ImgN})
     og_image = ""
     if news.img and news.img != "null.gif":
-        og_image = f"/images/news/{news.img}"
+        og_image = f"/static/uploads/news/{news.img}"
 
     return render_template(
         "article.html",
@@ -398,16 +399,19 @@ def sitemap():
     return Response(xml, mimetype="application/xml")
 
 
-# ── PWA files (served from VB6 root) ─────────────────────────────────────────
+# ── PWA files ────────────────────────────────────────────────────────────────
 
 @bp.route("/manifest.json")
 def manifest_json():
-    return send_from_directory(_VB6_ROOT, "manifest.json")
+    return send_from_directory(current_app.static_folder, "manifest.json")
 
 
 @bp.route("/sw.js")
 def sw_js():
-    return send_from_directory(_VB6_ROOT, "sw.js", mimetype="application/javascript")
+    return send_from_directory(
+        current_app.static_folder, "sw.js",
+        mimetype="application/javascript",
+    )
 
 
 # ── Robots / Ads.txt ─────────────────────────────────────────────────────────
@@ -459,10 +463,17 @@ def contact():
             db.session.commit()
             success = True
 
+    menu = db.session.execute(
+        select(Menu).where(Menu.IDM == "050000")
+    ).scalar_one_or_none()
+
     return render_template(
         "contact.html",
         error=error,
         success=success,
-        page_title="Contact Us",
+        menu=menu,
+        page_title=menu.seo_title if menu and menu.seo_title else "Contact Us",
+        meta_description=menu.description if menu and menu.description else "",
         is_googlebot=is_googlebot(),
+        canonical_url=f"{request.host_url.rstrip('/')}/contact",
     )

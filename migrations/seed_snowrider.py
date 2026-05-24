@@ -75,20 +75,19 @@ def _get_img(soup):
 
 # ── 1. tblTotal — site config ─────────────────────────────────────────────────
 print("Seeding tblTotal...")
-if not _exists("tblTotal", "IDT", 1):
+if not _exists("tblTotal", "ID", 1):
     index_soup = _parse_html(SNOW_SRC / "index.html")
     desc = _get_meta(index_soup, "description") or \
            _get_meta(index_soup, "og:description")
     cur.execute(
         '''INSERT INTO "tblTotal"
-           ("IDT", "TitleT", "DescrT", "KeyT", "AcT", "WebsiteInfo")
-           VALUES (%s, %s, %s, %s, %s, %s)''',
+           ("ID", "MetaTitle", "MetaDescription", "MetaKeyword", "WebsiteInfo")
+           VALUES (%s, %s, %s, %s, %s)''',
         (
             1,
             "Snow Rider X",
             desc,
             "snow rider 3d, snow rider, browser game, unblocked",
-            1,
             '{"FileLogo": "/static/uploads/icon/logo.jpg", '
             '"FileFavicon": "/static/uploads/icon/favicon.png", '
             '"FileShare": "/static/uploads/icon/logo.jpg"}',
@@ -120,10 +119,10 @@ for idm, slug, name, tab_m, type_m, html_file in PAGES:
         desc  = _get_meta(soup, "description") or _get_meta(soup, "og:description")
         cur.execute(
             '''INSERT INTO "tblMenu"
-               ("IDM", "NameM", "Name1M", "TitleM", "DescrM",
-                "AcM", "levels", "tab_m", "TypeM", "lang", "sort_order")
+               ("IDM", "NameM", "Name1M", "title", "description",
+                "AcM", "Levels", "TabM", "TypeM", "Lang", "SortM")
                VALUES (%s, %s, %s, %s, %s, 1, 1, %s, %s, 1, %s)''',
-            (idm, name, slug, title, desc, tab_m, type_m, int(idm[:2]))
+            (idm, name, slug, title, desc, tab_m, type_m, str(int(idm[:2])))
         )
         print(f"  inserted tblMenu {idm} {slug}")
     else:
@@ -132,8 +131,8 @@ for idm, slug, name, tab_m, type_m, html_file in PAGES:
     if not _exists("tblLink", "RowUrl", slug):
         row_type = 1 if type_m == 1 else 0
         cur.execute(
-            '''INSERT INTO "tblLink" ("RowUrl", "row_type", "IDM", "AcL")
-               VALUES (%s, %s, %s, 1)''',
+            '''INSERT INTO "tblLink" ("RowUrl", "RowType", "RowIDM")
+               VALUES (%s, %s, %s)''',
             (slug, row_type, idm)
         )
         print(f"  inserted tblLink {slug}")
@@ -165,7 +164,7 @@ for html_path in sorted(BLOG_DIR.glob("*.html")):
                 "DescN", "ImgN", "AcN", "TypeN", "SEON", "TimeN", "TimeUpN")
                VALUES (%s, %s, %s, %s, %s, %s, %s, 1, 1, 1, %s, %s)''',
             (title, slug, BLOG_MENU_IDM, title, desc,
-             content, img, now, now)
+             content, img, now.replace(tzinfo=None), now.replace(tzinfo=None))
         )
         print(f"  inserted tblNews {slug}")
     else:
@@ -173,8 +172,8 @@ for html_path in sorted(BLOG_DIR.glob("*.html")):
 
     if not _exists("tblLink", "RowUrl", slug):
         cur.execute(
-            '''INSERT INTO "tblLink" ("RowUrl", "row_type", "AcL")
-               VALUES (%s, 2, 1)''',
+            '''INSERT INTO "tblLink" ("RowUrl", "RowType")
+               VALUES (%s, 2)''',
             (slug,)
         )
         print(f"  inserted tblLink {slug}")

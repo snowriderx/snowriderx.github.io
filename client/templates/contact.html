@@ -1,46 +1,54 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto px-4 py-10">
-  <h1 class="text-2xl font-bold mb-6">Contact Us</h1>
+<div class="container" style="padding-top:1.5rem;padding-bottom:3rem;">
+
+  {% if menu and menu.desc_m %}
+  <div class="highlight article mb-5">
+    {{ menu.desc_m | safe }}
+  </div>
+  {% endif %}
 
   {% if success %}
-  <div class="bg-green-50 border border-green-300 text-green-800 rounded p-4 mb-6">
+  <div style="background:#f0fff4;border:1px solid #68d391;color:#276749;border-radius:6px;padding:16px;margin-bottom:24px;">
     Thank you! Your message has been sent.
   </div>
   {% endif %}
 
   {% if error %}
-  <div class="bg-red-50 border border-red-300 text-red-800 rounded p-4 mb-6">
+  <div style="background:#fff5f5;border:1px solid #fc8181;color:#c53030;border-radius:6px;padding:16px;margin-bottom:24px;">
     {{ error }}
   </div>
   {% endif %}
 
-  <form method="POST" class="space-y-4">
-    {# Honeypot — hidden from users, bots fill it #}
-    <div class="hidden" aria-hidden="true">
+  <form method="POST" style="max-width:600px;">
+    <div aria-hidden="true" style="display:none;">
       <input type="text" name="website" tabindex="-1" autocomplete="off">
     </div>
 
-    <div>
-      <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+    <div style="margin-bottom:16px;">
+      <label for="name" style="display:block;font-weight:bold;margin-bottom:6px;">Name</label>
       <input type="text" id="name" name="name" required
-        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 12px;font-size:1rem;box-sizing:border-box;">
     </div>
-    <div>
-      <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+
+    <div style="margin-bottom:16px;">
+      <label for="email" style="display:block;font-weight:bold;margin-bottom:6px;">Email</label>
       <input type="email" id="email" name="email" required
-        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+        style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 12px;font-size:1rem;box-sizing:border-box;">
     </div>
-    <div>
-      <label for="content" class="block text-sm font-medium text-gray-700 mb-1">Message</label>
+
+    <div style="margin-bottom:16px;">
+      <label for="content" style="display:block;font-weight:bold;margin-bottom:6px;">Message</label>
       <textarea id="content" name="content" rows="6" required
-        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        style="width:100%;border:1px solid #ccc;border-radius:4px;padding:8px 12px;font-size:1rem;box-sizing:border-box;resize:vertical;"></textarea>
     </div>
+
     <button type="submit"
-      class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-colors font-medium">
+      style="background:#007bff;color:white;border:none;padding:10px 24px;border-radius:6px;font-size:1rem;font-weight:bold;cursor:pointer;">
       Send Message
     </button>
   </form>
+
 </div>
 {% endblock %}

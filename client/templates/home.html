@@ -17,7 +17,7 @@
   <div class="unblocked-box ads-hidden">
     {{ ad_slot(6, is_googlebot=is_googlebot, is_noads=is_noads | default(False)) }}
     <div class="unblocked-banner">
-      <a href="/unblocked">▶ Play {{ GAME_NAME }} – No Ads, Unblocked! Start Catching Now</a>
+      <a href="#gameContainer" id="playBtn">▶ Play {{ GAME_NAME }} – No Ads, Unblocked! Start Catching Now</a>
     </div>
   </div>
 </div>
@@ -26,11 +26,17 @@
   $(function () {
     var h = $('header').outerHeight() + 30;
     $(window).on('load', function () { $('html,body').animate({ scrollTop: h }, 300); });
+    document.getElementById('playBtn').addEventListener('click', function (e) {
+      e.preventDefault();
+      var c = document.getElementById('gameContainer');
+      if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   });
 </script>
 
 <div class="game-box">
-  <div class="game-container container">
+  <div class="game-container" id="gameContainer">
+    <button class="fullscreen-btn" id="fullscreenBtn" title="Fullscreen">⛶</button>
     <iframe id="gameIframe" allowtransparency="yes" allow="autoplay" frameborder="0"
       width="100%" height="100%"
       style="position:absolute;top:0;left:0;right:0;bottom:0;"
@@ -60,13 +66,31 @@
     $('#gameIframe').attr('src', urlGameIframe);
   };
   function setGameIframe(game) { $('#gameIframe').attr('src', '/static/game/' + game + '/index.html?v=1.2.1'); }
+
+  var fullscreenBtn = document.getElementById('fullscreenBtn');
+  var gameContainer = document.getElementById('gameContainer');
+  if (fullscreenBtn && gameContainer) {
+    fullscreenBtn.addEventListener('click', function () {
+      if (!document.fullscreenElement) {
+        gameContainer.requestFullscreen().then(function () {
+          fullscreenBtn.innerHTML = '✖'; fullscreenBtn.title = 'Exit Fullscreen';
+        });
+      } else {
+        document.exitFullscreen().then(function () {
+          fullscreenBtn.innerHTML = '⛶'; fullscreenBtn.title = 'Fullscreen';
+        });
+      }
+    });
+    document.addEventListener('fullscreenchange', function () {
+      if (!document.fullscreenElement) {
+        fullscreenBtn.innerHTML = '⛶'; fullscreenBtn.title = 'Fullscreen';
+      }
+    });
+  }
 </script>
 
 <style>
   .main-container { padding: 0; min-height: 75vh; }
-  .game-container { position: relative; height: 0; width: 100%; padding-bottom: 42%; }
-  .game-container.full { position: fixed; height: 75vh; width: 100%; padding-bottom: 0; left: 0; top: 0; }
-  @media (max-width: 767px) { .game-container { padding-bottom: 200%; } }
 </style>
 
 {% endif %}

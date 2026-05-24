@@ -4,7 +4,7 @@ GAME_SRC = "/static/game/snow-rider/index.html"
 SCHEMA_TYPE = "VideoGame"
 HAS_PRODUCTS = False
 HAS_NOADS = False
-HAS_CONTACT_FORM = True
+HAS_CONTACT_FORM = False
 
 IFRAME_REFERRERPOLICY = "unsafe-url"
 GAME_DELAY_MS = 0

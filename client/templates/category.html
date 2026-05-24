@@ -26,7 +26,7 @@
 {% endblock %}
 
 {% block content %}
-<div class="container clearfix">
+<div class="container clearfix" style="padding-top:1.5rem;">
 
   <div class="page-title">
     <h1 class="h2 text-center mt-4 mb-4">{{ page_title }}</h1>
@@ -35,25 +35,23 @@
   {{ ad_slot(1, is_googlebot=is_googlebot) }}
 
   {% if articles %}
-  <div class="row">
+  <div class="row blog-row">
     {% for article in articles %}
     <div class="col-lg-4 col-md-12">
-      <div class="single-post mb-4">
-        <a href="/{{ article.slug }}">
-          <div class="blog-thumb">
-            <img src="/images/news/{{ article.img }}" loading="lazy" alt="{{ article.title or article.name }}" />
-          </div>
-          <div class="blog-content">
-            <h3 class="h3">{{ article.title or article.name }}</h3>
-            {% if article.description %}<p class="line line-3">{{ article.description }}</p>{% endif %}
-          </div>
-        </a>
-      </div>
+      <a class="blog-card" href="/{{ article.slug }}">
+        <div class="blog-card-image">
+          <img src="/static/uploads/news/{{ article.img }}" loading="lazy" alt="{{ article.title or article.name }}" />
+        </div>
+        <div class="blog-card-content">
+          <h3>{{ article.title or article.name }}</h3>
+          {% if article.description %}<p>{{ article.description }}</p>{% endif %}
+        </div>
+      </a>
     </div>
     {% endfor %}
   </div>
   {% else %}
-  <p class="text-center" style="padding:2rem 0;">No articles found.</p>
+  <p style="text-align:center;padding:2rem 0;">No articles found.</p>
   {% endif %}
 
   {% set total_pages = (total / per_page) | round(0, 'ceil') | int %}

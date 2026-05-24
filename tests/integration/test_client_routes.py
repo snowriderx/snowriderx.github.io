@@ -2,8 +2,8 @@
 Integration tests for client-facing routes.
 
 Uses a real PostgreSQL DB (same as other integration tests).
-Tests cover: home, category, article, game, 404, sitemap, robots,
-             security headers, redirect, unblocked.
+Tests cover: home, category, article, static page, game, 404, sitemap,
+             robots, security headers, redirect, unblocked, SEO meta tags.
 """
 import pytest
 from pathlib import Path
@@ -186,6 +186,157 @@ def test_googlebot_gets_200(c):
 def test_googlebot_no_ads(c):
     """Googlebot response must not contain ad slot markers."""
     r = c.get("/", headers={"User-Agent": "Googlebot/2.1"})
-    # Script tags injected for ads should be absent for bots
     assert b"googletag" not in r.data
     assert b"adsbygoogle" not in r.data
+
+
+# ── Category page ─────────────────────────────────────────────────────────────
+
+def test_category_200(c, client_app):
+    with client_app.app_context():
+        from extensions import db
+        row = db.session.execute(
+            db.text(
+                'SELECT l."RowUrl" FROM "tblLink" l '
+                'JOIN "tblMenu" m ON m."IDM" = l."RowIDM" '
+                'WHERE l."RowType" = 1 AND m."TypeM" = 1 AND l."RowUrl" != \'\' LIMIT 1'
+            )
+        ).fetchone()
+    if row is None:
+        pytest.skip("No category rows in tblLink")
+    r = c.get(f"/{row[0]}")
+    assert r.status_code == 200
+
+
+def test_category_uses_seo_title(c, client_app):
+    """Category page title must use menu.seo_title, not raw menu.name."""
+    with client_app.app_context():
+        from extensions import db
+        row = db.session.execute(
+            db.text(
+                'SELECT l."RowUrl", m."title" FROM "tblLink" l '
+                'JOIN "tblMenu" m ON m."IDM" = l."RowIDM" '
+                'WHERE l."RowType" = 1 AND m."TypeM" = 1 '
+                'AND m."title" IS NOT NULL AND m."title" != \'\' LIMIT 1'
+            )
+        ).fetchone()
+    if row is None:
+        pytest.skip("No category with seo_title")
+    r = c.get(f"/{row[0]}")
+    assert row[1].encode() in r.data
+
+
+def test_category_has_articles(c, client_app):
+    with client_app.app_context():
+        from extensions import db
+        row = db.session.execute(
+            db.text(
+                'SELECT l."RowUrl" FROM "tblLink" l '
+                'JOIN "tblMenu" m ON m."IDM" = l."RowIDM" '
+                'WHERE l."RowType" = 1 AND m."TypeM" = 1 LIMIT 1'
+            )
+        ).fetchone()
+    if row is None:
+        pytest.skip("No category rows")
+    r = c.get(f"/{row[0]}")
+    assert b"blog-card" in r.data
+
+
+# ── Static page ───────────────────────────────────────────────────────────────
+
+def test_static_page_200(c, client_app):
+    with client_app.app_context():
+        from extensions import db
+        row = db.session.execute(
+            db.text(
+                'SELECT l."RowUrl" FROM "tblLink" l '
+                'JOIN "tblMenu" m ON m."IDM" = l."RowIDM" '
+                'WHERE l."RowType" IN (0,1) AND m."TypeM" = 0 '
+                'AND l."RowUrl" != \'\' LIMIT 1'
+            )
+        ).fetchone()
+    if row is None:
+        pytest.skip("No static pages in tblLink")
+    r = c.get(f"/{row[0]}")
+    assert r.status_code == 200
+
+
+def test_static_page_uses_seo_title(c, client_app):
+    """Static page title must use menu.seo_title, not raw menu.name."""
+    with client_app.app_context():
+        from extensions import db
+        row = db.session.execute(
+            db.text(
+                'SELECT l."RowUrl", m."title" FROM "tblLink" l '
+                'JOIN "tblMenu" m ON m."IDM" = l."RowIDM" '
+                'WHERE l."RowType" IN (0,1) AND m."TypeM" = 0 '
+                'AND m."title" IS NOT NULL AND m."title" != \'\' LIMIT 1'
+            )
+        ).fetchone()
+    if row is None:
+        pytest.skip("No static page with seo_title")
+    r = c.get(f"/{row[0]}")
+    assert row[1].encode() in r.data
+
+
+# ── Article page ──────────────────────────────────────────────────────────────
+
+def test_article_200(c, client_app):
+    with client_app.app_context():
+        from extensions import db
+        row = db.session.execute(
+            db.text(
+                'SELECT "RowUrl" FROM "tblLink" '
+                'WHERE "RowType" = 2 AND "RowUrl" != \'\' LIMIT 1'
+            )
+        ).fetchone()
+    if row is None:
+        pytest.skip("No article rows in tblLink")
+    r = c.get(f"/{row[0]}")
+    assert r.status_code == 200
+
+
+def test_article_has_canonical(c, client_app):
+    with client_app.app_context():
+        from extensions import db
+        row = db.session.execute(
+            db.text(
+                'SELECT "RowUrl" FROM "tblLink" WHERE "RowType" = 2 LIMIT 1'
+            )
+        ).fetchone()
+    if row is None:
+        pytest.skip("No article rows")
+    r = c.get(f"/{row[0]}")
+    assert b'rel="canonical"' in r.data
+
+
+def test_article_schema_image_path(c, client_app):
+    """Schema.org image URL must use /static/uploads/news/, not /images/news/."""
+    with client_app.app_context():
+        from extensions import db
+        row = db.session.execute(
+            db.text(
+                'SELECT "RowUrl" FROM "tblLink" WHERE "RowType" = 2 LIMIT 1'
+            )
+        ).fetchone()
+    if row is None:
+        pytest.skip("No article rows")
+    r = c.get(f"/{row[0]}")
+    assert b"/images/news/" not in r.data
+
+
+def test_article_keywords_in_meta(c, client_app):
+    """Article page must emit meta keywords when KeyN is set."""
+    with client_app.app_context():
+        from extensions import db
+        row = db.session.execute(
+            db.text(
+                'SELECT l."RowUrl" FROM "tblLink" l '
+                'JOIN "tblNews" n ON LOWER(n."Name1N") = LOWER(l."RowUrl") '
+                'WHERE l."RowType" = 2 AND n."KeyN" IS NOT NULL AND n."KeyN" != \'\' LIMIT 1'
+            )
+        ).fetchone()
+    if row is None:
+        pytest.skip("No article with keywords")
+    r = c.get(f"/{row[0]}")
+    assert b'meta name="keywords"' in r.data

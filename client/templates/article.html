@@ -13,7 +13,7 @@
   "headline": {{ (news.title or news.name or '') | tojson }},
   "image": {
     "@type": "ImageObject",
-    "url": "https://{{ request.host }}{% if news.img and news.img != 'null.gif' %}/images/news/{{ news.img }}{% endif %}",
+    "url": "https://{{ request.host }}{% if news.img and news.img != 'null.gif' %}/static/uploads/news/{{ news.img }}{% endif %}",
     "height": 600,
     "width": 800
   },
@@ -76,7 +76,7 @@
         <div class="single-post mb-4">
           <a href="/{{ r.slug }}">
             <div class="blog-thumb">
-              <img src="/images/news/{{ r.img }}" loading="lazy" alt="{{ r.title or r.name }}" />
+              <img src="/static/uploads/news/{{ r.img }}" loading="lazy" alt="{{ r.title or r.name }}" />
             </div>
             <div class="blog-content">
               <h3 class="h3">{{ r.title or r.name }}</h3>
