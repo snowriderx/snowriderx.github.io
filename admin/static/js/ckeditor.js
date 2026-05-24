@@ -238,7 +238,10 @@ function _buildConfig(opts) {
       'CaseChange',
       'MultiLevelList',
       'AIAssistant',
-      'AITextAdapter'
+      'AITextAdapter',
+      /* ── Wiris MathType (fetches wiris.net on init — no CDN access) ── */
+      'MathType',
+      'ChemType'
     ],
 
     /* ── Toolbar ─────────────────────────────────────────────────
