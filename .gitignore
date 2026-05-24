@@ -46,6 +46,10 @@ theme/static/css/bootstrap.min.css
 migrations/*.txt
 migrations/*.csv
 
+# DB dumps
+*.dump
+*.pgdump
+
 # Pytest cache
 .pytest_cache/
 .coverage
