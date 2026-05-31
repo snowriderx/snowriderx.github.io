@@ -120,7 +120,7 @@ snowriderx/
 
 | Tool | Version |
 |------|---------|
-| Python | 3.11+ |
+| Python | 3.12+ |
 | PostgreSQL | 14+ |
 | Node.js | 18+ (Tailwind CSS only) |
 | Redis | 7+ (production only, for rate limiting) |
@@ -242,7 +242,7 @@ pytest tests/unit tests/integration
 ### 1. Install system dependencies
 
 ```bash
-sudo apt update && sudo apt install -y python3.11 python3.11-venv python3-pip \
+sudo apt update && sudo apt install -y python3.12 python3.12-venv python3-pip \
     postgresql postgresql-client nginx redis-server nodejs npm
 ```
 
@@ -265,7 +265,7 @@ sudo -u deploy git checkout flask_jinja2
 ### 4. Create virtual environment and install dependencies
 
 ```bash
-sudo -u deploy python3.11 -m venv /opt/snowriderx/.venv
+sudo -u deploy python3.12 -m venv /opt/snowriderx/.venv
 sudo -u deploy /opt/snowriderx/.venv/bin/pip install -r requirements.txt
 ```
 
