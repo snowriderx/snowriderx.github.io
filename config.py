@@ -19,12 +19,12 @@ class Config:
 
 
 class AdminConfig(Config):
-    SESSION_COOKIE_NAME = "__appid"
+    SESSION_COOKIE_NAME = "__sr_appid"
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
     SESSION_COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").lower() == "true"
 
-    REMEMBER_COOKIE_NAME = "__fl_remember"
+    REMEMBER_COOKIE_NAME = "__sr_remember"
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_SAMESITE = "Lax"
     REMEMBER_COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").lower() == "true"
