@@ -1,6 +1,6 @@
 ﻿{
-  "name": "escaperoadx.com",
-  "short_name": "Escape Road",
+  "name": "snowriderx.com",
+  "short_name": "Snow Rider",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -8,12 +8,12 @@
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/icons/escaperoadx-icon-192x192.png",
+      "src": "/icons/snowriderx-icon-192x192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/icons/escaperoadx-icon-512x512.png",
+      "src": "/icons/snowriderx-icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
