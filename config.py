@@ -29,6 +29,8 @@ class AdminConfig(Config):
     REMEMBER_COOKIE_SAMESITE = "Lax"
     REMEMBER_COOKIE_SECURE = os.getenv("COOKIE_SECURE", "false").lower() == "true"
     REMEMBER_COOKIE_DURATION = 86400
+    REMEMBER_COOKIE_PATH = "/admin"
+    SESSION_COOKIE_PATH = "/admin"
 
     UPLOAD_FOLDER = os.getenv("UPLOAD_FOLDER", "theme/static/uploads")
     MAX_CONTENT_LENGTH = int(os.getenv("MAX_CONTENT_LENGTH_MB", "10")) * 1024 * 1024
