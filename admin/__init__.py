@@ -151,6 +151,11 @@ def create_admin_app() -> Flask:
             "IMAGE_BASE_URL": app.config.get("IMAGE_BASE_URL", ""),
         }
 
+    @app.route("/")
+    def index():
+        from flask import redirect, url_for
+        return redirect(url_for("auth.login"))
+
     @app.after_request
     def set_security_headers(response):
         response.headers["X-Frame-Options"] = "SAMEORIGIN"
