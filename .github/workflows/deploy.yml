@@ -20,4 +20,6 @@ jobs:
             cd /opt/snowriderx
             git pull origin flask_jinja2
             sudo systemctl restart snowriderx
+            sleep 3
+            sudo systemctl is-active snowriderx && echo "✅ snowriderx is running" || echo "❌ snowriderx failed to start"
             echo "Deploy completed at $(date)"
