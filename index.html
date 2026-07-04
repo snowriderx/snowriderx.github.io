@@ -60,32 +60,31 @@
     .navbar-nav .nav-link { color:#666; margin:0 15px; text-decoration:none; }
     .navbar-nav .nav-link:hover { color:#333; }
 
-    .game-box { width:100%; max-width:1200px; margin:0 auto; padding:0 15px; }
+    .game-box { position:relative; width:100%; max-width:1200px; margin:0 auto; padding:0 15px; }
 
-    /* CTA block */
-    .cta-alert {
-      background:#f0f7ff; border:1px solid #cce0ff;
-      border-left:4px solid #007bff; border-radius:8px;
-      padding:13px 16px;
-      display:flex; align-items:center; gap:12px;
-      text-decoration:none; color:#333; transition:background .2s;
-      flex-wrap:wrap;
+    /* CTA banner-button */
+    .cta-banner {
+      display:block; background:linear-gradient(180deg, #2f8de6, #1a6fd1);
+      color:#fff; text-align:center; text-decoration:none;
+      padding:13px 16px; border-radius:8px; font-weight:700; font-size:1rem;
+      box-shadow:0 2px 6px rgba(0,0,0,.18); letter-spacing:.2px;
     }
-    .cta-alert:hover { background:#e0efff; color:#333; }
-    .cta-alert .ca-icon { font-size:1.6rem; flex-shrink:0; }
-    .cta-alert .ca-body { flex:1; min-width:140px; }
-    .cta-alert .ca-body h5 { font-size:.9rem; font-weight:bold; margin-bottom:2px; color:#007bff; }
-    .cta-alert .ca-body p { font-size:.78rem; color:#666; margin:0; }
-    .cta-alert .ca-btn {
-      background:#007bff; color:#fff; border:none;
-      padding:9px 14px; border-radius:6px;
-      font-size:.8rem; font-weight:bold; cursor:pointer;
-      width:100%; margin-top:4px;
+    .cta-banner:hover { filter:brightness(1.06); color:#fff; }
+    .cta-banner .tri { margin-right:6px; }
+
+    /* Manual ad slots */
+    .ad-slot { margin:16px 0; text-align:center; }
+    .ad-slot .ad-label {
+      display:block; font-size:.65rem; color:#999;
+      text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;
     }
-    @media (min-width:576px) {
-      .cta-alert { flex-wrap:nowrap; }
-      .cta-alert .ca-btn { width:auto; margin-top:0; margin-left:auto; white-space:nowrap; }
+
+    /* Rail ad (left, wide screens only) */
+    .ad-rail {
+      display:none; position:absolute; top:0; right:100%; margin-right:24px;
+      width:160px;
     }
+    @media (min-width:1600px) { .ad-rail { display:block; } }
 
     /* Game container — 16:9 trong col-9 */
     .game-container-sidebar {
@@ -198,20 +197,44 @@
 
   <!-- Main content -->
   <div class="game-box mt-3">
+
+    <!-- Rail ad (left, ≥1600px only) -->
+    <div class="ad-rail">
+      <div class="ad-slot">
+        <span class="ad-label">Advertisement</span>
+        <!-- TODO: replace with real ad slot ID -->
+        <ins class="adsbygoogle"
+             style="display:block"
+             data-ad-client="ca-pub-9431185290308469"
+             data-ad-slot="1486148072"
+             data-ad-format="vertical"
+             data-full-width-responsive="true"></ins>
+        <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+      </div>
+    </div>
+
     <div class="row g-3 align-items-start">
 
       <!-- col-9: CTA + Game + Description -->
       <div class="col-md-9">
 
-        <!-- CTA Alert -->
-        <a href="https://snowriderx.com/" target="_blank" rel="noopener noreferrer" class="cta-alert mb-2">
-          <div class="ca-icon">🌐</div>
-          <div class="ca-body">
-            <h5>Looking for the full Snow Rider 3D experience?</h5>
-            <p>More guides, leaderboards & game updates on the official site</p>
-          </div>
-          <button class="ca-btn">Visit snowriderx.com →</button>
+        <!-- CTA Banner -->
+        <a href="https://snowriderx.com/" target="_blank" rel="noopener noreferrer" class="cta-banner mb-2">
+          <span class="tri">▶</span>Play Snow Rider – No Ads, Unblocked! Start Sledding Now
         </a>
+
+        <!-- Ad slot #1 — above game -->
+        <div class="ad-slot">
+          <span class="ad-label">Advertisement</span>
+          <!-- TODO: replace with real ad slot ID -->
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-9431185290308469"
+               data-ad-slot="4742866804"
+               data-ad-format="horizontal"
+               data-full-width-responsive="true"></ins>
+          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
 
         <!-- Game iframe -->
         <div class="game-container-sidebar" id="gameContainer">
@@ -219,6 +242,19 @@
           <iframe id="gameIframe" allowtransparency="yes" allow="autoplay" frameborder="0"
             marginheight="0" marginwidth="0" scrolling="no"
             src="/snowrider3d/index.html"></iframe>
+        </div>
+
+        <!-- Ad slot #2 — below game -->
+        <div class="ad-slot">
+          <span class="ad-label">Advertisement</span>
+          <!-- TODO: replace with real ad slot ID -->
+          <ins class="adsbygoogle"
+               style="display:block"
+               data-ad-client="ca-pub-9431185290308469"
+               data-ad-slot="4742866804"
+               data-ad-format="auto"
+               data-full-width-responsive="true"></ins>
+          <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
         </div>
 
         <!-- Description -->
@@ -252,6 +288,19 @@
             <li>Anticipate obstacles early instead of making last-second moves.</li>
             <li>Practice daily – your reaction time improves the more you play.</li>
           </ul>
+
+          <!-- Ad slot #4 — mid-content -->
+          <div class="ad-slot">
+            <span class="ad-label">Advertisement</span>
+            <!-- TODO: replace with real ad slot ID -->
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-9431185290308469"
+                 data-ad-slot="4301802116"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+          </div>
 
           <h2>❓ Frequently Asked Questions</h2>
           <p><strong>Is Snow Rider 3D free to play?</strong><br>Yes, it's 100% free to play directly in your browser.</p>
